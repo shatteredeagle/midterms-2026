@@ -1,6 +1,62 @@
 {
-  "updated": null,
-  "status": "pending",
-  "sources": [],
-  "questions": []
+  "updated": "2026-11-03T22:15:00Z",
+  "status": "partial",
+  "note": "Early results released before polls closed; they are re-weighted to the final count later. Only numbers stated in NBC's published article are entered. The article gave no sample size and no House vote split by group yet.",
+  "sources": [
+    {
+      "id": "nbc",
+      "name": "NBC News Exit Poll (SSRS)",
+      "url": "https://www.nbcnews.com/politics/2026-election/exit-poll-trump-midterms-voters-economy-disapproval-rcna607045",
+      "published": "Nov 3, 5:06 PM EST",
+      "kind": "Early results: Election Day interviews plus phone, mail and online for early and mail voters"
+    }
+  ],
+  "questions": [
+    {
+      "title": "Views of Trump",
+      "kind": "share",
+      "items": [
+        {"label": "Approve of Trump's performance", "values": {"nbc": {"pct": 38, "note": "45% said so in the 2018 midterm exit poll"}}},
+        {"label": "A reason for my vote was to express opposition to the president", "values": {"nbc": {"pct": 43, "note": "Far higher than in 2018 per NBC; no 2018 figure given"}}},
+        {"label": "Trump is responsible for high prices", "values": {"nbc": {"pct": 62}}},
+        {"label": "Trump's policies have worsened economic conditions", "values": {"nbc": {"pct": 65}}}
+      ]
+    },
+    {
+      "title": "Most important issue facing the country",
+      "kind": "share",
+      "items": [
+        {"label": "Economy", "values": {"nbc": {"pct": 39}}},
+        {"label": "State of democracy", "values": {"nbc": {"pct": 32}}}
+      ]
+    },
+    {
+      "title": "The economy and household finances",
+      "kind": "share",
+      "items": [
+        {"label": "Nation's economy is in rough shape", "values": {"nbc": {"pct": 75, "note": "In 2018, 68% said it was in good shape"}}},
+        {"label": "Finances are better than two years ago", "values": {"nbc": {"pct": 18, "note": "NBC says nearly half say worse; no exact figure"}}},
+        {"label": "Very or somewhat concerned: food and groceries", "values": {"nbc": {"pct": 88}}},
+        {"label": "Very or somewhat concerned: gas and diesel fuel", "values": {"nbc": {"pct": 87}}},
+        {"label": "Very or somewhat concerned: utilities", "values": {"nbc": {"pct": 86}}},
+        {"label": "Very or somewhat concerned: healthcare", "values": {"nbc": {"pct": 85}}}
+      ]
+    },
+    {
+      "title": "Party favorability (favorable view)",
+      "kind": "share",
+      "items": [
+        {"label": "Democratic Party", "values": {"nbc": {"pct": 46, "note": "54% unfavorable"}}},
+        {"label": "Republican Party", "values": {"nbc": {"pct": 41, "note": "59% unfavorable"}}}
+      ]
+    },
+    {
+      "title": "Latino voters: party identification",
+      "kind": "share",
+      "items": [
+        {"label": "Democrat", "values": {"nbc": {"pct": 43, "note": "39% in 2024"}}},
+        {"label": "Republican", "values": {"nbc": {"pct": 27, "note": "29% in 2024"}}}
+      ]
+    }
+  ]
 }

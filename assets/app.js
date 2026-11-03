@@ -1,5 +1,5 @@
-import { STATES, closeTime } from './states.js?v=76e1b2c4';
-import { fetchControl } from './markets.js?v=76e1b2c4';
+import { STATES, closeTime } from './states.js?v=fd3592cb';
+import { fetchControl } from './markets.js?v=fd3592cb';
 
 const REPO = 'ShatteredEagle/midterms-2026';
 const RAW = `https://raw.githubusercontent.com/${REPO}/data/`;
@@ -432,11 +432,19 @@ function renderExit() {
   }
   $('#exitSub').textContent = `${x.status === 'final' ? 'Final-weighted' : 'Preliminary'} · updated ${new Date(x.updated).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' })}. Average is the unweighted mean across sources.`;
   const src = x.sources;
-  el.innerHTML = x.questions.map((q) => `<div class="q"><h3>${esc(q.title)}</h3><div class="table-scroll"><table><thead><tr><th>Group</th>${src.map((s) => `<th class="num">${esc(s.name)}</th>`).join('')}<th>Average D · R</th></tr></thead><tbody>${q.groups.map((g) => {
+  const srcMeta = `<p class="small" style="margin:0 0 14px">${src.map((s) => `<b>${esc(s.name)}</b> · ${esc(s.published || '')}${s.kind ? ` · ${esc(s.kind)}` : ''}${s.url ? ` · <a href="${esc(s.url)}" target="_blank" rel="noopener">source ↗</a>` : ''}`).join('<br>')}</p>${x.note ? `<p class="small" style="margin:0 0 14px">${esc(x.note)}</p>` : ''}`;
+  const rowTh = 'style="text-transform:none;letter-spacing:0;font-size:14px;color:var(--text)"';
+  const shareQ = (q) => `<div class="q"><h3>${esc(q.title)}</h3><div class="table-scroll"><table><thead><tr><th>Question</th>${src.map((s) => `<th class="num">${esc(s.name.replace(/ \(.*/, ''))}</th>`).join('')}<th>Share</th></tr></thead><tbody>${q.items.map((it) => {
+    const vals = src.map((s) => it.values?.[s.id]).filter(Boolean), avg = vals.length ? vals.reduce((a, v) => a + v.pct, 0) / vals.length : null;
+    const notes = src.map((s) => it.values?.[s.id]?.note).filter(Boolean);
+    return `<tr><th scope="row" ${rowTh}>${esc(it.label)}${notes.length ? `<div class="small">${esc(notes.join(' · '))}</div>` : ''}</th>${src.map((s) => `<td class="num">${it.values?.[s.id] ? `${it.values[s.id].pct}%` : '—'}</td>`).join('')}<td style="min-width:140px">${avg === null ? '—' : `<div class="split" role="img" aria-label="${avg.toFixed(0)} percent"><i style="width:${avg}%;background:#e0a21b"></i></div>`}</td></tr>`;
+  }).join('')}</tbody></table></div></div>`;
+  const dirQ = (q) => `<div class="q"><h3>${esc(q.title)}</h3><div class="table-scroll"><table><thead><tr><th>Group</th>${src.map((s) => `<th class="num">${esc(s.name)}</th>`).join('')}<th>Average D · R</th></tr></thead><tbody>${q.groups.map((g) => {
     const vals = src.map((s) => g.values?.[s.id]);
     const have = vals.filter(Boolean), d = have.length ? have.reduce((a, v) => a + v.dem, 0) / have.length : null, r = have.length ? have.reduce((a, v) => a + v.rep, 0) / have.length : null;
-    return `<tr><th scope="row" style="text-transform:none;letter-spacing:0;font-size:14px;color:var(--text)">${esc(g.label)}</th>${vals.map((v) => `<td class="num">${v ? `<span style="color:var(--d)">${v.dem}</span> · <span style="color:var(--r)">${v.rep}</span>` : '—'}</td>`).join('')}<td>${d === null ? '—' : `<div class="odds"><span>${d.toFixed(0)}</span><div class="split"><i class="d" style="width:${d / (d + r) * 100}%"></i><i class="r" style="width:${r / (d + r) * 100}%"></i></div><span>${r.toFixed(0)}</span></div>`}</td></tr>`;
-  }).join('')}</tbody></table></div></div>`).join('') + links;
+    return `<tr><th scope="row" ${rowTh}>${esc(g.label)}</th>${vals.map((v) => `<td class="num">${v ? `<span style="color:var(--d)">${v.dem}</span> · <span style="color:var(--r)">${v.rep}</span>` : '—'}</td>`).join('')}<td>${d === null ? '—' : `<div class="odds"><span>${d.toFixed(0)}</span><div class="split"><i class="d" style="width:${d / (d + r) * 100}%"></i><i class="r" style="width:${r / (d + r) * 100}%"></i></div><span>${r.toFixed(0)}</span></div>`}</td></tr>`;
+  }).join('')}</tbody></table></div></div>`;
+  el.innerHTML = srcMeta + x.questions.map((q) => (q.kind === 'share' ? shareQ(q) : dirQ(q))).join('') + links;
 }
 
 // ---------- change feed ----------
