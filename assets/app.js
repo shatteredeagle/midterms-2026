@@ -10,7 +10,7 @@ const pct = (x, d = 0) => (x * 100).toFixed(d) + '%';
 const FIPS = {};
 for (const [st, v] of Object.entries(STATES)) FIPS[v[1]] = st;
 
-const S = { otherAvgs: null, ballot: null, bqState: 'MA', changes: null, chgF: 'all', chgAll: false, chgSeen: 0, markets: null, polls: null, results: null, status: null, exit: null, control: null, paths: null, kind: 'S', sel: null, rkind: 'S', sort: 'close', q: '', showAll: false, fetchedAt: {} };
+const S = { early: null, turnout: null, otherAvgs: null, ballot: null, bqState: 'MA', changes: null, chgF: 'all', chgAll: false, chgSeen: 0, markets: null, polls: null, results: null, status: null, exit: null, control: null, paths: null, kind: 'S', sel: null, rkind: 'S', sort: 'close', q: '', showAll: false, fetchedAt: {} };
 
 // ---------- data ----------
 // raw.githubusercontent.com caches 5 min regardless of query string, so the browser reads the bundle through the
@@ -29,8 +29,9 @@ async function getBundle() {
 }
 async function loadAll() {
   const [b, exit] = await Promise.all([getBundle(), fetch('data/exit-polls.json', { cache: 'no-store' }).then((r) => r.json()).catch(() => null)]);
-  if (b) Object.assign(S, { changes: b.changes || S.changes, markets: b.markets || S.markets, polls: b.polls || S.polls, results: b.results || S.results, status: b.status || S.status });
+  if (b) Object.assign(S, { turnout: b.turnout || S.turnout, changes: b.changes || S.changes, markets: b.markets || S.markets, polls: b.polls || S.polls, results: b.results || S.results, status: b.status || S.status });
   if (exit) S.exit = exit;
+  if (!S.early) S.early = await fetch('data/early-vote.json', { cache: 'no-store' }).then((r) => r.json()).catch(() => null);
   if (!S.otherAvgs) S.otherAvgs = await fetch('data/other-averages.json', { cache: 'no-store' }).then((r) => r.json()).catch(() => null);
   if (!S.ballot) S.ballot = await fetch('data/ballot-questions.json', { cache: 'no-store' }).then((r) => r.json()).catch(() => null);
   S.fetchedAt.main = Date.now();
@@ -370,6 +371,28 @@ function wireChanges() {
   document.addEventListener('click', (e) => { if (e.target.id === 'chgBtn') { S.chgAll = !S.chgAll; renderChanges(); } });
 }
 
+// ---------- turnout & early vote ----------
+function renderTurnout() {
+  const n = (x) => Number(x).toLocaleString('en-US');
+  const cards = [];
+  for (const s of S.early?.states || []) {
+    const up = ((s.ballots / s.total2022 - 1) * 100).toFixed(0);
+    cards.push(`<article class="tcard"><h3><span>${esc(s.name)} · early vote</span><span class="tag live">${esc(s.asOf)}</span></h3>
+      <div class="big2">${n(s.ballots)} <span class="small">ballots · ${s.turnoutPct}% of registered</span></div>
+      <p class="small" style="margin:0"><b>${up > 0 ? '+' : ''}${up}%</b> vs. ${n(s.total2022)} total absentee and early ballots in 2022. In person ${n(s.inPerson)}, mail ${n(s.mail)}.</p>
+      <div class="stack" role="img" aria-label="Early ballots by party: ${s.byParty.map((p) => `${p.label} ${p.share}%`).join(', ')}">${s.byParty.map((p) => `<i class="${p.party}" style="width:${p.share}%"></i>`).join('')}</div>
+      <div class="legend2">${s.byParty.filter((p) => p.share >= 1).map((p) => `<span class="${p.party}">${esc(p.label)} ${p.share}%</span>`).join('')}</div>
+      <p class="small" style="margin:0">Who voted early, not how they voted. <a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.source)} ↗</a></p></article>`);
+  }
+  const fl = S.turnout?.FL;
+  if (fl) cards.push(`<article class="tcard"><h3><span>Florida · Election Day turnout</span><span class="tag live">live</span></h3>
+      <div class="big2">${n(fl.electionDay)} <span class="small">in-person votes so far</span></div>
+      <p class="small" style="margin:0">Sum of ${fl.counties} counties, last reported ${esc(fl.lastReportedET || '')} ET. Excludes early and mail ballots, which Florida counts separately.</p>
+      <p class="small" style="margin:0"><a href="${esc(fl.url)}" target="_blank" rel="noopener">${esc(fl.source)} ↗</a></p></article>`);
+  $('#turnoutSub').textContent = 'Official early-vote and Election Day turnout reports. Few states publish these in a form this page can read.';
+  $('#turnout-body').innerHTML = cards.join('') || '<p class="small">No turnout data yet.</p>';
+}
+
 // ---------- ballot questions (MA, RI) ----------
 function renderBallot() {
   const b = S.ballot?.states?.[S.bqState], el = $('#ballot-body');
@@ -421,7 +444,7 @@ function renderLive() {
 }
 
 // ---------- boot ----------
-function renderAll() { renderClock(); renderSenate(); renderHouse(); renderCompare(); renderFlips(); paintMap(); renderDetail(); renderChanges(); renderBallot(); renderTable(); renderPolls(); renderExit(); renderSources(); renderLive(); }
+function renderAll() { renderClock(); renderSenate(); renderHouse(); renderCompare(); renderFlips(); paintMap(); renderDetail(); renderChanges(); renderTurnout(); renderBallot(); renderTable(); renderPolls(); renderExit(); renderSources(); renderLive(); }
 async function boot() {
   const th = $('#theme');
   th.onclick = () => { const cur = document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); const n = cur === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = n; try { localStorage.setItem('theme', n); } catch {} };

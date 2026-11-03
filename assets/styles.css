@@ -218,3 +218,13 @@ a.avg:hover{border-color:var(--focus)}
 .tag.flip{color:#c98a00;border-color:currentColor}
 @media (max-width:980px){.flip-grid{grid-template-columns:1fr}}
 @media (max-width:560px){.flip-item{grid-template-columns:1fr auto;}.flip-item .bar{grid-column:1/-1}}
+
+.turnout-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.tcard{border:1px solid var(--line);border-left:4px solid #1fa464;border-radius:12px;padding:14px 16px;background:var(--surface-2);display:grid;gap:8px;align-content:start}
+.tcard h3{font-size:15px;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.tcard .big2{font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.tcard .stack{display:flex;height:12px;border-radius:99px;overflow:hidden;background:var(--none)}
+.tcard .stack i{display:block}
+.tcard .stack .D{background:var(--d)}.tcard .stack .R{background:var(--r)}.tcard .stack .O{background:var(--muted)}
+.tcard .legend2{display:flex;gap:12px;flex-wrap:wrap;font-size:13px}
+.tcard .legend2 .D{color:var(--d)}.tcard .legend2 .R{color:var(--r)}.tcard .legend2 .O{color:var(--muted)}

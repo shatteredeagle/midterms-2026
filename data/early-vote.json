@@ -1,0 +1,25 @@
+{
+  "updated": "2026-11-03T21:40:00Z",
+  "note": "Quoted from official state reports, entered by hand with a link. Early-vote party splits show who voted early, not who they voted for.",
+  "states": [
+    {
+      "code": "NC",
+      "name": "North Carolina",
+      "asOf": "Ballots cast through Nov 1, published Nov 2",
+      "source": "NC State Board of Elections, daily absentee and early voting report",
+      "url": "https://s3.amazonaws.com/dl.ncsbe.gov/Press/2026%20General/NC%20Absentee%20Stats%20for%202026%20General/2026-11-02%20Daily%20Absentee%20Stats%20Report%20-%202026%20General.pdf",
+      "ballots": 2819921,
+      "registered": 7894774,
+      "turnoutPct": 35.72,
+      "inPerson": 2726324,
+      "mail": 93597,
+      "total2022": 2155459,
+      "byParty": [
+        {"party": "D", "label": "Democratic", "ballots": 1081910, "share": 38.37},
+        {"party": "R", "label": "Republican", "ballots": 737349, "share": 26.15},
+        {"party": "O", "label": "Unaffiliated", "ballots": 991939, "share": 35.18},
+        {"party": "O", "label": "Libertarian and Green", "ballots": 8723, "share": 0.31}
+      ]
+    }
+  ]
+}

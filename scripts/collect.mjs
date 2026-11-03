@@ -104,19 +104,29 @@ async function results() {
   return { updated: now(), feeds, races };
 }
 
+// ---- Turnout so far (Florida publishes live Election Day turnout by county) ----
+async function turnout() {
+  const t = (await get('https://floridaelectionwatch.gov/ElectionDayTurnout', false)).replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, ' ').replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/\s+/g, ' ');
+  const body = t.slice(t.indexOf('County Turnout Last Reported Time Zone') + 'County Turnout Last Reported Time Zone'.length);
+  const rows = [...body.matchAll(/([A-Z][A-Za-z.\- ]+?) ([\d,]+) (\d{1,2}:\d{2} [AP]M) (Eastern|Central)/g)].map((m) => ({ county: m[1].trim(), votes: Number(m[2].replace(/,/g, '')), at: m[3], tz: m[4] }));
+  if (rows.length < 60) throw new Error('florida turnout layout changed');
+  const latest = rows.filter((r) => r.tz === 'Eastern').map((r) => r.at).sort((a, b) => Date.parse(`1/1/2000 ${b}`) - Date.parse(`1/1/2000 ${a}`))[0];
+  return { updated: now(), FL: { electionDay: rows.reduce((a, r) => a + r.votes, 0), counties: rows.length, lastReportedET: latest || null, source: 'Florida Division of Elections', url: 'https://floridaelectionwatch.gov/ElectionDayTurnout' } };
+}
+
 await mkdir(OUT, { recursive: true });
 const before = { markets: await readJ('markets'), polls: await readJ('polls'), results: await readJ('results') };
 const log = (await readJ('changes')) || { events: [] };
-await Promise.all([run('markets', markets), run('polls', polls, 270000), run('results', results)]);
+await Promise.all([run('markets', markets), run('polls', polls, 270000), run('results', results), run('turnout', turnout)]);
 let prev = {};
 try { prev = JSON.parse(await readFile(`${OUT}/status.json`, 'utf8')); } catch {}
 await writeFile(`${OUT}/status.json`, JSON.stringify({ updated: now(), sources: { ...prev.sources, ...status } }));
 // One file for the browser: a single request per refresh (kept under the GitHub API's unauthenticated rate limit).
-const [m, po, re, st] = await Promise.all(['markets', 'polls', 'results', 'status'].map(readJ));
+const [m, po, re, st, tu] = await Promise.all(['markets', 'polls', 'results', 'status', 'turnout'].map(readJ));
 // Change feed: diff against the previous run, keep the newest 300 events.
 const anchors = log.anchors || { odds: {}, control: {} };
 const fresh = diffSnapshots(before, { markets: m, polls: po, results: re }, Date.now(), anchors);
 const changes = { updated: now(), events: [...fresh.reverse(), ...(log.events || [])].slice(0, 300) };
 await writeFile(`${OUT}/changes.json`, JSON.stringify({ ...changes, anchors })); // anchors stay server-side; the bundle and site get events only
-await writeFile(`${OUT}/bundle.json`, JSON.stringify({ updated: now(), markets: m, polls: po, results: re, status: st, changes }));
+await writeFile(`${OUT}/bundle.json`, JSON.stringify({ updated: now(), markets: m, polls: po, results: re, status: st, turnout: tu, changes }));
 console.log(JSON.stringify(status));
