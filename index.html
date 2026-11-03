@@ -21,7 +21,7 @@
   <div class="wrap bar">
     <div class="brand"><span class="logo" aria-hidden="true"></span><h1>2026 Midterms</h1></div>
     <nav aria-label="Sections">
-      <a href="#map">Map</a><a href="#changes">Changes</a><a href="#races">Races</a><a href="#polls">Polls</a><a href="#exit">Exit polls</a><a href="#sources">Sources</a>
+      <a href="#map">Map</a><a href="#changes">Changes</a><a href="#races">Races</a><a href="#ballot">Ballot questions</a><a href="#polls">Polls</a><a href="#exit">Exit polls</a><a href="#sources">Sources</a>
     </nav>
     <div class="bar-right">
       <span id="live" class="pill" role="status" aria-live="polite"><i class="dot"></i><span id="liveText">Loading…</span></span>
@@ -85,6 +85,17 @@
       </div>
     </div>
     <div class="table-scroll"><table id="raceTable"></table></div>
+  </section>
+
+  <section id="ballot" class="panel" aria-labelledby="ballotH">
+    <div class="panel-head">
+      <div><h2 id="ballotH">Ballot questions</h2><p class="sub" id="ballotSub"></p></div>
+      <div class="seg" role="tablist" aria-label="State" id="ballotTabs">
+        <button role="tab" data-s="MA" aria-selected="true">Massachusetts</button>
+        <button role="tab" data-s="RI" aria-selected="false">Rhode Island</button>
+      </div>
+    </div>
+    <div id="ballot-body"></div>
   </section>
 
   <section id="polls" class="panel" aria-labelledby="pollsH">

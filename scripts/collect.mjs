@@ -1,7 +1,7 @@
 // Collector: runs in GitHub Actions every ~5 min. Writes compact JSON into ./out (published to the `data` branch).
 // Dependency-free (Node 20+). Every source is independent: one failing keeps the last good file.
 import { mkdir, writeFile, readFile, stat } from 'node:fs/promises';
-import { GAMMA, parseEvents } from '../assets/markets.js';
+import { GAMMA, BALLOT_SLUGS, parseEvents } from '../assets/markets.js';
 import { NAME_TO_ST } from '../assets/states.js';
 import { FEEDS } from './feeds.mjs';
 import { diffSnapshots } from './diff.mjs';
@@ -33,6 +33,8 @@ async function markets() {
     events.push(...page);
     if (page.length < 100) break;
   }
+  // Ballot-question markets are not tagged "midterms", so fetch them by slug.
+  for (const slug of Object.keys(BALLOT_SLUGS)) events.push(...(await get(`${GAMMA}?slug=${slug}`).catch(() => [])));
   const d = parseEvents(events);
   if (Object.keys(d.races).length < 20) throw new Error('too few races parsed');
   return { updated: now(), source: 'Polymarket', ...d };

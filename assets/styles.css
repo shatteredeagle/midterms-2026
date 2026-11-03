@@ -154,3 +154,13 @@ svg.chart .grid{stroke:var(--line)}
 .chg time{font-size:12.5px;color:var(--muted);white-space:nowrap}
 .chg .empty{display:block;color:var(--muted);padding:14px 6px}
 @media (max-width:560px){.chg li{grid-template-columns:64px 1fr}.chg time{grid-column:2}}
+
+.bq-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
+.bq{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--surface-2);display:grid;gap:8px;align-content:start}
+.bq h3{font-size:15px;display:flex;gap:10px;align-items:baseline}
+.bq h3 .n{font-size:12px;font-weight:700;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:1px 7px;white-space:nowrap}
+.bq p{margin:0;font-size:14px}
+.bq .meta{margin:0}
+.bq .res .split .d{background:var(--d)}
+.bq .res .split .r{background:var(--r)}
+.bq-note{margin:14px 0 0}

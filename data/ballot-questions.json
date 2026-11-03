@@ -1,0 +1,42 @@
+{
+  "updated": "2026-11-03T18:00:00Z",
+  "note": "Summaries come from Boston.com (Jul 21), BU Today (Oct 27) and Ballotpedia News (Jun 16); the official voter guides were not machine-readable. Check the official links for exact ballot wording. Results appear here only when entered from an official source.",
+  "states": {
+    "MA": {
+      "name": "Massachusetts",
+      "threshold": "Passes with a majority of Yes votes on the question, and Yes votes must also equal at least 30% of all ballots cast.",
+      "links": [
+        {"label": "Official 2026 questions (Secretary of the Commonwealth)", "url": "https://www.sec.state.ma.us/divisions/elections/research-and-statistics/2026-Information-for-voters/2026-ballot-questions.htm"},
+        {"label": "Election results (ElectionStats)", "url": "https://electionstats.state.ma.us/"}
+      ],
+      "questions": [
+        {"id": "MA-1", "n": 1, "title": "Expanding the Public Records Law", "yes": "Makes most records of the governor's office and the Legislature public, with exemptions for policy development and certain constituent communications."},
+        {"id": "MA-2", "n": 2, "title": "Collective bargaining for public defenders", "yes": "Lets employees of the Committee for Public Counsel Services (state public defenders) form a union and bargain collectively."},
+        {"id": "MA-3", "n": 3, "title": "State primary elections", "yes": "Replaces party primaries for state offices with one all-party primary; the top two finishers advance to November."},
+        {"id": "MA-4", "n": 4, "title": "Election Day registration", "yes": "Lets residents register or update their registration on Election Day with proof of residency and an oath."},
+        {"id": "MA-5", "n": 5, "title": "State revenue limit and rebate", "yes": "Changes the state tax revenue cap formula and refunds revenue above the limit, starting July 1, 2027."},
+        {"id": "MA-6", "n": 6, "title": "Natural resource conservation fund", "yes": "Creates a \"Nature for All\" fund for land conservation and recreation, paid from a small share of sales tax."},
+        {"id": "MA-7", "n": 7, "title": "Single-family homes on smaller lots", "yes": "Lets towns allow single-family homes on residential lots of at least 5,000 sq ft with 50 ft of frontage and public water and sewer."},
+        {"id": "MA-8", "n": 8, "title": "Prohibit retail sale of recreational marijuana", "yes": "Repeals the laws allowing recreational marijuana sales and home growing; medical marijuana and small-amount possession stay legal."},
+        {"id": "MA-9", "n": 9, "title": "Firearms regulation (referendum on the 2024 law)", "yes": "A referendum on the 2024 gun law. BU Today reports a Yes vote keeps the law in place; Boston.com words it as a repeal question. Check the official guide before relying on this one.", "flag": "Sources word this differently"}
+      ]
+    },
+    "RI": {
+      "name": "Rhode Island",
+      "threshold": "Each bond passes with a simple majority of those voting on it. Rhode Island has not rejected a bond question since 2006.",
+      "links": [
+        {"label": "Ballotpedia: Rhode Island 2026 ballot measures", "url": "https://ballotpedia.org/Rhode_Island_2026_ballot_measures"},
+        {"label": "RI Board of Elections", "url": "https://elections.ri.gov/"},
+        {"label": "RI Secretary of State: elections", "url": "https://vote.sos.ri.gov/"}
+      ],
+      "questions": [
+        {"id": "RI-HE", "title": "Higher education facilities bond", "amount": 275000000, "yes": "Funds a health building at URI, a workforce innovation center at CCRI Warwick, and a student success center at Rhode Island College."},
+        {"id": "RI-HO", "title": "Housing development bond", "amount": 120000000, "yes": "Funds residential development to increase and preserve affordable, accessible housing."},
+        {"id": "RI-EC", "title": "Economic and infrastructure development bond", "amount": 100000000, "yes": "Funds industrial site preparation, Quonset and I-95 district infrastructure, ocean industry infrastructure and life sciences jobs."},
+        {"id": "RI-EN", "title": "Environment and watershed protection bond", "amount": 55000000, "yes": "Funds local water infrastructure aid, recreation facility renovation and Narragansett Bay restoration."},
+        {"id": "RI-CU", "title": "Historical center and cultural grants bond", "amount": 50000000, "yes": "Funds matching historic preservation grants and a new Rhode Island State History Center."}
+      ],
+      "orderNote": "Official question numbers were not available from any source I could read, so these are listed by name."
+    }
+  }
+}

@@ -10,7 +10,7 @@ const pct = (x, d = 0) => (x * 100).toFixed(d) + '%';
 const FIPS = {};
 for (const [st, v] of Object.entries(STATES)) FIPS[v[1]] = st;
 
-const S = { changes: null, chgF: 'all', chgAll: false, chgSeen: 0, markets: null, polls: null, results: null, status: null, exit: null, control: null, paths: null, kind: 'S', sel: null, rkind: 'S', sort: 'close', q: '', showAll: false, fetchedAt: {} };
+const S = { ballot: null, bqState: 'MA', changes: null, chgF: 'all', chgAll: false, chgSeen: 0, markets: null, polls: null, results: null, status: null, exit: null, control: null, paths: null, kind: 'S', sel: null, rkind: 'S', sort: 'close', q: '', showAll: false, fetchedAt: {} };
 
 // ---------- data ----------
 // raw.githubusercontent.com caches 5 min regardless of query string, so the browser reads the bundle through the
@@ -31,6 +31,7 @@ async function loadAll() {
   const [b, exit] = await Promise.all([getBundle(), fetch('data/exit-polls.json', { cache: 'no-store' }).then((r) => r.json()).catch(() => null)]);
   if (b) Object.assign(S, { changes: b.changes || S.changes, markets: b.markets || S.markets, polls: b.polls || S.polls, results: b.results || S.results, status: b.status || S.status });
   if (exit) S.exit = exit;
+  if (!S.ballot) S.ballot = await fetch('data/ballot-questions.json', { cache: 'no-store' }).then((r) => r.json()).catch(() => null);
   S.fetchedAt.main = Date.now();
 }
 async function loadControl() {
@@ -307,6 +308,31 @@ function wireChanges() {
   document.addEventListener('click', (e) => { if (e.target.id === 'chgBtn') { S.chgAll = !S.chgAll; renderChanges(); } });
 }
 
+// ---------- ballot questions (MA, RI) ----------
+function renderBallot() {
+  const b = S.ballot?.states?.[S.bqState], el = $('#ballot-body');
+  if (!b) { el.innerHTML = '<p class="small">Ballot question data unavailable.</p>'; return; }
+  $('#ballotSub').textContent = `${b.name} statewide questions on the Nov 3 ballot. ${b.threshold}`;
+  const money = (n) => `$${(n / 1e6).toFixed(0)}M`;
+  const card = (q) => {
+    const mk = S.markets?.ballot?.[q.id], r = q.result;
+    const res = r ? `<div class="res"><div class="cand" data-p="D"><span>Yes</span><b>${r.yes.toFixed(1)}%</b></div><div class="split" role="img" aria-label="Yes ${r.yes}%, No ${(100 - r.yes).toFixed(1)}%"><i class="d" style="width:${r.yes}%"></i><i class="r" style="width:${100 - r.yes}%"></i></div><p class="small">${esc(r.reporting || '')} · ${esc(r.source || '')}</p></div>` : '<span class="tag">Results pending</span>';
+    return `<article class="bq"><h3>${q.n ? `<span class="n">Q${q.n}</span>` : ''}<span>${esc(q.title)}${q.amount ? ` <span class="small">· ${money(q.amount)}</span>` : ''}</span></h3>
+      <p><b>Yes:</b> ${esc(q.yes)}</p>${q.flag ? `<p class="small"><span class="tag">${esc(q.flag)}</span></p>` : ''}
+      ${res}${mk ? `<p class="small">Market odds this passes: <b>${pct(mk.yes)}</b> · $${(mk.vol / 1e3).toFixed(0)}k traded</p>` : ''}</article>`;
+  };
+  el.innerHTML = `<div class="bq-grid">${b.questions.map(card).join('')}</div>${b.orderNote ? `<p class="small bq-note">${esc(b.orderNote)}</p>` : ''}
+    <p class="small bq-note">${esc(S.ballot.note)}</p><div class="links" style="margin-top:10px">${b.links.map((l) => `<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`).join('')}</div>`;
+}
+function wireBallot() {
+  $('#ballotTabs').addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    S.bqState = b.dataset.s;
+    for (const x of document.querySelectorAll('#ballotTabs button')) x.setAttribute('aria-selected', x === b);
+    renderBallot();
+  });
+}
+
 // ---------- sources ----------
 function renderSources() {
   const st = S.status?.sources || {};
@@ -334,12 +360,12 @@ function renderLive() {
 }
 
 // ---------- boot ----------
-function renderAll() { renderClock(); renderSenate(); renderHouse(); renderBalance(); paintMap(); renderDetail(); renderChanges(); renderTable(); renderPolls(); renderExit(); renderSources(); renderLive(); }
+function renderAll() { renderClock(); renderSenate(); renderHouse(); renderBalance(); paintMap(); renderDetail(); renderChanges(); renderBallot(); renderTable(); renderPolls(); renderExit(); renderSources(); renderLive(); }
 async function boot() {
   const th = $('#theme');
   th.onclick = () => { const cur = document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); const n = cur === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = n; try { localStorage.setItem('theme', n); } catch {} };
   S.paths = await (await fetch('assets/map-paths.json')).json();
-  drawMap(); wireMap(); wireTable(); wireChanges();
+  drawMap(); wireMap(); wireTable(); wireChanges(); wireBallot();
   await Promise.all([loadAll(), loadControl()]);
   renderAll();
   setInterval(() => { renderClock(); renderLive(); }, 1000);

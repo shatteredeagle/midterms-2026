@@ -35,12 +35,18 @@ function seatDist(ev) {
   return { buckets: b.map((x) => ({ label: x.label, p: x.p / tot })), mean: b.reduce((a, x) => a + (x.p / tot) * bucketMid(x.label), 0) };
 }
 
+// Ballot-question markets (only a few exist): event slug -> question id.
+export const BALLOT_SLUGS = { 'massachusetts-passes-jungle-primary-ballot-measure': 'MA-3' };
+
 export function parseEvents(events) {
-  const out = { races: {}, control: {}, seats: {} };
+  const out = { races: {}, control: {}, seats: {}, ballot: {} };
   for (const ev of events) {
     const t = (ev.title || '').trim();
     let m;
-    if ((m = t.match(/^(.+?) Senate Election Winner/))) {
+    if (BALLOT_SLUGS[ev.slug]) {
+      const mk = (ev.markets || [])[0];
+      if (mk && Number.isFinite(yes(mk))) out.ballot[BALLOT_SLUGS[ev.slug]] = { yes: yes(mk), vol: Math.round(Number(ev.volume) || 0), slug: ev.slug };
+    } else if ((m = t.match(/^(.+?) Senate Election Winner/))) {
       const st = NAME_TO_ST[m[1].trim().toLowerCase()];
       const r = st && raceFrom(ev, `S-${st}`, 'S', st);
       if (r) out.races[r.id] = r;
