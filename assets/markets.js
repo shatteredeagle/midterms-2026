@@ -10,12 +10,19 @@ const party = (m) => {
 };
 const clean = (s) => (s || '').replace(/\s*\([A-Z]\)\s*$/, '').trim();
 
-function raceFrom(ev, id, kind, state, extra = {}) {
+// Markets that label candidates by name only (no party) take their party from `hints` (polls / official feeds), matched on last name.
+const lastName = (n) => String(n).toLowerCase().replace(/[^a-z\s'-]/g, ' ').trim().split(/\s+/).pop();
+
+function raceFrom(ev, id, kind, state, extra = {}, hints = []) {
+  const hintMap = new Map(hints.map((h) => [lastName(h.n), h.p]));
   const cands = [];
   for (const m of ev.markets || []) {
     const p = yes(m);
-    if (!Number.isFinite(p) || /^(Person|Party) [A-Z]$/.test(m.groupItemTitle || '')) continue;
-    cands.push({ n: clean(m.groupItemTitle), p: party(m), price: p });
+    if (!Number.isFinite(p) || /^(Person|Party|Candidate) [A-Z]$/.test(m.groupItemTitle || '')) continue;
+    const name = clean(m.groupItemTitle);
+    let pty = party(m);
+    if (pty === 'O' && hintMap.has(lastName(name))) pty = hintMap.get(lastName(name));
+    cands.push({ n: name, p: pty, price: p });
   }
   if (!cands.length) return null;
   const sum = (k) => cands.filter((c) => c.p === k).reduce((a, c) => a + c.price, 0);
@@ -38,7 +45,7 @@ function seatDist(ev) {
 // Ballot-question markets (only a few exist): event slug -> question id.
 export const BALLOT_SLUGS = { 'massachusetts-passes-jungle-primary-ballot-measure': 'MA-3' };
 
-export function parseEvents(events) {
+export function parseEvents(events, hints = {}) {
   const out = { races: {}, control: {}, seats: {}, ballot: {} };
   for (const ev of events) {
     const t = (ev.title || '').trim();
@@ -48,14 +55,14 @@ export function parseEvents(events) {
       if (mk && Number.isFinite(yes(mk))) out.ballot[BALLOT_SLUGS[ev.slug]] = { yes: yes(mk), vol: Math.round(Number(ev.volume) || 0), slug: ev.slug };
     } else if ((m = t.match(/^(.+?) Senate Election Winner/))) {
       const st = NAME_TO_ST[m[1].trim().toLowerCase()];
-      const r = st && raceFrom(ev, `S-${st}`, 'S', st);
+      const r = st && raceFrom(ev, `S-${st}`, 'S', st, {}, hints[`S-${st}`]);
       if (r) out.races[r.id] = r;
     } else if ((m = t.match(/^(.+?) Governor Election Winner/))) {
       const st = NAME_TO_ST[m[1].trim().toLowerCase()];
-      const r = st && raceFrom(ev, `G-${st}`, 'G', st);
+      const r = st && raceFrom(ev, `G-${st}`, 'G', st, {}, hints[`G-${st}`]);
       if (r) out.races[r.id] = r;
     } else if ((m = t.match(/^([A-Z]{2})-(\d{2}) House Election Winner/))) {
-      const r = raceFrom(ev, `H-${m[1]}-${m[2]}`, 'H', m[1], { district: m[2] });
+      const r = raceFrom(ev, `H-${m[1]}-${m[2]}`, 'H', m[1], { district: m[2] }, hints[`H-${m[1]}-${m[2]}`]);
       if (r) out.races[r.id] = r;
     } else if (ev.slug === 'which-party-will-win-the-senate-in-2026' || ev.slug === 'which-party-will-win-the-house-in-2026') {
       const r = raceFrom(ev, 'x', 'C', '');

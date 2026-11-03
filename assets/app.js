@@ -47,7 +47,7 @@ function race(id) {
   if (!m && !p && !o) return null;
   const st = id.split('-')[1];
   let pD = null;
-  if (m) pD = m.d / ((m.d + m.r) || 1);
+  if (m && m.d + m.r > 0) pD = m.d / (m.d + m.r);
   else if (p) { const lp = p.cands.find((c) => p.leader && c.n.includes(p.leader))?.p; if (lp) pD = lp === 'D' ? p.winProb : 1 - p.winProb; }
   const closed = isClosed(st);
   const projected = closed && pD !== null && (pD >= 0.99 || pD <= 0.01);
@@ -68,7 +68,7 @@ function flipInfo(r) {
   return { holder, to, prob, flipping: prob > 0.5, name: r.p.holderName };
 }
 function houseState(st) {
-  const rs = allRaces('H').filter((r) => r.st === st && r.m);
+  const rs = allRaces('H').filter((r) => r.st === st && r.m && r.pD !== null);
   if (!rs.length) return null;
   const d = rs.reduce((a, r) => a + r.pD, 0);
   return { n: rs.length, d, r: rs.length - d, share: d / rs.length };
@@ -237,7 +237,7 @@ function renderDetail() {
   const racesHtml = raceBlock(`S-${st}`) + raceBlock(`G-${st}`);
   el.innerHTML = `<h3>${esc(name)}</h3><p class="small">Polls close ${isClosed(st) ? '(closed)' : 'about'} ${ct} · <a href="https://ballotpedia.org/${name.replace(/ /g, '_')}_elections,_2026" target="_blank" rel="noopener">Ballotpedia</a></p>
     ${racesHtml || '<p class="small" style="margin-top:12px">No Senate or governor race here in 2026.</p>'}
-    ${h ? `<div class="race"><h4>House · ${h.n} districts</h4><p>Expected <b style="color:var(--d)">${h.d.toFixed(1)} D</b> · <b style="color:var(--r)">${h.r.toFixed(1)} R</b> <span class="small">(sum of district market odds)</span></p><p class="small">Closest: ${allRaces('H').filter((r) => r.st === st && r.m).sort((a, b) => Math.abs(a.pD - .5) - Math.abs(b.pD - .5)).slice(0, 3).map((r) => `${st}-${r.m.district} ${leanText(r.pD)}`).join(', ')}</p></div>` : ''}`;
+    ${h ? `<div class="race"><h4>House · ${h.n} districts</h4><p>Expected <b style="color:var(--d)">${h.d.toFixed(1)} D</b> · <b style="color:var(--r)">${h.r.toFixed(1)} R</b> <span class="small">(sum of district market odds)</span></p><p class="small">Closest: ${allRaces('H').filter((r) => r.st === st && r.m && r.pD !== null).sort((a, b) => Math.abs(a.pD - .5) - Math.abs(b.pD - .5)).slice(0, 3).map((r) => `${st}-${r.m.district} ${leanText(r.pD)}`).join(', ')}</p></div>` : ''}`;
 }
 function select(st) { S.sel = st; paintMap(); renderDetail(); }
 function wireMap() {

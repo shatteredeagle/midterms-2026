@@ -19,6 +19,7 @@ export function diffSnapshots(prev, next, nowMs = Date.now(), anchors = { odds: 
     for (const [id, r] of Object.entries(next.markets.races)) {
       const p = prev.markets.races[id];
       if (!p) continue;
+      if (p.d + p.r === 0 || r.d + r.r === 0) { delete anchors.odds[id]; continue; } // party labels were missing: no real odds to compare
       const b = pD(r), thr = id[0] === 'H' ? 0.05 : 0.03;
       const a = anchors.odds[id] ?? pD(p);
       if (Math.abs(b - a) >= thr) { ev('odds', id, `${label(id)}: ${side(a)} → ${side(b)}`, { from: a, to: b }); anchors.odds[id] = b; } else anchors.odds[id] = a;

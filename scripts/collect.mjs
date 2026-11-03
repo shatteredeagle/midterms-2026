@@ -15,6 +15,7 @@ const get = async (u, json = true) => {
   return json ? r.json() : r.text();
 };
 const status = {};
+const readJ = async (n) => { try { return JSON.parse(await readFile(`${OUT}/${n}.json`, 'utf8')); } catch { return null; } };
 // Slow-changing sources are skipped while the previous file is younger than minAgeMs (polite to small sites when looping).
 async function run(name, fn, minAgeMs = 0) {
   if (minAgeMs) {
@@ -35,7 +36,10 @@ async function markets() {
   }
   // Ballot-question markets are not tagged "midterms", so fetch them by slug.
   for (const slug of Object.keys(BALLOT_SLUGS)) events.push(...(await get(`${GAMMA}?slug=${slug}`).catch(() => [])));
-  const d = parseEvents(events);
+  // Party hints for name-only markets (e.g. Alaska, California governor): candidates already labeled by polls or official feeds.
+  const hints = {};
+  for (const src of [await readJ('polls'), await readJ('results')]) for (const [id, r] of Object.entries(src?.races || {})) (hints[id] ||= []).push(...(r.cands || []).filter((x) => x.p && x.p !== 'O').map((x) => ({ n: x.n, p: x.p })));
+  const d = parseEvents(events, hints);
   if (Object.keys(d.races).length < 20) throw new Error('too few races parsed');
   return { updated: now(), source: 'Polymarket', ...d };
 }
@@ -78,8 +82,6 @@ async function polls() {
   if (!avg || Object.keys(races).length < 10) throw new Error('poll page layout changed');
   return { updated: now(), source: 'PollCheck', generic: { dem: Number(avg[1]), rep: Number(avg[2]), margin: (avg[3] === 'D' ? 1 : -1) * Number(avg[4]), polls: list }, races };
 }
-
-const readJ = async (n) => { try { return JSON.parse(await readFile(`${OUT}/${n}.json`, 'utf8')); } catch { return null; } };
 
 // ---- Official results: state election offices (see scripts/feeds.mjs) ----
 // A failing feed keeps its last good races so one flaky state never blanks the map.
