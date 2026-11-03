@@ -3,6 +3,7 @@
 import { mkdir, writeFile, readFile, stat } from 'node:fs/promises';
 import { GAMMA, parseEvents } from '../assets/markets.js';
 import { NAME_TO_ST } from '../assets/states.js';
+import { FEEDS } from './feeds.mjs';
 
 const OUT = process.argv[2] || 'out';
 const UA = 'midterms-2026-dashboard/1.0 (+https://github.com/ShatteredEagle/midterms-2026)';
@@ -73,20 +74,21 @@ async function polls() {
   return { updated: now(), source: 'PollCheck', generic: { dem: Number(avg[1]), rep: Number(avg[2]), margin: (avg[3] === 'D' ? 1 : -1) * Number(avg[4]), polls: list }, races };
 }
 
-// ---- Official results: California Secretary of State (JSON) ----
+// ---- Official results: state election offices (see scripts/feeds.mjs) ----
+// A failing feed keeps its last good races so one flaky state never blanks the map.
 async function results() {
-  const races = {};
-  const gov = await get('https://media.sos.ca.gov/media/governor.json');
-  const r = gov.find((x) => /^Governor/i.test(x.raceTitle));
-  if (r) {
-    const votes = r.candidates.reduce((a, c) => a + Number(String(c.Votes).replace(/,/g, '')), 0);
-    races['G-CA'] = {
-      id: 'G-CA', source: 'California Secretary of State', reporting: r.Reporting, reportedAt: r.ReportingTime, totalVotes: votes,
-      pct: Number((r.Reporting.match(/(\d+(?:\.\d+)?)%/) || [])[1] || 0),
-      cands: r.candidates.map((c) => ({ n: c.Name, p: { Dem: 'D', Rep: 'R' }[c.Party] || 'O', votes: Number(String(c.Votes).replace(/,/g, '')), pct: Number(c.Percent) })),
-    };
-  }
-  return { updated: now(), races };
+  let prev = { races: {}, feeds: {} };
+  try { prev = JSON.parse(await readFile(`${OUT}/results.json`, 'utf8')); } catch {}
+  const races = { ...prev.races }, feeds = { ...prev.feeds };
+  await Promise.all(Object.entries(FEEDS).map(async ([st, fn]) => {
+    try {
+      const got = await fn();
+      for (const k of Object.keys(races)) if (k.endsWith(`-${st}`)) delete races[k];
+      Object.assign(races, got);
+      feeds[st] = { ok: true, at: now(), races: Object.keys(got) };
+    } catch (e) { feeds[st] = { ...feeds[st], ok: false, at: now(), error: e.message }; console.error(st, e.message); }
+  }));
+  return { updated: now(), feeds, races };
 }
 
 await mkdir(OUT, { recursive: true });
