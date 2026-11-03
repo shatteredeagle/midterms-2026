@@ -1,0 +1,330 @@
+import { STATES, closeTime } from './states.js';
+import { fetchControl } from './markets.js';
+
+const REPO = 'ShatteredEagle/midterms-2026';
+const RAW = `https://raw.githubusercontent.com/${REPO}/data/`;
+const KIND = { S: 'Senate', G: 'Governor', H: 'House' };
+const $ = (s, r = document) => r.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const pct = (x, d = 0) => (x * 100).toFixed(d) + '%';
+const FIPS = {};
+for (const [st, v] of Object.entries(STATES)) FIPS[v[1]] = st;
+
+const S = { markets: null, polls: null, results: null, status: null, exit: null, control: null, paths: null, kind: 'S', sel: null, rkind: 'S', sort: 'close', q: '', showAll: false, fetchedAt: {} };
+
+// ---------- data ----------
+async function getJSON(name, { allowRaw = true } = {}) {
+  const bust = Math.floor(Date.now() / 60000);
+  const tries = allowRaw ? [`${RAW}${name}.json?t=${bust}`, `data/${name}.json?t=${bust}`] : [`data/${name}.json?t=${bust}`];
+  let best = null;
+  for (const u of tries) {
+    try {
+      const r = await fetch(u, { cache: 'no-store' });
+      if (!r.ok) continue;
+      const j = await r.json();
+      if (!best || (j.updated && j.updated > (best.updated || ''))) best = j;
+      if (best && allowRaw) break; // raw branch is authoritative when reachable
+    } catch { /* try next */ }
+  }
+  return best;
+}
+async function loadAll() {
+  const [markets, polls, results, status, exit] = await Promise.all([getJSON('markets'), getJSON('polls'), getJSON('results'), getJSON('status'), getJSON('exit-polls', { allowRaw: false })]);
+  Object.assign(S, { markets: markets || S.markets, polls: polls || S.polls, results: results || S.results, status: status || S.status, exit: exit || S.exit });
+  S.fetchedAt.main = Date.now();
+}
+async function loadControl() {
+  try { S.control = await fetchControl(); S.fetchedAt.control = Date.now(); } catch { /* keep snapshot */ }
+}
+
+// ---------- model ----------
+const now = () => Date.now();
+const isClosed = (st) => now() >= closeTime(st);
+function race(id) {
+  const m = S.markets?.races?.[id], p = S.polls?.races?.[id], o = S.results?.races?.[id];
+  if (!m && !p && !o) return null;
+  const st = id.split('-')[1];
+  let pD = null;
+  if (m) pD = m.d / ((m.d + m.r) || 1);
+  else if (p) { const lp = p.cands.find((c) => p.leader && c.n.includes(p.leader))?.p; if (lp) pD = lp === 'D' ? p.winProb : 1 - p.winProb; }
+  const closed = isClosed(st);
+  const projected = closed && pD !== null && (pD >= 0.99 || pD <= 0.01);
+  return { id, kind: id[0], st, m, p, o, pD, closed, projected };
+}
+const binOf = (pD) => pD === null ? 'none' : pD >= .95 ? 'D3' : pD >= .8 ? 'D2' : pD >= .62 ? 'D1' : pD > .38 ? 'T' : pD > .2 ? 'R1' : pD > .05 ? 'R2' : 'R3';
+const leanText = (pD) => pD === null ? 'No data' : pD >= .5 ? `D ${pct(pD)}` : `R ${pct(1 - pD)}`;
+function allRaces(kind) {
+  const ids = new Set([...Object.keys(S.markets?.races || {}), ...Object.keys(S.polls?.races || {})].filter((k) => k[0] === kind));
+  return [...ids].map(race).filter(Boolean);
+}
+function houseState(st) {
+  const rs = allRaces('H').filter((r) => r.st === st && r.m);
+  if (!rs.length) return null;
+  const d = rs.reduce((a, r) => a + r.pD, 0);
+  return { n: rs.length, d, r: rs.length - d, share: d / rs.length };
+}
+
+// ---------- hero ----------
+function renderClock() {
+  const times = Object.keys(STATES).map((s) => [closeTime(s), s]).sort((a, b) => a[0] - b[0]);
+  const next = times.find((t) => t[0] > now());
+  const closed = times.filter((t) => t[0] <= now()).length;
+  const el = $('#clock');
+  const fmt = (t) => new Date(t).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+  if (now() < times[0][0]) {
+    const same = times.filter((t) => t[0] === times[0][0]).map((t) => t[1]).join(', ');
+    el.innerHTML = `<h3>Election Day · Nov 3</h3><div class="when">${countdown(times[0][0] - now())}</div><p class="meta">Until first poll close (${fmt(times[0][0])}): ${esc(same)}</p>`;
+  } else if (next) {
+    const same = times.filter((t) => t[0] === next[0]).map((t) => t[1]).join(', ');
+    el.innerHTML = `<h3>Polls closed in ${closed} of 51</h3><div class="when">${countdown(next[0] - now())}</div><p class="meta">Next at ${fmt(next[0])}: ${esc(same)}</p>`;
+  } else el.innerHTML = `<h3>Polls</h3><div class="when">All closed</div><p class="meta">Counting continues; late ballots can move margins.</p>`;
+}
+const countdown = (ms) => { const s = Math.max(0, Math.floor(ms / 1000)); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60); return h ? `${h}h ${String(m).padStart(2, '0')}m` : `${m}m ${String(s % 60).padStart(2, '0')}s`; };
+
+function renderSenate() {
+  const rs = allRaces('S').filter((r) => r.pD !== null);
+  const NOT_UP = { D: 34, R: 31 }; // seats not on the ballot (incl. independents caucusing)
+  let dC = 0, dF = 0, t = 0, rF = 0, rC = 0;
+  for (const r of rs) {
+    if (r.projected) r.pD >= .5 ? dC++ : rC++;
+    else if (r.pD >= .62) dF++; else if (r.pD <= .38) rF++; else t++;
+  }
+  const cells = [...Array(NOT_UP.D).fill('D0'), ...Array(dC).fill('D0'), ...Array(dF).fill('D1'), ...Array(t).fill('T'), ...Array(rF).fill('R1'), ...Array(rC).fill('R0'), ...Array(NOT_UP.R).fill('R0')];
+  const dTot = NOT_UP.D + dC + dF, rTot = NOT_UP.R + rC + rF;
+  const c = S.control?.senate || S.markets?.control?.senate;
+  $('#cardSenate').innerHTML = `<h3>Senate · 51 for majority</h3>
+    <div class="big"><b class="d">${dTot}</b><small>D incl. leaning</small><b class="r">${rTot}</b><small>R incl. leaning</small></div>
+    <div class="waffle" role="img" aria-label="Senate seats: ${dTot} Democratic or leaning, ${t} toss-up, ${rTot} Republican or leaning">${cells.map((k) => `<i class="${k}"></i>`).join('')}</div>
+    <div class="waffle-key"><span style="--c:var(--d)">Safe/called D</span><span style="--c:var(--d-2)">Leans D</span><span style="--c:var(--t)">Toss-up ${t}</span><span style="--c:var(--r-2)">Leans R</span><span style="--c:var(--r)">Safe/called R</span></div>
+    <p class="meta">${c ? `Market control odds: <b>D ${pct(c.d / (c.d + c.r))}</b> · R ${pct(c.r / (c.d + c.r))}. ` : ''}Projected so far: D ${dC} · R ${rC}.</p>`;
+}
+function renderHouse() {
+  const c = S.control?.house || S.markets?.control?.house;
+  const seats = S.markets?.seats?.houseR;
+  const d = c ? c.d / (c.d + c.r) : null;
+  const expR = seats ? Math.round(seats.mean) : null;
+  $('#cardHouse').innerHTML = `<h3>House · 218 for majority</h3>
+    ${d === null ? '<p class="meta">No data yet.</p>' : `<div class="big"><b class="d">${pct(d)}</b><small>Democrats</small><b class="r">${pct(1 - d)}</b><small>Republicans</small></div>
+    <div class="split" role="img" aria-label="House control odds"><i class="d" style="width:${d * 100}%"></i><i class="r" style="width:${(1 - d) * 100}%"></i></div>`}
+    <p class="meta">${expR ? `Market-implied: about <b>${435 - expR} D</b> – ${expR} R seats. ` : ''}House calls come in slowly; district results are not in a free feed, so this is odds, not a count.</p>`;
+}
+function renderBalance() {
+  const b = S.control?.balance || S.markets?.control?.balance;
+  const rows = b ? [['Democrats sweep', b['Democrats Sweep']], ['R Senate, D House', b['R Senate, D House']], ['Republicans sweep', b['Republicans Sweep']], ['D Senate, R House', b['D Senate, R House']]].filter((x) => x[1] != null) : [];
+  $('#cardBalance').innerHTML = `<h3>Balance of power</h3>${rows.length ? rows.map(([l, v]) => `<div class="cand" data-p="${l.startsWith('Dem') ? 'D' : l.startsWith('Rep') ? 'R' : 'O'}"><span>${l}</span><b>${pct(v)}</b><div class="bar"><i style="width:${Math.max(1, v * 100)}%"></i></div></div>`).join('') : '<p class="meta">No data yet.</p>'}<p class="meta">Prediction-market odds for each combination.</p>`;
+}
+
+// ---------- map ----------
+function drawMap() {
+  const svg = $('#usmap');
+  const defs = `<defs><pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="var(--t)"/><rect width="3" height="8" fill="var(--hatch)" opacity=".55"/></pattern></defs>`;
+  const paths = Object.entries(S.paths).map(([fips, p]) => {
+    const st = FIPS[fips];
+    return st ? `<path id="st-${st}" data-st="${st}" d="${p.d}" tabindex="0" role="button"></path>` : '';
+  }).join('');
+  const labels = Object.entries(S.paths).map(([fips, p]) => {
+    const st = FIPS[fips];
+    return st && !['CT', 'RI', 'NJ', 'DE', 'MD', 'DC', 'VT', 'NH', 'MA', 'HI', 'AK'].includes(st) ? `<text x="${p.c[0]}" y="${p.c[1]}">${st}</text>` : '';
+  }).join('');
+  svg.innerHTML = defs + paths + labels;
+  $('#smallStates').innerHTML = ['CT', 'RI', 'NJ', 'DE', 'MD', 'DC', 'VT', 'NH', 'MA'].map((s) => `<button class="chip" data-st="${s}" type="button" aria-label="${STATES[s][0]}">${s}</button>`).join('');
+}
+function stateInfo(st) {
+  if (S.kind === 'H') {
+    const h = houseState(st);
+    return h ? { bin: h.share >= .95 ? 'D3' : h.share >= .75 ? 'D2' : h.share >= .55 ? 'D1' : h.share > .45 ? 'T' : h.share > .25 ? 'R1' : h.share > .05 ? 'R2' : 'R3', text: `${h.d.toFixed(1)} D · ${h.r.toFixed(1)} R of ${h.n} seats (expected)` } : { bin: 'none', text: 'No market data' };
+  }
+  const r = race(`${S.kind}-${st}`);
+  if (!r) return { bin: 'none', text: `No ${KIND[S.kind]} race in 2026` };
+  const official = r.o && r.o.totalVotes > 0;
+  return { bin: binOf(r.pD), called: r.projected, text: `${official ? 'Counting · ' : ''}${leanText(r.pD)}${r.projected ? ' · projected' : r.closed ? ' · polls closed' : ''}` };
+}
+function paintMap() {
+  for (const el of document.querySelectorAll('#usmap path')) {
+    const st = el.dataset.st, i = stateInfo(st);
+    el.setAttribute('class', `b-${i.bin}${i.called ? ' called' : ''}${S.sel === st ? ' sel' : ''}`);
+    el.setAttribute('aria-label', `${STATES[st][0]}: ${i.text}`);
+  }
+  for (const c of document.querySelectorAll('.chip')) c.classList.toggle('sel', c.dataset.st === S.sel);
+  const sw = (cls, label) => `<span><i class="b-${cls}" style="background:${cls === 'T' ? 'repeating-linear-gradient(45deg,var(--t) 0 3px,var(--hatch) 3px 5px)' : `var(--${{ D3: 'd', D2: 'd-2', D1: 'd-1', R1: 'r-1', R2: 'r-2', R3: 'r', none: 'none' }[cls]})`}"></i>${label}</span>`;
+  $('#legend').innerHTML = sw('D3', 'D ≥95%') + sw('D2', 'D 80–95%') + sw('D1', 'D 62–80%') + sw('T', 'Toss-up') + sw('R1', 'R 62–80%') + sw('R2', 'R 80–95%') + sw('R3', 'R ≥95%') + sw('none', S.kind === 'H' ? 'No data' : 'No race') + '<span>Bold outline = projected after polls close</span>';
+  const closedN = Object.keys(STATES).filter(isClosed).length;
+  $('#mapSub').textContent = S.kind === 'H' ? 'Expected House seats by state, summed from per-district market odds. Updates as markets move.' : `${KIND[S.kind]} races colored by market odds (${closedN} states closed). Official counts appear in the detail panel as feeds publish.`;
+}
+function candRows(cands, mode) {
+  return cands.map((c) => `<div class="cand" data-p="${esc(c.p)}"><span>${esc(c.n)} <span class="small">(${esc(c.p)})</span></span><b>${mode === 'votes' ? `${Number(c.pct).toFixed(1)}%` : mode === 'poll' ? `${c.pct}%` : pct(c.price)}</b><div class="bar"><i style="width:${Math.min(100, mode === 'market' ? c.price * 100 : c.pct)}%"></i></div></div>`).join('');
+}
+function raceBlock(id) {
+  const r = race(id);
+  if (!r) return '';
+  const o = r.o;
+  let h = `<div class="race"><h4>${KIND[r.kind]}${r.p?.special ? ' (special)' : ''} ${r.kind === 'H' ? esc(r.m?.district || '') : ''}</h4>`;
+  if (o && o.totalVotes > 0) h += `<p><span class="tag live">Official count</span> <span class="small">${esc(o.source)} · ${esc(o.reporting)}</span></p>${candRows(o.cands.map((c) => ({ ...c })), 'votes')}`;
+  else if (r.closed) h += `<p class="small">Polls closed. No free official feed for this race — check the state election office.</p>`;
+  if (r.m) h += `<p class="small" style="margin-top:8px"><b>Market odds</b> · $${(r.m.vol / 1e3).toFixed(0)}k traded${r.projected ? ' · <span class="tag live">projected</span>' : ''}</p>${candRows(r.m.cands.filter((c) => c.price >= .01), 'market')}`;
+  if (r.p) h += `<p class="small" style="margin-top:8px"><b>Polling average</b> · ${esc(r.p.rating)} · ${r.p.polls} polls, ${r.p.pollsters} pollsters${r.p.lead ? ` · ${esc(r.p.lead)}` : ''}</p>${candRows(r.p.cands, 'poll')}`;
+  return h + '</div>';
+}
+function renderDetail() {
+  const el = $('#detail');
+  if (!S.sel) {
+    el.innerHTML = `<h3>Select a state</h3><p class="small">Click or tab to a state on the map, or pick one from the table, to see its races: official count when available, market odds, and the polling average.</p>`;
+    return;
+  }
+  const st = S.sel, [name, , ] = STATES[st];
+  const h = houseState(st);
+  const ct = new Date(closeTime(st)).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+  const racesHtml = raceBlock(`S-${st}`) + raceBlock(`G-${st}`);
+  el.innerHTML = `<h3>${esc(name)}</h3><p class="small">Polls close ${isClosed(st) ? '(closed)' : 'about'} ${ct} · <a href="https://ballotpedia.org/${name.replace(/ /g, '_')}_elections,_2026" target="_blank" rel="noopener">Ballotpedia</a></p>
+    ${racesHtml || '<p class="small" style="margin-top:12px">No Senate or governor race here in 2026.</p>'}
+    ${h ? `<div class="race"><h4>House · ${h.n} districts</h4><p>Expected <b style="color:var(--d)">${h.d.toFixed(1)} D</b> · <b style="color:var(--r)">${h.r.toFixed(1)} R</b> <span class="small">(sum of district market odds)</span></p><p class="small">Closest: ${allRaces('H').filter((r) => r.st === st && r.m).sort((a, b) => Math.abs(a.pD - .5) - Math.abs(b.pD - .5)).slice(0, 3).map((r) => `${st}-${r.m.district} ${leanText(r.pD)}`).join(', ')}</p></div>` : ''}`;
+}
+function select(st) { S.sel = st; paintMap(); renderDetail(); }
+function wireMap() {
+  const tip = $('#tip'), wrap = $('.map-wrap');
+  const show = (el, ev) => {
+    const st = el.dataset.st, i = stateInfo(st);
+    tip.hidden = false; tip.innerHTML = `<b>${esc(STATES[st][0])}</b>${esc(i.text)}`;
+    const b = wrap.getBoundingClientRect(), x = (ev?.clientX ?? el.getBoundingClientRect().left) - b.left + 14, y = (ev?.clientY ?? el.getBoundingClientRect().top) - b.top + 14;
+    tip.style.left = Math.min(x, b.width - 250) + 'px'; tip.style.top = y + 'px';
+  };
+  const svg = $('#usmap');
+  svg.addEventListener('pointermove', (e) => { const p = e.target.closest('path'); p ? show(p, e) : (tip.hidden = true); });
+  svg.addEventListener('pointerleave', () => (tip.hidden = true));
+  svg.addEventListener('focusin', (e) => { if (e.target.matches('path')) show(e.target); });
+  svg.addEventListener('focusout', () => (tip.hidden = true));
+  svg.addEventListener('click', (e) => { const p = e.target.closest('path'); if (p) select(p.dataset.st); });
+  svg.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('path')) { e.preventDefault(); select(e.target.dataset.st); } });
+  $('#smallStates').addEventListener('click', (e) => { const c = e.target.closest('.chip'); if (c) select(c.dataset.st); });
+  $('#mapTabs').addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    S.kind = b.dataset.m;
+    for (const x of document.querySelectorAll('#mapTabs button')) x.setAttribute('aria-selected', x === b);
+    paintMap();
+  });
+}
+
+// ---------- races table ----------
+function renderTable() {
+  let rs = allRaces(S.rkind);
+  const q = S.q.trim().toLowerCase();
+  if (q) rs = rs.filter((r) => `${STATES[r.st][0]} ${r.st} ${(r.m?.cands || []).map((c) => c.n).join(' ')} ${(r.p?.cands || []).map((c) => c.n).join(' ')}`.toLowerCase().includes(q));
+  rs.sort((a, b) => {
+    const ca = a.pD === null ? 9 : Math.abs(a.pD - .5), cb = b.pD === null ? 9 : Math.abs(b.pD - .5);
+    return S.sort === 'close' ? ca - cb : STATES[a.st][0].localeCompare(STATES[b.st][0]);
+  });
+  const LIMIT = 25, shown = S.showAll || q ? rs : rs.slice(0, LIMIT);
+  const hasPolls = S.rkind !== 'H';
+  const row = (r) => {
+    const name = S.rkind === 'H' ? `${r.st}-${r.m.district}` : STATES[r.st][0] + (r.p?.special ? ' (special)' : '');
+    const d = r.pD ?? .5;
+    const o = r.o && r.o.totalVotes > 0 ? `<span class="tag live">Counting ${r.o.pct}%</span>` : r.projected ? `<span class="tag live">Projected ${r.pD >= .5 ? 'D' : 'R'}</span>` : r.closed ? '<span class="tag">Polls closed</span>' : `<span class="tag">Polls close ${new Date(closeTime(r.st)).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</span>`;
+    return `<tr data-st="${r.st}" tabindex="0"><th scope="row" style="text-transform:none;letter-spacing:0;font-size:14px;color:var(--text)">${esc(name)}</th>
+      ${hasPolls ? `<td class="rate" data-s="${esc(r.p?.rating || '')}">${esc(r.p?.rating || '—')}</td><td>${esc(r.p?.lead || '—')}</td>` : `<td>${esc(r.m.cands.slice(0, 2).map((c) => c.n.split(' ').pop()).join(' vs '))}</td>`}
+      <td><div class="odds" role="img" aria-label="Market odds: Democrat ${pct(d)}, Republican ${pct(1 - d)}"><span>${(d * 100).toFixed(0)}</span><div class="split"><i class="d" style="width:${d * 100}%"></i><i class="r" style="width:${(1 - d) * 100}%"></i></div><span>${((1 - d) * 100).toFixed(0)}</span></div></td>
+      <td>${o}</td></tr>`;
+  };
+  $('#raceTable').innerHTML = `<thead><tr><th>${S.rkind === 'H' ? 'District' : 'State'}</th>${hasPolls ? '<th>Rating</th><th>Poll average</th>' : '<th>Candidates</th>'}<th>Market odds D · R (%)</th><th>Status</th></tr></thead><tbody>${shown.map(row).join('') || '<tr><td colspan="5">No races match.</td></tr>'}</tbody>`;
+  const more = $('#moreRow');
+  more?.remove();
+  if (!q && rs.length > LIMIT) $('#raceTable').insertAdjacentHTML('afterend', `<div class="more" id="moreRow"><button type="button" id="moreBtn">${S.showAll ? 'Show fewer' : `Show all ${rs.length}`}</button></div>`);
+}
+function wireTable() {
+  $('#raceTabs').addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    S.rkind = b.dataset.k; S.showAll = false;
+    for (const x of document.querySelectorAll('#raceTabs button')) x.setAttribute('aria-selected', x === b);
+    renderTable();
+  });
+  $('#q').addEventListener('input', (e) => { S.q = e.target.value; renderTable(); });
+  const pick = (t) => { const tr = t.closest('tr[data-st]'); if (tr) { select(tr.dataset.st); $('#map').scrollIntoView({ behavior: 'smooth', block: 'start' }); } };
+  $('#raceTable').addEventListener('click', (e) => pick(e.target));
+  $('#raceTable').addEventListener('keydown', (e) => { if (e.key === 'Enter') pick(e.target); });
+  document.addEventListener('click', (e) => { if (e.target.id === 'moreBtn') { S.showAll = !S.showAll; renderTable(); } });
+}
+
+// ---------- polls ----------
+const MONTHS = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
+const parseDate = (s) => { const [d, m, y] = s.split(' '); return Date.UTC(+y, MONTHS[m], +d); };
+function renderPolls() {
+  const g = S.polls?.generic;
+  const el = $('#polls-body');
+  if (!g) { el.innerHTML = '<p class="small">Polling data unavailable.</p>'; return; }
+  const ps = g.polls.map((p) => ({ ...p, t: parseDate(p.date) }));
+  const t0 = Math.min(...ps.map((p) => p.t)), t1 = Math.max(...ps.map((p) => p.t), t0 + 864e5);
+  const W = 640, H = 230, L = 34, B = 24, T = 10, R = 10;
+  const X = (t) => L + ((t - t0) / (t1 - t0)) * (W - L - R), Y = (m) => T + (1 - (m - 0) / 16) * (H - T - B);
+  const grid = [0, 4, 8, 12, 16].map((v) => `<line class="grid" x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${L - 6}" y="${Y(v) + 4}" text-anchor="end">${v ? 'D+' + v : '0'}</text>`).join('');
+  const dots = ps.map((p) => { const c = p.margin >= 0 ? 'var(--d)' : 'var(--r)'; return `<circle cx="${X(p.t)}" cy="${Y(Math.abs(p.margin) > 16 ? 16 : p.margin)}" r="5" fill="${p.dup ? 'none' : c}" stroke="${c}" stroke-width="1.5" opacity="${p.dup ? .8 : .75}"><title>${esc(p.pollster)} · ${esc(p.date)} · ${p.margin >= 0 ? 'D' : 'R'}+${Math.abs(p.margin)} (${p.pop}, n=${p.n})${p.dup ? ' · not in average' : ''}</title></circle>`; }).join('');
+  const fmtD = (t) => new Date(t).toLocaleDateString([], { month: 'short', day: 'numeric', timeZone: 'UTC' });
+  const rows = ps.slice(0, S.showPolls ? 40 : 8).map((p) => `<tr><td>${esc(p.pollster)}${p.dup ? ' <span class="tag" title="Another version of the same survey is in the average">alt. version</span>' : ''}</td><td>${esc(p.date)}</td><td class="num">${p.n.toLocaleString()} ${p.pop}</td><td class="num" style="color:var(--d)">${p.dem}</td><td class="num" style="color:var(--r)">${p.rep}</td><td class="num"><b>${p.margin >= 0 ? 'D' : 'R'}+${Math.abs(p.margin)}</b></td></tr>`).join('');
+  el.innerHTML = `<div><div class="gb"><div><b class="d">${g.dem}%</b><div class="small">Democratic</div></div><div><b class="r">${g.rep}%</b><div class="small">Republican</div></div><div><b>${g.margin >= 0 ? 'D' : 'R'}+${Math.abs(g.margin).toFixed(1)}</b><div class="small">Margin</div></div></div>
+    <p class="small" style="margin-top:14px">Average by PollCheck across likely-voter polls. Filled dots are in the average; hollow dots are alternate versions of the same survey. Hover a dot for details.</p>
+    <svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Generic ballot polls by date, margin in points">${grid}<line x1="${L}" x2="${W - R}" y1="${Y(g.margin)}" y2="${Y(g.margin)}" stroke="var(--text)" stroke-dasharray="4 4"/><text x="${W - R}" y="${Y(g.margin) - 6}" text-anchor="end" style="fill:var(--text)">avg ${g.margin >= 0 ? 'D' : 'R'}+${Math.abs(g.margin).toFixed(1)}</text>${dots}<text x="${L}" y="${H - 6}">${fmtD(t0)}</text><text x="${W - R}" y="${H - 6}" text-anchor="end">${fmtD(t1)}</text></svg></div>
+    <div class="table-scroll"><table><thead><tr><th>Pollster</th><th>Fielded</th><th class="num">Sample</th><th class="num">D</th><th class="num">R</th><th class="num">Spread</th></tr></thead><tbody>${rows}</tbody></table>
+    <div class="more"><button type="button" id="morePolls">${S.showPolls ? 'Show fewer' : 'Show 40 latest'}</button></div></div>`;
+  $('#morePolls').onclick = () => { S.showPolls = !S.showPolls; renderPolls(); };
+}
+
+// ---------- exit polls ----------
+const EXIT_LINKS = [['AP VoteCast / Voter Poll', 'https://apnews.com/hub/ap-votecast'], ['SSRS / Edison Research', 'https://www.edisonresearch.com/'], ['CNN', 'https://www.cnn.com/politics'], ['NBC News', 'https://www.nbcnews.com/politics'], ['ABC News', 'https://abcnews.go.com/Politics'], ['CBS News', 'https://www.cbsnews.com/politics/'], ['Fox News', 'https://www.foxnews.com/politics']];
+function renderExit() {
+  const x = S.exit, el = $('#exit-body');
+  const links = `<div class="links">${EXIT_LINKS.map(([n, u]) => `<a href="${u}" target="_blank" rel="noopener">${n} ↗</a>`).join('')}</div>`;
+  if (!x?.questions?.length) {
+    $('#exitSub').textContent = 'Aggregated across outlets once published.';
+    el.innerHTML = `<div class="pending"><div><b>Waiting for the first release.</b><p class="small" style="margin:6px 0 0">Exit polls and AP VoteCast are not published as open data, and outlets embargo results until polls close in each state. When they appear, this section shows each source side by side with their average. Early waves are preliminary and get re-weighted to the final count, so treat them with caution.</p></div>${links}</div>`;
+    return;
+  }
+  $('#exitSub').textContent = `${x.status === 'final' ? 'Final-weighted' : 'Preliminary'} · updated ${new Date(x.updated).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' })}. Average is the unweighted mean across sources.`;
+  const src = x.sources;
+  el.innerHTML = x.questions.map((q) => `<div class="q"><h3>${esc(q.title)}</h3><div class="table-scroll"><table><thead><tr><th>Group</th>${src.map((s) => `<th class="num">${esc(s.name)}</th>`).join('')}<th>Average D · R</th></tr></thead><tbody>${q.groups.map((g) => {
+    const vals = src.map((s) => g.values?.[s.id]);
+    const have = vals.filter(Boolean), d = have.length ? have.reduce((a, v) => a + v.dem, 0) / have.length : null, r = have.length ? have.reduce((a, v) => a + v.rep, 0) / have.length : null;
+    return `<tr><th scope="row" style="text-transform:none;letter-spacing:0;font-size:14px;color:var(--text)">${esc(g.label)}</th>${vals.map((v) => `<td class="num">${v ? `<span style="color:var(--d)">${v.dem}</span> · <span style="color:var(--r)">${v.rep}</span>` : '—'}</td>`).join('')}<td>${d === null ? '—' : `<div class="odds"><span>${d.toFixed(0)}</span><div class="split"><i class="d" style="width:${d / (d + r) * 100}%"></i><i class="r" style="width:${r / (d + r) * 100}%"></i></div><span>${r.toFixed(0)}</span></div>`}</td></tr>`;
+  }).join('')}</tbody></table></div></div>`).join('') + links;
+}
+
+// ---------- sources ----------
+function renderSources() {
+  const st = S.status?.sources || {};
+  const age = (k) => { const t = st[k]?.at; if (!t) return '<span class="tag">no data</span>'; const m = Math.round((now() - Date.parse(t)) / 60000); return `<span class="tag ${st[k].ok && m < 20 ? 'live' : ''}">${st[k].ok ? `${m}m ago` : 'last fetch failed'}</span>`; };
+  const cards = [
+    ['Polymarket', 'Per-race win odds for every Senate, governor and House race; chamber control; seat totals.', 'https://polymarket.com/event/which-party-will-win-the-house-in-2026', age('markets') + ' · control odds refresh live in your browser'],
+    ['PollCheck', 'Polling averages and ratings for Senate, governor races, and the generic ballot.', 'https://www.pollcheck.co.uk/us-midterms-2026', age('polls')],
+    ['California Secretary of State', 'Official statewide count (governor). More states are added as they publish machine-readable files.', 'https://electionresults.sos.ca.gov/', age('results')],
+    ['Exit polls', 'No open feed exists. Entered from published outlet releases (AP VoteCast, SSRS/Edison, networks).', 'https://apnews.com/hub/ap-votecast', S.exit?.updated ? `<span class="tag live">updated ${new Date(S.exit.updated).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</span>` : '<span class="tag">waiting</span>'],
+  ];
+  const xs = [['AP', 'https://apnews.com/'], ['Decision Desk HQ', 'https://decisiondeskhq.com/'], ['Silver Bulletin', 'https://www.natesilver.net/'], ['RealClearPolling', 'https://www.realclearpolling.com/'], ['FiftyPlusOne', 'https://www.fiftyplusone.news/'], ['Cook Political', 'https://www.cookpolitical.com/'], ['Sabato’s Crystal Ball', 'https://centerforpolitics.org/crystalball/'], ['Inside Elections', 'https://insideelections.com/'], ['270toWin', 'https://www.270towin.com/']];
+  $('#src-body').innerHTML = `<div class="src-grid">${cards.map(([n, d, u, s]) => `<div class="src"><h3><a href="${u}" target="_blank" rel="noopener">${n} ↗</a></h3><p class="small" style="margin:0 0 8px">${d}</p>${s}</div>`).join('')}</div>
+  <h3 style="font-size:15px;margin-bottom:8px">Cross-check elsewhere</h3><div class="links">${xs.map(([n, u]) => `<a href="${u}" target="_blank" rel="noopener">${n} ↗</a>`).join('')}</div>
+  <h3 style="font-size:15px;margin:18px 0 6px">How to read this page</h3>
+  <ul class="small" style="margin:0;padding-left:18px;max-width:80ch"><li><b>Map colors</b> are market-implied win probabilities, not votes counted. A race is marked <i>projected</i> only after its state’s polls close and the market reaches 99%.</li><li><b>Official count</b> badges appear only where a state publishes a machine-readable file. Everything else links you to the authoritative source.</li><li>Poll-close times are approximate and use the last time any part of a state closes.</li><li>Prediction markets reflect traders’ views and can be wrong or manipulated; they are shown alongside, not instead of, polls.</li></ul>`;
+}
+
+// ---------- status pill ----------
+function renderLive() {
+  const el = $('#live'), t = $('#liveText');
+  const m = S.markets?.updated ? Math.round((now() - Date.parse(S.markets.updated)) / 60000) : null;
+  const c = S.fetchedAt.control ? Math.round((now() - S.fetchedAt.control) / 1000) : null;
+  el.className = 'pill ' + (m === null ? 'bad' : m <= 12 ? 'ok' : m <= 30 ? 'stale' : 'bad');
+  t.textContent = m === null ? 'Data unavailable' : c !== null && c < 120 ? `Live · control odds ${c}s ago · races ${m}m ago` : `Races updated ${m}m ago`;
+}
+
+// ---------- boot ----------
+function renderAll() { renderClock(); renderSenate(); renderHouse(); renderBalance(); paintMap(); renderDetail(); renderTable(); renderPolls(); renderExit(); renderSources(); renderLive(); }
+async function boot() {
+  const th = $('#theme');
+  th.onclick = () => { const cur = document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); const n = cur === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = n; try { localStorage.setItem('theme', n); } catch {} };
+  S.paths = await (await fetch('assets/map-paths.json')).json();
+  drawMap(); wireMap(); wireTable();
+  await Promise.all([loadAll(), loadControl()]);
+  renderAll();
+  setInterval(() => { renderClock(); renderLive(); }, 1000);
+  let busy = false;
+  const tick = async (full) => { if (document.hidden || busy) return; busy = true; try { await (full ? Promise.all([loadAll(), loadControl()]) : loadControl()); renderAll(); } finally { busy = false; } };
+  setInterval(() => tick(false), 30000);
+  setInterval(() => tick(true), 90000);
+  document.addEventListener('visibilitychange', () => !document.hidden && tick(true));
+}
+boot().catch((e) => { console.error(e); $('#liveText').textContent = 'Failed to load'; });
