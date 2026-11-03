@@ -113,13 +113,14 @@ function renderClock() {
   const closed = times.filter((t) => t[0] <= now()).length;
   const el = $('#clock');
   const fmt = (t) => new Date(t).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+  const row = (eyebrow, when, meta) => `<span class="eyebrow">${eyebrow}</span><span class="when">${when}</span><span class="meta">${meta}</span>`;
   if (now() < times[0][0]) {
     const same = times.filter((t) => t[0] === times[0][0]).map((t) => t[1]).join(', ');
-    el.innerHTML = `<h3>Election Day · Nov 3</h3><div class="when">${countdown(times[0][0] - now())}</div><p class="meta">Until first poll close (${fmt(times[0][0])}): ${esc(same)}</p>`;
+    el.innerHTML = row('Election Day · Nov 3', countdown(times[0][0] - now()), `until the first polls close (${fmt(times[0][0])}): ${esc(same)}`);
   } else if (next) {
     const same = times.filter((t) => t[0] === next[0]).map((t) => t[1]).join(', ');
-    el.innerHTML = `<h3>Polls closed in ${closed} of 51</h3><div class="when">${countdown(next[0] - now())}</div><p class="meta">Next at ${fmt(next[0])}: ${esc(same)}</p>`;
-  } else el.innerHTML = `<h3>Polls</h3><div class="when">All closed</div><p class="meta">Counting continues; late ballots can move margins.</p>`;
+    el.innerHTML = row(`Polls closed in ${closed} of 51`, countdown(next[0] - now()), `until the next close at ${fmt(next[0])}: ${esc(same)}`);
+  } else el.innerHTML = row('Polls', 'All closed', 'Counting continues; late ballots can move margins.');
 }
 const countdown = (ms) => { const s = Math.max(0, Math.floor(ms / 1000)); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60); return h ? `${h}h ${String(m).padStart(2, '0')}m` : `${m}m ${String(s % 60).padStart(2, '0')}s`; };
 
@@ -195,7 +196,7 @@ function renderFlips() {
   el.innerHTML = `<div class="flip-grid">${col('S', 'Senate')}${col('G', 'Governor')}</div><p class="small" style="margin-top:12px">Gold bar = more likely than not to flip. "Holds the seat" means the winner of its last election; appointments and party switches aren't tracked. House flips aren't shown because no free source lists each district's current party.</p>`;
 }
 function wireFlips() {
-  const pick = (t) => { const li = t.closest('.flip-item'); if (li) { select(li.dataset.st); $('#map').scrollIntoView({ behavior: 'smooth', block: 'start' }); } };
+  const pick = (t) => { const li = t.closest('.flip-item'); if (li) { select(li.dataset.st); goMap(); } };
   $('#flips-body').addEventListener('click', (e) => pick(e.target));
   $('#flips-body').addEventListener('keydown', (e) => { if (e.key === 'Enter') pick(e.target); });
 }
@@ -344,7 +345,7 @@ function wireTable() {
     renderTable();
   });
   $('#q').addEventListener('input', (e) => { S.q = e.target.value; renderTable(); });
-  const pick = (t) => { const tr = t.closest('tr[data-st]'); if (tr) { select(tr.dataset.st); $('#map').scrollIntoView({ behavior: 'smooth', block: 'start' }); } };
+  const pick = (t) => { const tr = t.closest('tr[data-st]'); if (tr) { select(tr.dataset.st); goMap(); } };
   $('#raceTable').addEventListener('click', (e) => pick(e.target));
   $('#raceTable').addEventListener('keydown', (e) => { if (e.key === 'Enter') pick(e.target); });
   document.addEventListener('click', (e) => { if (e.target.id === 'moreBtn') { S.showAll = !S.showAll; renderTable(); } });
@@ -386,7 +387,7 @@ function wirePolls() {
     for (const x of document.querySelectorAll('#pollTabs button')) x.setAttribute('aria-selected', x === b);
     renderPolls();
   });
-  const pick = (t) => { const r = t.closest('.sen-row'); if (r) { select(r.dataset.st); $('#map').scrollIntoView({ behavior: 'smooth', block: 'start' }); } };
+  const pick = (t) => { const r = t.closest('.sen-row'); if (r) { select(r.dataset.st); goMap(); } };
   $('#polls-body').addEventListener('click', (e) => pick(e.target));
   $('#polls-body').addEventListener('keydown', (e) => { if (e.key === 'Enter') pick(e.target); });
 }
@@ -467,16 +468,16 @@ function renderTurnout() {
   for (const s of S.early?.states || []) {
     const up = s.total2022 ? ((s.ballots / s.total2022 - 1) * 100).toFixed(0) : null;
     const links = [{ label: s.source, url: s.url }, ...(s.links || [])];
-    cards.push(`<article class="tcard"><h3><span>${esc(s.name)} · early vote</span><span class="tag live">${esc(s.asOf)}</span></h3>
-      <div class="big2">${s.ballotsLabel ? esc(s.ballotsLabel) : n(s.ballots)} <span class="small">ballots${s.turnoutPct ? ` · ${s.turnoutPct}% of registered` : ''}</span></div>
+    cards.push(`<article class="tcard"><h3><span>${esc(s.name)} · early vote</span><span class="asof">${esc(s.asOf)}</span></h3>
+      <div class="big2 ${s.ballotsLabel ? 'txt' : ''}">${s.ballotsLabel ? esc(s.ballotsLabel) : n(s.ballots)} <span class="small">ballots${s.turnoutPct ? ` · ${s.turnoutPct}% of registered` : ''}</span></div>
       ${up !== null ? `<p class="small" style="margin:0"><b>${up > 0 ? '+' : ''}${up}%</b> vs. ${n(s.total2022)} total absentee and early ballots in 2022.${s.inPerson ? ` In person ${n(s.inPerson)}, mail ${n(s.mail)}.` : ''}</p>` : ''}
       ${s.byParty ? `<div class="stack" role="img" aria-label="Early ballots by party: ${s.byParty.map((p) => `${p.label} ${p.share}%`).join(', ')}">${s.byParty.map((p) => `<i class="${p.party}" style="width:${p.share}%"></i>`).join('')}</div>
       <div class="legend2">${s.byParty.filter((p) => p.share >= 1).map((p) => `<span class="${p.party}">${esc(p.label)} ${p.share}%</span>`).join('')}</div>` : ''}
-      ${(s.notes || []).map((t) => `<p class="small" style="margin:0">${esc(t)}</p>`).join('')}
+      ${(s.notes || []).length ? `<details><summary>Details and caveats</summary>${s.notes.map((t) => `<p class="small">${esc(t)}</p>`).join('')}</details>` : ''}
       <p class="small" style="margin:0">${s.byParty ? 'Who voted early, not how they voted. ' : ''}${links.map((l) => `<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`).join(' · ')}</p></article>`);
   }
   const fl = S.turnout?.FL;
-  if (fl) cards.push(`<article class="tcard"><h3><span>Florida · Election Day turnout</span><span class="tag live">live</span></h3>
+  if (fl) cards.push(`<article class="tcard"><h3><span>Florida · Election Day turnout</span><span class="asof">Live, updates as counties report</span></h3>
       <div class="big2">${n(fl.electionDay)} <span class="small">in-person votes so far</span></div>
       <p class="small" style="margin:0">Sum of ${fl.counties} counties, last reported ${esc(fl.lastReportedET || '')} ET. Excludes early and mail ballots, which Florida counts separately.</p>
       <p class="small" style="margin:0"><a href="${esc(fl.url)}" target="_blank" rel="noopener">${esc(fl.source)} ↗</a></p></article>`);
@@ -534,6 +535,24 @@ function renderLive() {
   t.textContent = m === null ? 'Data unavailable' : c !== null && c < 120 ? `Live · control odds ${c}s ago · races ${m}m ago` : `Races updated ${m}m ago`;
 }
 
+// ---------- views (hash router) ----------
+const VIEWS = ['overview', 'races', 'polls', 'reports', 'changes', 'sources'];
+const ALIAS = { map: 'overview', flips: 'overview', turnout: 'reports', exit: 'reports', ballot: 'reports' };
+function showView(v, anchor) {
+  for (const el of document.querySelectorAll('.view')) el.hidden = el.dataset.view !== v;
+  for (const a of document.querySelectorAll('#nav a')) a.toggleAttribute('aria-current', a.dataset.v === v) || a.removeAttribute('aria-current');
+  for (const a of document.querySelectorAll('#nav a')) if (a.dataset.v === v) a.setAttribute('aria-current', 'page');
+  document.title = `${v[0].toUpperCase() + v.slice(1)} · 2026 Midterm Election Dashboard`;
+  const t = anchor && document.getElementById(anchor);
+  t ? t.scrollIntoView({ behavior: 'smooth', block: 'start' }) : window.scrollTo(0, 0);
+}
+function route() {
+  const h = location.hash.slice(1);
+  if (VIEWS.includes(h)) showView(h);
+  else showView(ALIAS[h] || (document.getElementById(h) ? VIEWS.find((v) => document.querySelector(`#view-${v} #${h}`)) : null) || 'overview', document.getElementById(h) ? h : null);
+}
+const goMap = () => { if (location.hash !== '#map') history.replaceState(null, '', '#map'); showView('overview', 'map'); };
+
 // ---------- boot ----------
 function renderAll() { renderClock(); renderSenate(); renderHouse(); renderCompare(); renderFlips(); paintMap(); renderDetail(); renderChanges(); renderTurnout(); renderBallot(); renderTable(); renderPolls(); renderExit(); renderSources(); renderLive(); }
 async function boot() {
@@ -549,6 +568,8 @@ async function boot() {
   const tick = async (full) => { if (document.hidden || busy) return; busy = true; try { await (full ? Promise.all([loadAll(), loadControl(), ...(++n % 4 === 0 ? [loadHistory()] : [])]) : loadControl()); renderAll(); } finally { busy = false; } };
   setInterval(() => tick(false), 30000);
   setInterval(() => tick(true), 90000);
+  window.addEventListener('hashchange', route);
+  route();
   document.addEventListener('visibilitychange', () => !document.hidden && tick(true));
 }
 boot().catch((e) => { console.error(e); $('#liveText').textContent = 'Failed to load'; });

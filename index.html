@@ -16,40 +16,28 @@
 <script>try{const t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t}catch{}</script>
 </head>
 <body>
-<a class="skip" href="#map">Skip to map</a>
+<a class="skip" href="#main">Skip to content</a>
 <header class="top">
   <div class="wrap bar">
     <div class="brand"><span class="logo" aria-hidden="true"></span><h1>2026 Midterms</h1></div>
-    <nav aria-label="Sections">
-      <a href="#map">Map</a><a href="#changes">Changes</a><a href="#races">Races</a><a href="#ballot">Ballot questions</a><a href="#polls">Polls</a><a href="#turnout">Turnout</a><a href="#exit">Exit polls</a><a href="#sources">Sources</a>
+    <nav aria-label="Sections" id="nav">
+      <a href="#overview" data-v="overview">Overview</a><a href="#races" data-v="races">Races</a><a href="#polls" data-v="polls">Polls</a><a href="#reports" data-v="reports">Reports</a><a href="#changes" data-v="changes">Changes</a><a href="#sources" data-v="sources">Sources</a>
     </nav>
     <div class="bar-right">
       <span id="live" class="pill" role="status" aria-live="polite"><i class="dot"></i><span id="liveText">Loading…</span></span>
-      <button id="theme" class="icon" type="button" aria-label="Toggle dark mode">◐</button>
+      <button id="theme" class="icon" type="button" aria-label="Toggle dark mode" title="Toggle dark mode"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor"/></svg></button>
     </div>
   </div>
 </header>
 
-<main class="wrap">
-  <section class="hero" aria-label="Chamber control">
-    <div class="countdown card" id="clock"></div>
+<main class="wrap" id="main" tabindex="-1">
+  <div class="view" data-view="overview" id="view-overview">
+<div class="clockbar card" id="clock"></div>
+    <section class="hero" aria-label="Chamber control">
     <article class="card" id="cardSenate"></article>
     <article class="card" id="cardHouse"></article>
   </section>
-
-  <section class="pair" aria-label="Market odds versus polling">
-    <article class="card sbc market" id="cardMarket"></article>
-    <article class="card sbc poll" id="cardPolls"></article>
-  </section>
-
-  <section id="flips" class="panel" aria-labelledby="flipsH">
-    <div class="panel-head">
-      <div><h2 id="flipsH">Seats that could flip</h2><p class="sub">Races where the party that holds the seat today is not the favorite, plus close calls. Chance is the market's probability that the seat changes party.</p></div>
-    </div>
-    <div id="flips-body"></div>
-  </section>
-
-  <section id="map" class="panel" aria-labelledby="mapH">
+<section id="map" class="panel" aria-labelledby="mapH">
     <div class="panel-head">
       <div><h2 id="mapH">Status map</h2><p class="sub" id="mapSub"></p></div>
       <div class="seg" role="tablist" aria-label="Map layer" id="mapTabs">
@@ -69,23 +57,20 @@
       <aside id="detail" class="detail" aria-live="polite"></aside>
     </div>
   </section>
-
-  <section id="changes" class="panel" aria-labelledby="chgH">
-    <div class="panel-head">
-      <div><h2 id="chgH">What changed</h2><p class="sub">A running log of moves between updates: odds shifts, new counts, lead changes, new polls. Also available as <a id="chgJson" href="#" target="_blank" rel="noopener">JSON</a>.</p></div>
-      <div class="seg" role="tablist" aria-label="Change type" id="chgTabs">
-        <button role="tab" data-f="all" aria-selected="true">All</button>
-        <button role="tab" data-f="count" aria-selected="false">Counts</button>
-        <button role="tab" data-f="odds" aria-selected="false">Odds</button>
-        <button role="tab" data-f="polls" aria-selected="false">Polls</button>
-        <button role="tab" data-f="reports" aria-selected="false">Reports</button>
-      </div>
-    </div>
-    <ol id="chgList" class="chg" aria-live="polite"></ol>
-    <div class="more" id="chgMore"></div>
+<section class="pair" aria-label="Market odds versus polling">
+    <article class="card sbc market" id="cardMarket"></article>
+    <article class="card sbc poll" id="cardPolls"></article>
   </section>
+<section id="flips" class="panel" aria-labelledby="flipsH">
+    <div class="panel-head">
+      <div><h2 id="flipsH">Seats that could flip</h2><p class="sub">Races where the party that holds the seat today is not the favorite, plus close calls. Chance is the market's probability that the seat changes party.</p></div>
+    </div>
+    <div id="flips-body"></div>
+  </section>
+  </div>
 
-  <section id="races" class="panel" aria-labelledby="racesH">
+  <div class="view" data-view="races" id="view-races">
+<section id="races" class="panel" aria-labelledby="racesH">
     <div class="panel-head">
       <div><h2 id="racesH">Races</h2><p class="sub">Polling average vs. market odds. Sorted by how close the market thinks it is.</p></div>
       <div class="controls">
@@ -99,19 +84,10 @@
     </div>
     <div class="table-scroll"><table id="raceTable"></table></div>
   </section>
+  </div>
 
-  <section id="ballot" class="panel" aria-labelledby="ballotH">
-    <div class="panel-head">
-      <div><h2 id="ballotH">Ballot questions</h2><p class="sub" id="ballotSub"></p></div>
-      <div class="seg" role="tablist" aria-label="State" id="ballotTabs">
-        <button role="tab" data-s="MA" aria-selected="true">Massachusetts</button>
-        <button role="tab" data-s="RI" aria-selected="false">Rhode Island</button>
-      </div>
-    </div>
-    <div id="ballot-body"></div>
-  </section>
-
-  <section id="polls" class="panel" aria-labelledby="pollsH">
+  <div class="view" data-view="polls" id="view-polls">
+<section id="polls" class="panel" aria-labelledby="pollsH">
     <div class="panel-head">
       <div><h2 id="pollsH">Generic ballot</h2><p class="sub" id="pollsSub">National House polling average, with the individual polls behind it.</p></div>
       <div class="seg" role="tablist" aria-label="Chamber" id="pollTabs">
@@ -121,25 +97,56 @@
     </div>
     <div id="polls-body" class="polls-grid"></div>
   </section>
+  </div>
 
-  <section id="turnout" class="panel" aria-labelledby="turnoutH">
+  <div class="view" data-view="reports" id="view-reports">
+<section id="turnout" class="panel" aria-labelledby="turnoutH">
     <div class="panel-head"><div><h2 id="turnoutH">Early vote &amp; turnout</h2><p class="sub" id="turnoutSub"></p></div></div>
     <div id="turnout-body" class="turnout-grid"></div>
   </section>
-
-  <section id="exit" class="panel" aria-labelledby="exitH">
+<section id="ballot" class="panel" aria-labelledby="ballotH">
+    <div class="panel-head">
+      <div><h2 id="ballotH">Ballot questions</h2><p class="sub" id="ballotSub"></p></div>
+      <div class="seg" role="tablist" aria-label="State" id="ballotTabs">
+        <button role="tab" data-s="MA" aria-selected="true">Massachusetts</button>
+        <button role="tab" data-s="RI" aria-selected="false">Rhode Island</button>
+      </div>
+    </div>
+    <div id="ballot-body"></div>
+  </section>
+<section id="exit" class="panel" aria-labelledby="exitH">
     <div class="panel-head"><div><h2 id="exitH">Exit polls &amp; voter surveys</h2><p class="sub" id="exitSub"></p></div></div>
     <div id="exit-body"></div>
   </section>
+  </div>
 
-  <section id="sources" class="panel" aria-labelledby="srcH">
+  <div class="view" data-view="changes" id="view-changes">
+<section id="changes" class="panel" aria-labelledby="chgH">
+    <div class="panel-head">
+      <div><h2 id="chgH">What changed</h2><p class="sub">A running log of moves between updates: odds shifts, new counts, lead changes, new polls. Also available as <a id="chgJson" href="#" target="_blank" rel="noopener">JSON</a>.</p></div>
+      <div class="seg" role="tablist" aria-label="Change type" id="chgTabs">
+        <button role="tab" data-f="all" aria-selected="true">All</button>
+        <button role="tab" data-f="count" aria-selected="false">Counts</button>
+        <button role="tab" data-f="odds" aria-selected="false">Odds</button>
+        <button role="tab" data-f="polls" aria-selected="false">Polls</button>
+        <button role="tab" data-f="reports" aria-selected="false">Reports</button>
+      </div>
+    </div>
+    <ol id="chgList" class="chg" aria-live="polite"></ol>
+    <div class="more" id="chgMore"></div>
+  </section>
+  </div>
+
+  <div class="view" data-view="sources" id="view-sources">
+<section id="sources" class="panel" aria-labelledby="srcH">
     <div class="panel-head"><div><h2 id="srcH">Sources &amp; method</h2><p class="sub">What feeds this page, how fresh it is, and where to cross-check.</p></div></div>
     <div id="src-body"></div>
   </section>
+  </div>
 </main>
 
 <footer class="wrap foot">
-  <p><strong>Not official results.</strong> Market-implied projections are probabilities from trading prices, not race calls. Only the California Secretary of State feed is an official count; for everything else follow your state election office and AP. Data may be delayed or briefly wrong.</p>
+  <p><strong>Not official results.</strong> Market-implied projections are probabilities from trading prices, not race calls. Official counts appear only for the states listed under Sources; for everything else follow your state election office and AP. Data may be delayed or briefly wrong.</p>
   <p>Open source (MIT) · <a href="https://github.com/ShatteredEagle/midterms-2026">github.com/ShatteredEagle/midterms-2026</a></p>
 </footer>
 <script type="module" src="assets/app.js"></script>
