@@ -1,17 +1,725 @@
 {
-  "updated": "2026-11-03T22:58:00Z",
+  "updated": "2026-11-03T23:55:00Z",
   "status": "partial",
-  "note": "Early results, re-weighted to the final count later. NBC, ABC, AP, CBS, CNN, Fox News and MS NOW share this one SSRS poll (over 75,000 voters nationally, in person, online and by phone, plus a pre-election survey for early and mail voters), so other networks' exit polls will repeat these numbers, not add a second opinion. NBC has not yet released vote-by-group tables or House vote shares; only numbers stated in its article are entered.",
+  "note": "Early results, re-weighted to the final count later. NBC, ABC, AP, CBS, CNN, Fox News and MS NOW share this one SSRS poll (over 75,000 voters nationally; in person, online and by phone, plus a pre-election survey for early and mail voters), so other networks will repeat these numbers, not add a second opinion. In the vote-by-group tables the columns are NBC's Democrat and Republican columns; they match the U.S. House vote (for example 2% Democratic among those voting to support Trump), but NBC's text does not label them, and no overall House total has been published. Numbers come from NBC's national table; its live blog quotes a few subgroup figures that differ, and those are not used.",
   "sources": [
     {
       "id": "nbc",
       "name": "NBC News Exit Poll (SSRS)",
       "url": "https://www.nbcnews.com/politics/2026-election/exit-poll-trump-midterms-voters-economy-disapproval-rcna607045",
-      "published": "Nov 3, 5:06 PM EST, updated 5:44 PM EST",
+      "published": "Nov 3: article 5:06 PM EST (updated 6:14 PM), national tables updated 6:45 PM EST",
       "kind": "Early results: Election Day interviews plus phone, mail and online for early and mail voters"
     }
   ],
   "questions": [
+    {
+      "title": "Vote by gender",
+      "kind": "vote",
+      "groups": [
+        {
+          "label": "Men (47%)",
+          "values": {
+            "nbc": {
+              "dem": 48,
+              "rep": 49
+            }
+          }
+        },
+        {
+          "label": "Women (53%)",
+          "values": {
+            "nbc": {
+              "dem": 57,
+              "rep": 40
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Vote by race",
+      "kind": "vote",
+      "groups": [
+        {
+          "label": "White (72%)",
+          "values": {
+            "nbc": {
+              "dem": 47,
+              "rep": 51
+            }
+          }
+        },
+        {
+          "label": "Black (9%)",
+          "values": {
+            "nbc": {
+              "dem": 88,
+              "rep": 9
+            }
+          }
+        },
+        {
+          "label": "Latino (10%)",
+          "values": {
+            "nbc": {
+              "dem": 61,
+              "rep": 35
+            }
+          }
+        },
+        {
+          "label": "Asian (4%)",
+          "values": {
+            "nbc": {
+              "dem": 69,
+              "rep": 29
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Vote by age",
+      "kind": "vote",
+      "groups": [
+        {
+          "label": "18–29 (10%)",
+          "values": {
+            "nbc": {
+              "dem": 71,
+              "rep": 25
+            }
+          }
+        },
+        {
+          "label": "30–44 (20%)",
+          "values": {
+            "nbc": {
+              "dem": 59,
+              "rep": 36
+            }
+          }
+        },
+        {
+          "label": "45–64 (34%)",
+          "values": {
+            "nbc": {
+              "dem": 49,
+              "rep": 48
+            }
+          }
+        },
+        {
+          "label": "65+ (35%)",
+          "values": {
+            "nbc": {
+              "dem": 47,
+              "rep": 51
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Vote by education",
+      "kind": "vote",
+      "groups": [
+        {
+          "label": "High school grad (22%)",
+          "values": {
+            "nbc": {
+              "dem": 42,
+              "rep": 54
+            }
+          }
+        },
+        {
+          "label": "Some college, no degree (19%)",
+          "values": {
+            "nbc": {
+              "dem": 48,
+              "rep": 48
+            }
+          }
+        },
+        {
+          "label": "Bachelor's degree (27%)",
+          "values": {
+            "nbc": {
+              "dem": 58,
+              "rep": 39
+            }
+          }
+        },
+        {
+          "label": "Advanced degree (20%)",
+          "values": {
+            "nbc": {
+              "dem": 65,
+              "rep": 32
+            }
+          }
+        },
+        {
+          "label": "College graduates (47%)",
+          "values": {
+            "nbc": {
+              "dem": 61,
+              "rep": 36
+            }
+          }
+        },
+        {
+          "label": "No college degree (53%)",
+          "values": {
+            "nbc": {
+              "dem": 45,
+              "rep": 51
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Vote by race and education",
+      "kind": "vote",
+      "groups": [
+        {
+          "label": "White, college degree (35%)",
+          "values": {
+            "nbc": {
+              "dem": 58,
+              "rep": 40
+            }
+          }
+        },
+        {
+          "label": "White, no degree (38%)",
+          "values": {
+            "nbc": {
+              "dem": 36,
+              "rep": 61
+            }
+          }
+        },
+        {
+          "label": "Voters of color, college degree (12%)",
+          "values": {
+            "nbc": {
+              "dem": 72,
+              "rep": 25
+            }
+          }
+        },
+        {
+          "label": "Voters of color, no degree (16%)",
+          "values": {
+            "nbc": {
+              "dem": 67,
+              "rep": 28
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Vote by party and ideology",
+      "kind": "vote",
+      "groups": [
+        {
+          "label": "Democrats (34%)",
+          "values": {
+            "nbc": {
+              "dem": 97,
+              "rep": 2
+            }
+          }
+        },
+        {
+          "label": "Republicans (33%)",
+          "values": {
+            "nbc": {
+              "dem": 6,
+              "rep": 93
+            }
+          }
+        },
+        {
+          "label": "Independents (33%)",
+          "values": {
+            "nbc": {
+              "dem": 55,
+              "rep": 39
+            }
+          }
+        },
+        {
+          "label": "Liberal (25%)",
+          "values": {
+            "nbc": {
+              "dem": 96,
+              "rep": 3
+            }
+          }
+        },
+        {
+          "label": "Moderate (41%)",
+          "values": {
+            "nbc": {
+              "dem": 63,
+              "rep": 33
+            }
+          }
+        },
+        {
+          "label": "Conservative (34%)",
+          "values": {
+            "nbc": {
+              "dem": 10,
+              "rep": 88
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Vote by 2024 presidential vote",
+      "kind": "vote",
+      "groups": [
+        {
+          "label": "Harris voters (48%)",
+          "values": {
+            "nbc": {
+              "dem": 96,
+              "rep": 2
+            }
+          }
+        },
+        {
+          "label": "Trump voters (46%)",
+          "values": {
+            "nbc": {
+              "dem": 6,
+              "rep": 91
+            }
+          }
+        },
+        {
+          "label": "Did not vote (5%)",
+          "values": {
+            "nbc": {
+              "dem": 66,
+              "rep": 25
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Vote by where voters live and region",
+      "kind": "vote",
+      "groups": [
+        {
+          "label": "Urban (20%)",
+          "values": {
+            "nbc": {
+              "dem": 70,
+              "rep": 27
+            }
+          }
+        },
+        {
+          "label": "Suburban (45%)",
+          "values": {
+            "nbc": {
+              "dem": 57,
+              "rep": 41
+            }
+          }
+        },
+        {
+          "label": "Small town or rural (36%)",
+          "values": {
+            "nbc": {
+              "dem": 39,
+              "rep": 58
+            }
+          }
+        },
+        {
+          "label": "East (21%)",
+          "values": {
+            "nbc": {
+              "dem": 59,
+              "rep": 39
+            }
+          }
+        },
+        {
+          "label": "Midwest (21%)",
+          "values": {
+            "nbc": {
+              "dem": 52,
+              "rep": 45
+            }
+          }
+        },
+        {
+          "label": "South (37%)",
+          "values": {
+            "nbc": {
+              "dem": 47,
+              "rep": 50
+            }
+          }
+        },
+        {
+          "label": "West (21%)",
+          "values": {
+            "nbc": {
+              "dem": 57,
+              "rep": 39
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Vote by income, religion and union",
+      "kind": "vote",
+      "groups": [
+        {
+          "label": "Family income under $50k (27%)",
+          "values": {
+            "nbc": {
+              "dem": 54,
+              "rep": 41
+            }
+          }
+        },
+        {
+          "label": "$50k–$99k (31%)",
+          "values": {
+            "nbc": {
+              "dem": 52,
+              "rep": 46
+            }
+          }
+        },
+        {
+          "label": "$100k and over (41%)",
+          "values": {
+            "nbc": {
+              "dem": 53,
+              "rep": 45
+            }
+          }
+        },
+        {
+          "label": "Protestant (21%)",
+          "values": {
+            "nbc": {
+              "dem": 38,
+              "rep": 60
+            }
+          }
+        },
+        {
+          "label": "Catholic (21%)",
+          "values": {
+            "nbc": {
+              "dem": 47,
+              "rep": 50
+            }
+          }
+        },
+        {
+          "label": "Jewish (3%)",
+          "values": {
+            "nbc": {
+              "dem": 67,
+              "rep": 32
+            }
+          }
+        },
+        {
+          "label": "No religion (26%)",
+          "values": {
+            "nbc": {
+              "dem": 75,
+              "rep": 21
+            }
+          }
+        },
+        {
+          "label": "White evangelical (17%)",
+          "values": {
+            "nbc": {
+              "dem": 16,
+              "rep": 82
+            }
+          }
+        },
+        {
+          "label": "Union household (15%)",
+          "values": {
+            "nbc": {
+              "dem": 58,
+              "rep": 39
+            }
+          }
+        },
+        {
+          "label": "First midterm vote (9%)",
+          "values": {
+            "nbc": {
+              "dem": 62,
+              "rep": 34
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Vote by view of Trump",
+      "kind": "vote",
+      "groups": [
+        {
+          "label": "Approve of Trump's job (38%)",
+          "values": {
+            "nbc": {
+              "dem": 3,
+              "rep": 95
+            }
+          }
+        },
+        {
+          "label": "Disapprove (62%)",
+          "values": {
+            "nbc": {
+              "dem": 84,
+              "rep": 13
+            }
+          }
+        },
+        {
+          "label": "Strongly approve (20%)",
+          "values": {
+            "nbc": {
+              "dem": 2,
+              "rep": 98
+            }
+          }
+        },
+        {
+          "label": "Strongly disapprove (53%)",
+          "values": {
+            "nbc": {
+              "dem": 92,
+              "rep": 5
+            }
+          }
+        },
+        {
+          "label": "Voting to support Trump (16%)",
+          "values": {
+            "nbc": {
+              "dem": 2,
+              "rep": 98
+            }
+          }
+        },
+        {
+          "label": "Voting to oppose Trump (43%)",
+          "values": {
+            "nbc": {
+              "dem": 96,
+              "rep": 2
+            }
+          }
+        },
+        {
+          "label": "Trump not a factor (41%)",
+          "values": {
+            "nbc": {
+              "dem": 28,
+              "rep": 67
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Vote by most important issue",
+      "kind": "vote",
+      "groups": [
+        {
+          "label": "Economy (39%)",
+          "values": {
+            "nbc": {
+              "dem": 50,
+              "rep": 46
+            }
+          }
+        },
+        {
+          "label": "State of democracy (32%)",
+          "values": {
+            "nbc": {
+              "dem": 77,
+              "rep": 21
+            }
+          }
+        },
+        {
+          "label": "Immigration (14%)",
+          "values": {
+            "nbc": {
+              "dem": 9,
+              "rep": 89
+            }
+          }
+        },
+        {
+          "label": "Healthcare (8%)",
+          "values": {
+            "nbc": {
+              "dem": 64,
+              "rep": 31
+            }
+          }
+        },
+        {
+          "label": "Foreign policy (4%)",
+          "values": {
+            "nbc": {
+              "dem": 44,
+              "rep": 50
+            }
+          }
+        },
+        {
+          "label": "Crime (3%)",
+          "values": {
+            "nbc": {
+              "dem": 17,
+              "rep": 79
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Vote by views on immigration enforcement and Iran",
+      "kind": "vote",
+      "groups": [
+        {
+          "label": "Immigration enforcement has gone too far (57%)",
+          "values": {
+            "nbc": {
+              "dem": 88,
+              "rep": 9
+            }
+          }
+        },
+        {
+          "label": "Not gone far enough (21%)",
+          "values": {
+            "nbc": {
+              "dem": 7,
+              "rep": 91
+            }
+          }
+        },
+        {
+          "label": "About right (23%)",
+          "values": {
+            "nbc": {
+              "dem": 7,
+              "rep": 90
+            }
+          }
+        },
+        {
+          "label": "Iran military action was the wrong decision (62%)",
+          "values": {
+            "nbc": {
+              "dem": 80,
+              "rep": 16
+            }
+          }
+        },
+        {
+          "label": "Right decision (38%)",
+          "values": {
+            "nbc": {
+              "dem": 7,
+              "rep": 91
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Vote by view of the economy",
+      "kind": "vote",
+      "groups": [
+        {
+          "label": "Economy excellent or good (25%)",
+          "values": {
+            "nbc": {
+              "dem": 10,
+              "rep": 89
+            }
+          }
+        },
+        {
+          "label": "Not so good or poor (75%)",
+          "values": {
+            "nbc": {
+              "dem": 67,
+              "rep": 29
+            }
+          }
+        },
+        {
+          "label": "Tariffs hurt the national economy (65%)",
+          "values": {
+            "nbc": {
+              "dem": 78,
+              "rep": 18
+            }
+          }
+        },
+        {
+          "label": "Tariffs helped (22%)",
+          "values": {
+            "nbc": {
+              "dem": 3,
+              "rep": 95
+            }
+          }
+        },
+        {
+          "label": "Finances worse than two years ago (44%)",
+          "values": {
+            "nbc": {
+              "dem": 72,
+              "rep": 24
+            }
+          }
+        },
+        {
+          "label": "Finances better (18%)",
+          "values": {
+            "nbc": {
+              "dem": 23,
+              "rep": 75
+            }
+          }
+        }
+      ]
+    },
     {
       "title": "Views of Trump",
       "kind": "share",
@@ -191,6 +899,150 @@
             "nbc": {
               "pct": 27,
               "note": "29% in 2024"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Immigration, ICE and the Iran war",
+      "kind": "share",
+      "items": [
+        {
+          "label": "Immigration enforcement has gone too far",
+          "values": {
+            "nbc": {
+              "pct": 57,
+              "note": "23% about right, 21% not far enough"
+            }
+          }
+        },
+        {
+          "label": "Disapprove of ICE",
+          "values": {
+            "nbc": {
+              "pct": 59,
+              "note": "41% approve"
+            }
+          }
+        },
+        {
+          "label": "Immigrants help the country",
+          "values": {
+            "nbc": {
+              "pct": 59,
+              "note": "40% say they hurt"
+            }
+          }
+        },
+        {
+          "label": "Iran military action was the wrong decision",
+          "values": {
+            "nbc": {
+              "pct": 62
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "AI, corruption and trust",
+      "kind": "share",
+      "items": [
+        {
+          "label": "AI will do more to hurt society than help",
+          "values": {
+            "nbc": {
+              "pct": 57,
+              "note": "24% help"
+            }
+          }
+        },
+        {
+          "label": "Oppose a new data center in their community",
+          "values": {
+            "nbc": {
+              "pct": 76
+            }
+          }
+        },
+        {
+          "label": "Corruption a crucial or major factor in their Congress vote",
+          "values": {
+            "nbc": {
+              "pct": 90
+            }
+          }
+        },
+        {
+          "label": "Confident elections in their state are fair and accurate",
+          "values": {
+            "nbc": {
+              "pct": 71,
+              "note": "59% for elections nationwide"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Institutions and the economic system",
+      "kind": "share",
+      "items": [
+        {
+          "label": "Disapprove of Congress",
+          "values": {
+            "nbc": {
+              "pct": 76
+            }
+          }
+        },
+        {
+          "label": "Disapprove of the Supreme Court",
+          "values": {
+            "nbc": {
+              "pct": 58
+            }
+          }
+        },
+        {
+          "label": "Dissatisfied or angry with the country's direction",
+          "values": {
+            "nbc": {
+              "pct": 75
+            }
+          }
+        },
+        {
+          "label": "Economic system favors the wealthy",
+          "values": {
+            "nbc": {
+              "pct": 69
+            }
+          }
+        },
+        {
+          "label": "Tariffs hurt the national economy",
+          "values": {
+            "nbc": {
+              "pct": 65,
+              "note": "22% helped"
+            }
+          }
+        },
+        {
+          "label": "Favorable view of capitalism",
+          "values": {
+            "nbc": {
+              "pct": 57
+            }
+          }
+        },
+        {
+          "label": "Favorable view of socialism",
+          "values": {
+            "nbc": {
+              "pct": 32
             }
           }
         }
