@@ -1,6 +1,6 @@
 // Collector: runs in GitHub Actions every ~5 min. Writes compact JSON into ./out (published to the `data` branch).
 // Dependency-free (Node 20+). Every source is independent: one failing keeps the last good file.
-import { mkdir, writeFile, readFile } from 'node:fs/promises';
+import { mkdir, writeFile, readFile, stat } from 'node:fs/promises';
 import { GAMMA, parseEvents } from '../assets/markets.js';
 import { NAME_TO_ST } from '../assets/states.js';
 
@@ -13,7 +13,12 @@ const get = async (u, json = true) => {
   return json ? r.json() : r.text();
 };
 const status = {};
-async function run(name, fn) {
+// Slow-changing sources are skipped while the previous file is younger than minAgeMs (polite to small sites when looping).
+async function run(name, fn, minAgeMs = 0) {
+  if (minAgeMs) {
+    const age = await stat(`${OUT}/${name}.json`).then((s) => Date.now() - s.mtimeMs, () => Infinity);
+    if (age < minAgeMs) return;
+  }
   try { const d = await fn(); await writeFile(`${OUT}/${name}.json`, JSON.stringify(d)); status[name] = { ok: true, at: now() }; }
   catch (e) { console.error(name, e.message); status[name] = { ok: false, at: now(), error: e.message }; }
 }
@@ -85,7 +90,7 @@ async function results() {
 }
 
 await mkdir(OUT, { recursive: true });
-await Promise.all([run('markets', markets), run('polls', polls), run('results', results)]);
+await Promise.all([run('markets', markets), run('polls', polls, 270000), run('results', results)]);
 let prev = {};
 try { prev = JSON.parse(await readFile(`${OUT}/status.json`, 'utf8')); } catch {}
 await writeFile(`${OUT}/status.json`, JSON.stringify({ updated: now(), sources: { ...prev.sources, ...status } }));
