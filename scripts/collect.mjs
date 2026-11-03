@@ -96,4 +96,8 @@ await Promise.all([run('markets', markets), run('polls', polls, 270000), run('re
 let prev = {};
 try { prev = JSON.parse(await readFile(`${OUT}/status.json`, 'utf8')); } catch {}
 await writeFile(`${OUT}/status.json`, JSON.stringify({ updated: now(), sources: { ...prev.sources, ...status } }));
+// One file for the browser: a single request per refresh (kept under the GitHub API's unauthenticated rate limit).
+const read = async (n) => { try { return JSON.parse(await readFile(`${OUT}/${n}.json`, 'utf8')); } catch { return null; } };
+const [m, po, re, st] = await Promise.all(['markets', 'polls', 'results', 'status'].map(read));
+await writeFile(`${OUT}/bundle.json`, JSON.stringify({ updated: now(), markets: m, polls: po, results: re, status: st }));
 console.log(JSON.stringify(status));

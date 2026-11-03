@@ -13,24 +13,24 @@ for (const [st, v] of Object.entries(STATES)) FIPS[v[1]] = st;
 const S = { markets: null, polls: null, results: null, status: null, exit: null, control: null, paths: null, kind: 'S', sel: null, rkind: 'S', sort: 'close', q: '', showAll: false, fetchedAt: {} };
 
 // ---------- data ----------
-async function getJSON(name, { allowRaw = true } = {}) {
-  const bust = Math.floor(Date.now() / 60000);
-  const tries = allowRaw ? [`${RAW}${name}.json?t=${bust}`, `data/${name}.json?t=${bust}`] : [`data/${name}.json?t=${bust}`];
-  let best = null;
-  for (const u of tries) {
-    try {
-      const r = await fetch(u, { cache: 'no-store' });
-      if (!r.ok) continue;
-      const j = await r.json();
-      if (!best || (j.updated && j.updated > (best.updated || ''))) best = j;
-      if (best && allowRaw) break; // raw branch is authoritative when reachable
-    } catch { /* try next */ }
+// raw.githubusercontent.com caches 5 min regardless of query string, so the browser reads the bundle through the
+// GitHub contents API (conditional requests: 304s are free against the rate limit) and falls back to raw, then the seed copy.
+const API = `https://api.github.com/repos/${REPO}/contents/bundle.json?ref=data`;
+async function getBundle() {
+  const tries = [
+    () => fetch(API, { headers: { Accept: 'application/vnd.github.raw' } }),
+    () => fetch(`${RAW}bundle.json`),
+    () => fetch('data/bundle.json'),
+  ];
+  for (const t of tries) {
+    try { const r = await t(); if (r.ok) return await r.json(); } catch { /* next */ }
   }
-  return best;
+  return null;
 }
 async function loadAll() {
-  const [markets, polls, results, status, exit] = await Promise.all([getJSON('markets'), getJSON('polls'), getJSON('results'), getJSON('status'), getJSON('exit-polls', { allowRaw: false })]);
-  Object.assign(S, { markets: markets || S.markets, polls: polls || S.polls, results: results || S.results, status: status || S.status, exit: exit || S.exit });
+  const [b, exit] = await Promise.all([getBundle(), fetch('data/exit-polls.json', { cache: 'no-store' }).then((r) => r.json()).catch(() => null)]);
+  if (b) Object.assign(S, { markets: b.markets || S.markets, polls: b.polls || S.polls, results: b.results || S.results, status: b.status || S.status });
+  if (exit) S.exit = exit;
   S.fetchedAt.main = Date.now();
 }
 async function loadControl() {
