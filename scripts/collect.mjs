@@ -56,7 +56,9 @@ function raceTable(text, kind) {
     if (!st) continue;
     const avg = lines[i + 2]?.match(/^(\S+) ([+-][\d.]+)/);
     const cands = [...(lines[i + 3] || '').matchAll(/([A-Z][^()%|]*?) \(([DRI])\) ([\d.]+)%/g)].map((c) => ({ n: c[1].trim(), p: c[2], pct: Number(c[3]) }));
-    out[`${kind}-${st}`] = { id: `${kind}-${st}`, kind, state: st, special: !!m[2], rating: lean[1], leader: lean[2], winProb: Number(lean[3]) / 100, polls: Number(lean[4]), pollsters: Number(lean[5]), lead: avg ? `${avg[1]} ${avg[2]}` : null, cands };
+    // Last result line, e.g. "2020: Joni Ernst (R) 51.8%, ...": the winner's party is who holds the seat today.
+    const last = (lines[i + 4] || '').match(/^(\d{4}): (.+?) \(([DRI])\) ([\d.]+)%/);
+    out[`${kind}-${st}`] = { id: `${kind}-${st}`, kind, state: st, special: !!m[2], holder: last ? last[3] : null, holderName: last ? last[2] : null, holderYear: last ? Number(last[1]) : null, rating: lean[1], leader: lean[2], winProb: Number(lean[3]) / 100, polls: Number(lean[4]), pollsters: Number(lean[5]), lead: avg ? `${avg[1]} ${avg[2]}` : null, cands };
   }
   return out;
 }

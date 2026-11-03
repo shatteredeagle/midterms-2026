@@ -59,6 +59,14 @@ function allRaces(kind) {
   const ids = new Set([...Object.keys(S.markets?.races || {}), ...Object.keys(S.polls?.races || {})].filter((k) => k[0] === kind));
   return [...ids].map(race).filter(Boolean);
 }
+// A seat "flips" when the party favored to win is not the party that holds it today (holder = winner of its last election, from PollCheck).
+function flipInfo(r) {
+  const holder = r?.p?.holder;
+  if (!r || r.pD === null || !holder || holder === 'I') return null;
+  const to = holder === 'R' ? 'D' : 'R';
+  const prob = holder === 'R' ? r.pD : 1 - r.pD;
+  return { holder, to, prob, flipping: prob > 0.5, name: r.p.holderName };
+}
 function houseState(st) {
   const rs = allRaces('H').filter((r) => r.st === st && r.m);
   if (!rs.length) return null;
@@ -139,6 +147,25 @@ function renderCompare() {
     <p class="meta">${g ? `Generic ballot margin ${g.margin >= 0 ? 'D' : 'R'}+${Math.abs(g.margin).toFixed(1)}. ` : ''}Senate row counts each race by its PollCheck rating (market lean where unrated), plus seats not up.</p>`;
 }
 
+// ---------- flips ----------
+function renderFlips() {
+  const el = $('#flips-body');
+  const col = (kind, title) => {
+    const rs = allRaces(kind).map((r) => ({ r, f: flipInfo(r) })).filter((x) => x.f);
+    const flipping = rs.filter((x) => x.f.flipping), toD = flipping.filter((x) => x.f.to === 'D').length, toR = flipping.length - toD;
+    const list = rs.filter((x) => x.f.prob >= 0.3).sort((a, b) => b.f.prob - a.f.prob).slice(0, 10);
+    const net = toD - toR;
+    const summary = `If favorites hold: <b style="color:var(--d)">D gains ${toD}</b> · <b style="color:var(--r)">R gains ${toR}</b>${net ? ` · net ${net > 0 ? 'D' : 'R'} +${Math.abs(net)}` : ''}`;
+    return `<div><h3 style="font-size:15px;margin-bottom:8px">${title}</h3><p class="flip-sum">${summary}</p><ol class="flip-list">${list.map(({ r, f }) => `<li class="flip-item ${f.flipping ? 'on' : ''}" data-st="${r.st}" tabindex="0" aria-label="${STATES[r.st][0]} ${title}: held by ${f.holder}, ${pct(f.prob)} chance to flip to ${f.to}"><span class="st">${esc(STATES[r.st][0])}${r.p?.special ? ' (sp.)' : ''}</span><span class="arrow"><span class="${f.holder}">${f.holder}</span> → <span class="${f.to}">${f.to}</span></span><div class="bar" role="img" aria-label="${pct(f.prob)} chance to flip"><i style="width:${f.prob * 100}%"></i></div><span class="p">${pct(f.prob)}</span></li>`).join('') || '<li class="small">No close calls right now.</li>'}</ol></div>`;
+  };
+  el.innerHTML = `<div class="flip-grid">${col('S', 'Senate')}${col('G', 'Governor')}</div><p class="small" style="margin-top:12px">Gold bar = more likely than not to flip. "Holds the seat" means the winner of its last election; appointments and party switches aren't tracked. House flips aren't shown because no free source lists each district's current party.</p>`;
+}
+function wireFlips() {
+  const pick = (t) => { const li = t.closest('.flip-item'); if (li) { select(li.dataset.st); $('#map').scrollIntoView({ behavior: 'smooth', block: 'start' }); } };
+  $('#flips-body').addEventListener('click', (e) => pick(e.target));
+  $('#flips-body').addEventListener('keydown', (e) => { if (e.key === 'Enter') pick(e.target); });
+}
+
 // ---------- map ----------
 function drawMap() {
   const svg = $('#usmap');
@@ -162,17 +189,18 @@ function stateInfo(st) {
   const r = race(`${S.kind}-${st}`);
   if (!r) return { bin: 'none', text: `No ${KIND[S.kind]} race in 2026` };
   const official = r.o && r.o.totalVotes > 0;
-  return { bin: binOf(r.pD), called: r.projected, text: `${official ? 'Counting · ' : ''}${leanText(r.pD)}${r.projected ? ' · projected' : r.closed ? ' · polls closed' : ''}` };
+  const fl = flipInfo(r);
+  return { bin: binOf(r.pD), called: r.projected, flip: !!fl?.flipping, text: `${official ? 'Counting · ' : ''}${leanText(r.pD)}${r.projected ? ' · projected' : r.closed ? ' · polls closed' : ''}${fl?.flipping ? ` · projected flip ${fl.holder}→${fl.to}` : ''}` };
 }
 function paintMap() {
   for (const el of document.querySelectorAll('#usmap path')) {
     const st = el.dataset.st, i = stateInfo(st);
-    el.setAttribute('class', `b-${i.bin}${i.called ? ' called' : ''}${S.sel === st ? ' sel' : ''}`);
+    el.setAttribute('class', `b-${i.bin}${i.called ? ' called' : ''}${i.flip ? ' flip' : ''}${S.sel === st ? ' sel' : ''}`);
     el.setAttribute('aria-label', `${STATES[st][0]}: ${i.text}`);
   }
   for (const c of document.querySelectorAll('.chip')) c.classList.toggle('sel', c.dataset.st === S.sel);
   const sw = (cls, label) => `<span><i class="b-${cls}" style="background:${cls === 'T' ? 'repeating-linear-gradient(45deg,var(--t) 0 3px,var(--hatch) 3px 5px)' : `var(--${{ D3: 'd', D2: 'd-2', D1: 'd-1', R1: 'r-1', R2: 'r-2', R3: 'r', none: 'none' }[cls]})`}"></i>${label}</span>`;
-  $('#legend').innerHTML = sw('D3', 'D ≥95%') + sw('D2', 'D 80–95%') + sw('D1', 'D 62–80%') + sw('T', 'Toss-up') + sw('R1', 'R 62–80%') + sw('R2', 'R 80–95%') + sw('R3', 'R ≥95%') + sw('none', S.kind === 'H' ? 'No data' : 'No race') + '<span>Bold outline = projected after polls close</span>';
+  $('#legend').innerHTML = sw('D3', 'D ≥95%') + sw('D2', 'D 80–95%') + sw('D1', 'D 62–80%') + sw('T', 'Toss-up') + sw('R1', 'R 62–80%') + sw('R2', 'R 80–95%') + sw('R3', 'R ≥95%') + sw('none', S.kind === 'H' ? 'No data' : 'No race') + '<span>Bold outline = projected after polls close</span><span><i style="background:none;border:2px dashed #f2b01e"></i>Gold dashed = favored to flip</span>';
   const closedN = Object.keys(STATES).filter(isClosed).length;
   $('#mapSub').textContent = S.kind === 'H' ? 'Expected House seats by state, summed from per-district market odds. Updates as markets move.' : `${KIND[S.kind]} races colored by market odds (${closedN} states closed). Official counts appear in the detail panel as feeds publish.`;
 }
@@ -189,6 +217,8 @@ function raceBlock(id) {
   if (!r) return '';
   const o = r.o;
   let h = `<div class="race"><h4>${KIND[r.kind]}${r.p?.special ? ' (special)' : ''} ${r.kind === 'H' ? esc(r.m?.district || '') : ''}</h4>`;
+  const fi = flipInfo(r);
+  if (fi) h += `<p class="small">Held by <b>${fi.holder}</b>${fi.name ? ` (${esc(fi.name)}, last election)` : ''} · chance to flip to ${fi.to}: <span class="tag ${fi.flipping ? 'live' : 'flip'}">${pct(fi.prob)}</span></p>`;
   if (o && o.totalVotes > 0) h += block('official', 'Votes counted', 'Official count', `${esc(o.source)} · ${esc(o.reporting)}${o.winner ? ` · <span class="tag live">State flags winner: ${esc(o.winner)}</span>` : ''}`, candRows(o.cands.map((c) => ({ ...c })), 'votes'));
   else if (r.closed) h += `<p class="small">Polls closed. No free official feed for this race — check the state election office.</p>`;
   if (r.m) h += block('market', 'Market odds', 'Chance to win, set by traders', `${money(r.m.vol)} traded${r.projected ? ' · <span class="tag live">projected</span>' : ''}`, candRows(r.m.cands.filter((c) => c.price >= .01), 'market'));
@@ -249,7 +279,8 @@ function renderTable() {
     const name = S.rkind === 'H' ? `${r.st}-${r.m.district}` : STATES[r.st][0] + (r.p?.special ? ' (special)' : '');
     const d = r.pD ?? .5;
     const o = r.o && r.o.totalVotes > 0 ? `<span class="tag live">Counting ${r.o.pct}%</span>` : r.projected ? `<span class="tag live">Projected ${r.pD >= .5 ? 'D' : 'R'}</span>` : r.closed ? '<span class="tag">Polls closed</span>' : `<span class="tag">Polls close ${new Date(closeTime(r.st)).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</span>`;
-    return `<tr data-st="${r.st}" tabindex="0"><th scope="row" style="text-transform:none;letter-spacing:0;font-size:14px;color:var(--text)">${esc(name)}</th>
+    const fi = flipInfo(r), fb = fi && fi.prob >= 0.3 ? ` <span class="tag ${fi.flipping ? 'flip' : ''}" title="Chance the seat changes party">${fi.flipping ? 'flip' : 'could flip'} ${fi.holder}→${fi.to} ${pct(fi.prob)}</span>` : '';
+    return `<tr data-st="${r.st}" tabindex="0"><th scope="row" style="text-transform:none;letter-spacing:0;font-size:14px;color:var(--text)">${esc(name)}${fb}</th>
       ${hasPolls ? `<td class="rate" data-s="${esc(r.p?.rating || '')}">${esc(r.p?.rating || '—')}</td><td>${esc(r.p?.lead || '—')}</td>` : `<td>${esc(r.m.cands.slice(0, 2).map((c) => c.n.split(' ').pop()).join(' vs '))}</td>`}
       <td><div class="odds" role="img" aria-label="Market odds: Democrat ${pct(d)}, Republican ${pct(1 - d)}"><span>${(d * 100).toFixed(0)}</span><div class="split"><i class="d" style="width:${d * 100}%"></i><i class="r" style="width:${(1 - d) * 100}%"></i></div><span>${((1 - d) * 100).toFixed(0)}</span></div></td>
       <td>${o}</td></tr>`;
@@ -390,12 +421,12 @@ function renderLive() {
 }
 
 // ---------- boot ----------
-function renderAll() { renderClock(); renderSenate(); renderHouse(); renderCompare(); paintMap(); renderDetail(); renderChanges(); renderBallot(); renderTable(); renderPolls(); renderExit(); renderSources(); renderLive(); }
+function renderAll() { renderClock(); renderSenate(); renderHouse(); renderCompare(); renderFlips(); paintMap(); renderDetail(); renderChanges(); renderBallot(); renderTable(); renderPolls(); renderExit(); renderSources(); renderLive(); }
 async function boot() {
   const th = $('#theme');
   th.onclick = () => { const cur = document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); const n = cur === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = n; try { localStorage.setItem('theme', n); } catch {} };
   S.paths = await (await fetch('assets/map-paths.json')).json();
-  drawMap(); wireMap(); wireTable(); wireChanges(); wireBallot();
+  drawMap(); wireMap(); wireTable(); wireChanges(); wireBallot(); wireFlips();
   await Promise.all([loadAll(), loadControl()]);
   renderAll();
   setInterval(() => { renderClock(); renderLive(); }, 1000);
