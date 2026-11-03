@@ -188,7 +188,7 @@ function raceBlock(id) {
   if (!r) return '';
   const o = r.o;
   let h = `<div class="race"><h4>${KIND[r.kind]}${r.p?.special ? ' (special)' : ''} ${r.kind === 'H' ? esc(r.m?.district || '') : ''}</h4>`;
-  if (o && o.totalVotes > 0) h += block('official', 'Votes counted', 'Official count', `${esc(o.source)} · ${esc(o.reporting)}`, candRows(o.cands.map((c) => ({ ...c })), 'votes'));
+  if (o && o.totalVotes > 0) h += block('official', 'Votes counted', 'Official count', `${esc(o.source)} · ${esc(o.reporting)}${o.winner ? ` · <span class="tag live">State flags winner: ${esc(o.winner)}</span>` : ''}`, candRows(o.cands.map((c) => ({ ...c })), 'votes'));
   else if (r.closed) h += `<p class="small">Polls closed. No free official feed for this race — check the state election office.</p>`;
   if (r.m) h += block('market', 'Market odds', 'Chance to win, set by traders', `${money(r.m.vol)} traded${r.projected ? ' · <span class="tag live">projected</span>' : ''}`, candRows(r.m.cands.filter((c) => c.price >= .01), 'market'));
   if (r.p) h += block('poll', 'Polling average', 'Share of voters, from surveys', `${esc(r.p.rating)} · ${r.p.polls} polls, ${r.p.pollsters} pollsters${r.p.lead ? ` · <b>${esc(r.p.lead)}</b>` : ''}`, candRows(r.p.cands, 'poll'));
@@ -367,7 +367,7 @@ function renderSources() {
   const cards = [
     ['Polymarket', 'Per-race win odds for every Senate, governor and House race; chamber control; seat totals.', 'https://polymarket.com/event/which-party-will-win-the-house-in-2026', age('markets') + ' · control odds refresh live in your browser'],
     ['PollCheck', 'Polling averages and ratings for Senate, governor races, and the generic ballot.', 'https://www.pollcheck.co.uk/us-midterms-2026', age('polls')],
-    ['State election offices', `Official unofficial counts, straight from the states that publish machine-readable files: ${Object.entries(S.results?.feeds || {}).map(([k, v]) => `${k}${v.ok ? '' : ' (failing)'}`).join(', ') || 'CA, CO, IA, MN, NC, NE, SD'}. Other states link out; Georgia, Texas, Florida, Washington and Utah had no usable open file.`, 'https://www.usa.gov/election-results', age('results')],
+    ['State election offices', `Official unofficial counts, straight from the states that publish machine-readable files: ${Object.entries(S.results?.feeds || {}).map(([k, v]) => `${k}${v.ok ? '' : ' (failing)'}`).join(', ') || 'CA, CO, FL, GA, IA, MN, NC, NE, SD'}. Other states link out; Texas, Washington, Utah and most others had no usable open file.`, 'https://www.usa.gov/election-results', age('results')],
     ['Exit polls', 'No open feed exists. Entered from published outlet releases (AP VoteCast, SSRS/Edison, networks).', 'https://apnews.com/hub/ap-votecast', S.exit?.updated ? `<span class="tag live">updated ${new Date(S.exit.updated).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</span>` : '<span class="tag">waiting</span>'],
   ];
   const xs = [['AP', 'https://apnews.com/'], ['Decision Desk HQ', 'https://decisiondeskhq.com/'], ['Silver Bulletin', 'https://www.natesilver.net/'], ['RealClearPolling', 'https://www.realclearpolling.com/'], ['FiftyPlusOne', 'https://www.fiftyplusone.news/'], ['Cook Political', 'https://www.cookpolitical.com/'], ['Sabato’s Crystal Ball', 'https://centerforpolitics.org/crystalball/'], ['Inside Elections', 'https://insideelections.com/'], ['270toWin', 'https://www.270towin.com/']];

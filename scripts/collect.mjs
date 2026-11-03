@@ -77,15 +77,21 @@ async function polls() {
   return { updated: now(), source: 'PollCheck', generic: { dem: Number(avg[1]), rep: Number(avg[2]), margin: (avg[3] === 'D' ? 1 : -1) * Number(avg[4]), polls: list }, races };
 }
 
+const readJ = async (n) => { try { return JSON.parse(await readFile(`${OUT}/${n}.json`, 'utf8')); } catch { return null; } };
+
 // ---- Official results: state election offices (see scripts/feeds.mjs) ----
 // A failing feed keeps its last good races so one flaky state never blanks the map.
 async function results() {
   let prev = { races: {}, feeds: {} };
   try { prev = JSON.parse(await readFile(`${OUT}/results.json`, 'utf8')); } catch {}
   const races = { ...prev.races }, feeds = { ...prev.feeds };
+  // Candidate-name -> party hints for feeds that omit party (Florida), from the polls and markets files.
+  const hints = {};
+  for (const src of [await readJ('polls'), await readJ('markets')]) for (const [id, r] of Object.entries(src?.races || {})) (hints[id] ||= []).push(...(r.cands || []).filter((x) => x.p).map((x) => ({ n: x.n, p: x.p })));
+  const ctx = { hints };
   await Promise.all(Object.entries(FEEDS).map(async ([st, fn]) => {
     try {
-      const got = await fn();
+      const got = await fn(ctx);
       for (const k of Object.keys(races)) if (k.endsWith(`-${st}`)) delete races[k];
       Object.assign(races, got);
       feeds[st] = { ok: true, at: now(), races: Object.keys(got) };
@@ -95,7 +101,6 @@ async function results() {
 }
 
 await mkdir(OUT, { recursive: true });
-const readJ = async (n) => { try { return JSON.parse(await readFile(`${OUT}/${n}.json`, 'utf8')); } catch { return null; } };
 const before = { markets: await readJ('markets'), polls: await readJ('polls'), results: await readJ('results') };
 const log = (await readJ('changes')) || { events: [] };
 await Promise.all([run('markets', markets), run('polls', polls, 270000), run('results', results)]);
