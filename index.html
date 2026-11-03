@@ -21,7 +21,7 @@
   <div class="wrap bar">
     <div class="brand"><span class="logo" aria-hidden="true"></span><h1>2026 Midterms</h1></div>
     <nav aria-label="Sections">
-      <a href="#map">Map</a><a href="#races">Races</a><a href="#polls">Polls</a><a href="#exit">Exit polls</a><a href="#sources">Sources</a>
+      <a href="#map">Map</a><a href="#changes">Changes</a><a href="#races">Races</a><a href="#polls">Polls</a><a href="#exit">Exit polls</a><a href="#sources">Sources</a>
     </nav>
     <div class="bar-right">
       <span id="live" class="pill" role="status" aria-live="polite"><i class="dot"></i><span id="liveText">Loading…</span></span>
@@ -56,6 +56,20 @@
       </div>
       <aside id="detail" class="detail" aria-live="polite"></aside>
     </div>
+  </section>
+
+  <section id="changes" class="panel" aria-labelledby="chgH">
+    <div class="panel-head">
+      <div><h2 id="chgH">What changed</h2><p class="sub">A running log of moves between updates: odds shifts, new counts, lead changes, new polls. Also available as <a id="chgJson" href="#" target="_blank" rel="noopener">JSON</a>.</p></div>
+      <div class="seg" role="tablist" aria-label="Change type" id="chgTabs">
+        <button role="tab" data-f="all" aria-selected="true">All</button>
+        <button role="tab" data-f="count" aria-selected="false">Counts</button>
+        <button role="tab" data-f="odds" aria-selected="false">Odds</button>
+        <button role="tab" data-f="polls" aria-selected="false">Polls</button>
+      </div>
+    </div>
+    <ol id="chgList" class="chg" aria-live="polite"></ol>
+    <div class="more" id="chgMore"></div>
   </section>
 
   <section id="races" class="panel" aria-labelledby="racesH">

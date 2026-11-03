@@ -4,6 +4,7 @@ import { mkdir, writeFile, readFile, stat } from 'node:fs/promises';
 import { GAMMA, parseEvents } from '../assets/markets.js';
 import { NAME_TO_ST } from '../assets/states.js';
 import { FEEDS } from './feeds.mjs';
+import { diffSnapshots } from './diff.mjs';
 
 const OUT = process.argv[2] || 'out';
 const UA = 'midterms-2026-dashboard/1.0 (+https://github.com/ShatteredEagle/midterms-2026)';
@@ -92,12 +93,18 @@ async function results() {
 }
 
 await mkdir(OUT, { recursive: true });
+const readJ = async (n) => { try { return JSON.parse(await readFile(`${OUT}/${n}.json`, 'utf8')); } catch { return null; } };
+const before = { markets: await readJ('markets'), polls: await readJ('polls'), results: await readJ('results') };
+const log = (await readJ('changes')) || { events: [] };
 await Promise.all([run('markets', markets), run('polls', polls, 270000), run('results', results)]);
 let prev = {};
 try { prev = JSON.parse(await readFile(`${OUT}/status.json`, 'utf8')); } catch {}
 await writeFile(`${OUT}/status.json`, JSON.stringify({ updated: now(), sources: { ...prev.sources, ...status } }));
 // One file for the browser: a single request per refresh (kept under the GitHub API's unauthenticated rate limit).
-const read = async (n) => { try { return JSON.parse(await readFile(`${OUT}/${n}.json`, 'utf8')); } catch { return null; } };
-const [m, po, re, st] = await Promise.all(['markets', 'polls', 'results', 'status'].map(read));
-await writeFile(`${OUT}/bundle.json`, JSON.stringify({ updated: now(), markets: m, polls: po, results: re, status: st }));
+const [m, po, re, st] = await Promise.all(['markets', 'polls', 'results', 'status'].map(readJ));
+// Change feed: diff against the previous run, keep the newest 300 events.
+const fresh = diffSnapshots(before, { markets: m, polls: po, results: re });
+const changes = { updated: now(), events: [...fresh.reverse(), ...(log.events || [])].slice(0, 300) };
+await writeFile(`${OUT}/changes.json`, JSON.stringify(changes));
+await writeFile(`${OUT}/bundle.json`, JSON.stringify({ updated: now(), markets: m, polls: po, results: re, status: st, changes }));
 console.log(JSON.stringify(status));

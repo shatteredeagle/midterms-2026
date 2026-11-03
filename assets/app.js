@@ -10,7 +10,7 @@ const pct = (x, d = 0) => (x * 100).toFixed(d) + '%';
 const FIPS = {};
 for (const [st, v] of Object.entries(STATES)) FIPS[v[1]] = st;
 
-const S = { markets: null, polls: null, results: null, status: null, exit: null, control: null, paths: null, kind: 'S', sel: null, rkind: 'S', sort: 'close', q: '', showAll: false, fetchedAt: {} };
+const S = { changes: null, chgF: 'all', chgAll: false, chgSeen: 0, markets: null, polls: null, results: null, status: null, exit: null, control: null, paths: null, kind: 'S', sel: null, rkind: 'S', sort: 'close', q: '', showAll: false, fetchedAt: {} };
 
 // ---------- data ----------
 // raw.githubusercontent.com caches 5 min regardless of query string, so the browser reads the bundle through the
@@ -29,7 +29,7 @@ async function getBundle() {
 }
 async function loadAll() {
   const [b, exit] = await Promise.all([getBundle(), fetch('data/exit-polls.json', { cache: 'no-store' }).then((r) => r.json()).catch(() => null)]);
-  if (b) Object.assign(S, { markets: b.markets || S.markets, polls: b.polls || S.polls, results: b.results || S.results, status: b.status || S.status });
+  if (b) Object.assign(S, { changes: b.changes || S.changes, markets: b.markets || S.markets, polls: b.polls || S.polls, results: b.results || S.results, status: b.status || S.status });
   if (exit) S.exit = exit;
   S.fetchedAt.main = Date.now();
 }
@@ -285,6 +285,28 @@ function renderExit() {
   }).join('')}</tbody></table></div></div>`).join('') + links;
 }
 
+// ---------- change feed ----------
+const CHG_GROUP = { odds: 'odds', control: 'odds', projected: 'count', count: 'count', lead: 'count', polls: 'polls', rating: 'polls', source: 'count' };
+const ago = (iso) => { const s = Math.max(0, Math.round((now() - Date.parse(iso)) / 1000)); return s < 90 ? `${s}s ago` : s < 5400 ? `${Math.round(s / 60)}m ago` : `${Math.round(s / 3600)}h ago`; };
+function renderChanges() {
+  const evs = (S.changes?.events || []).filter((e) => S.chgF === 'all' || CHG_GROUP[e.type] === S.chgF);
+  const shown = S.chgAll ? evs.slice(0, 100) : evs.slice(0, 12);
+  const el = $('#chgList');
+  el.innerHTML = shown.length ? shown.map((e) => `<li class="${Date.parse(e.t) > S.chgSeen && S.chgSeen ? 'new' : ''}"><span class="k ${esc(e.type)}">${esc(e.type)}</span><span>${esc(e.text)}</span><time datetime="${esc(e.t)}" title="${esc(new Date(e.t).toLocaleString())}">${ago(e.t)}</time></li>`).join('') : '<li class="empty">No changes logged yet. Entries appear here as odds move, counts come in, and polls update.</li>';
+  $('#chgMore').innerHTML = evs.length > 12 ? `<button type="button" id="chgBtn">${S.chgAll ? 'Show fewer' : `Show more (${Math.min(evs.length, 100)})`}</button>` : '';
+  $('#chgJson').href = `${RAW}changes.json`;
+  if (S.changes?.events?.length) S.chgSeen = Date.parse(S.changes.events[0].t);
+}
+function wireChanges() {
+  $('#chgTabs').addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    S.chgF = b.dataset.f; S.chgAll = false;
+    for (const x of document.querySelectorAll('#chgTabs button')) x.setAttribute('aria-selected', x === b);
+    renderChanges();
+  });
+  document.addEventListener('click', (e) => { if (e.target.id === 'chgBtn') { S.chgAll = !S.chgAll; renderChanges(); } });
+}
+
 // ---------- sources ----------
 function renderSources() {
   const st = S.status?.sources || {};
@@ -312,12 +334,12 @@ function renderLive() {
 }
 
 // ---------- boot ----------
-function renderAll() { renderClock(); renderSenate(); renderHouse(); renderBalance(); paintMap(); renderDetail(); renderTable(); renderPolls(); renderExit(); renderSources(); renderLive(); }
+function renderAll() { renderClock(); renderSenate(); renderHouse(); renderBalance(); paintMap(); renderDetail(); renderChanges(); renderTable(); renderPolls(); renderExit(); renderSources(); renderLive(); }
 async function boot() {
   const th = $('#theme');
   th.onclick = () => { const cur = document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); const n = cur === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = n; try { localStorage.setItem('theme', n); } catch {} };
   S.paths = await (await fetch('assets/map-paths.json')).json();
-  drawMap(); wireMap(); wireTable();
+  drawMap(); wireMap(); wireTable(); wireChanges();
   await Promise.all([loadAll(), loadControl()]);
   renderAll();
   setInterval(() => { renderClock(); renderLive(); }, 1000);
