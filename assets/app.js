@@ -109,10 +109,23 @@ function renderHouse() {
     <div class="split" role="img" aria-label="House control odds"><i class="d" style="width:${d * 100}%"></i><i class="r" style="width:${(1 - d) * 100}%"></i></div>`}
     <p class="meta">${expR ? `Market-implied: about <b>${435 - expR} D</b> – ${expR} R seats. ` : ''}House calls come in slowly; district results are not in a free feed, so this is odds, not a count.</p>`;
 }
-function renderBalance() {
-  const b = S.control?.balance || S.markets?.control?.balance;
-  const rows = b ? [['Democrats sweep', b['Democrats Sweep']], ['R Senate, D House', b['R Senate, D House']], ['Republicans sweep', b['Republicans Sweep']], ['D Senate, R House', b['D Senate, R House']]].filter((x) => x[1] != null) : [];
-  $('#cardBalance').innerHTML = `<h3>Balance of power</h3>${rows.length ? rows.map(([l, v]) => `<div class="cand" data-p="${l.startsWith('Dem') ? 'D' : l.startsWith('Rep') ? 'R' : 'O'}"><span>${l}</span><b>${pct(v)}</b><div class="bar"><i style="width:${Math.max(1, v * 100)}%"></i></div></div>`).join('') : '<p class="meta">No data yet.</p>'}<p class="meta">Prediction-market odds for each combination.</p>`;
+const row = (lbl, d, r, t = 0, fmt = (x) => Math.round(x) + '%', tl = '') => `<div class="row"><span class="lbl">${lbl}</span><div><div class="vals"><span class="d">D ${fmt(d)}</span>${t ? `<span class="t">${tl} ${fmt(t)}</span>` : ''}<span class="r">${fmt(r)} R</span></div><div class="split" role="img" aria-label="${lbl}: Democratic ${fmt(d)}, Republican ${fmt(r)}"><i class="d" style="width:${d / ((d + r + t) || 1) * 100}%"></i>${t ? `<i class="t" style="width:${t / (d + r + t) * 100}%"></i>` : ''}<i class="r" style="width:${r / ((d + r + t) || 1) * 100}%"></i></div></div></div>`;
+function renderCompare() {
+  const mc = S.control || S.markets?.control || {};
+  const pr = (x) => (x ? [x.d / (x.d + x.r) * 100, x.r / (x.d + x.r) * 100] : null);
+  const hs = pr(mc.house), ss = pr(mc.senate), bal = mc.balance || S.markets?.control?.balance;
+  const sweeps = bal ? `${row('Dem. sweep', (bal['Democrats Sweep'] || 0) * 100, (bal['Republicans Sweep'] || 0) * 100)}` : '';
+  $('#cardMarket').innerHTML = `<header><h3>Market odds</h3><span class="what">Chance to win, set by traders</span></header>
+    ${hs ? row('House control', ...hs) : ''}${ss ? row('Senate control', ...ss) : ''}${sweeps}
+    <p class="meta">Last row: Democratic sweep vs. Republican sweep of both chambers.</p>`;
+  const g = S.polls?.generic;
+  const rs = Object.values(S.polls?.races || {}).filter((r) => r.kind === 'S');
+  const side = (r) => (/ D$/.test(r.rating) ? 'D' : / R$/.test(r.rating) ? 'R' : 'T');
+  const nd = 34 + rs.filter((r) => side(r) === 'D').length, nr = 31 + rs.filter((r) => side(r) === 'R').length, nt = rs.filter((r) => side(r) === 'T').length;
+  $('#cardPolls').innerHTML = `<header><h3>Polling average</h3><span class="what">Share of voters, from surveys</span></header>
+    ${g ? row('Generic ballot', g.dem, g.rep, 0, (x) => x.toFixed(1) + '%') : ''}
+    ${rs.length ? row('Senate seats by rating', nd, nr, nt, (x) => String(x), 'Toss-up') : ''}
+    <p class="meta">${g ? `Generic ballot margin ${g.margin >= 0 ? 'D' : 'R'}+${Math.abs(g.margin).toFixed(1)}. ` : ''}Senate row counts each race by its PollCheck rating, plus seats not up.</p>`;
 }
 
 // ---------- map ----------
@@ -364,7 +377,7 @@ function renderLive() {
 }
 
 // ---------- boot ----------
-function renderAll() { renderClock(); renderSenate(); renderHouse(); renderBalance(); paintMap(); renderDetail(); renderChanges(); renderBallot(); renderTable(); renderPolls(); renderExit(); renderSources(); renderLive(); }
+function renderAll() { renderClock(); renderSenate(); renderHouse(); renderCompare(); paintMap(); renderDetail(); renderChanges(); renderBallot(); renderTable(); renderPolls(); renderExit(); renderSources(); renderLive(); }
 async function boot() {
   const th = $('#theme');
   th.onclick = () => { const cur = document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); const n = cur === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = n; try { localStorage.setItem('theme', n); } catch {} };
