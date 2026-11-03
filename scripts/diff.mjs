@@ -7,7 +7,9 @@ const pD = (r) => r.d / ((r.d + r.r) || 1);
 const side = (p) => (p >= 0.5 ? `D ${Math.round(p * 100)}%` : `R ${Math.round((1 - p) * 100)}%`);
 const MILESTONES = [10, 25, 50, 75, 90, 100];
 
-export function diffSnapshots(prev, next, nowMs = Date.now()) {
+// `anchors` holds the last LOGGED level per race/control so slow drifts still fire once they total the threshold
+// (comparing only to the previous 30-second snapshot misses any move smaller than the threshold per run).
+export function diffSnapshots(prev, next, nowMs = Date.now(), anchors = { odds: {}, control: {} }) {
   const t = new Date(nowMs).toISOString();
   const out = [];
   const ev = (type, id, text, extra = {}) => out.push({ t, type, id, text, ...extra });
@@ -17,16 +19,17 @@ export function diffSnapshots(prev, next, nowMs = Date.now()) {
     for (const [id, r] of Object.entries(next.markets.races)) {
       const p = prev.markets.races[id];
       if (!p) continue;
-      const a = pD(p), b = pD(r), thr = id[0] === 'H' ? 0.05 : 0.03;
-      if (Math.abs(b - a) >= thr) ev('odds', id, `${label(id)}: ${side(a)} → ${side(b)}`, { from: a, to: b });
-      const st = id.split('-')[1];
-      if (STATES[st] && nowMs >= closeTime(st) && (b >= 0.99 || b <= 0.01) && !(a >= 0.99 || a <= 0.01)) ev('projected', id, `${label(id)}: market now projects ${b >= 0.5 ? 'D' : 'R'} (${side(b)})`, { to: b });
+      const b = pD(r), thr = id[0] === 'H' ? 0.05 : 0.03;
+      const a = anchors.odds[id] ?? pD(p);
+      if (Math.abs(b - a) >= thr) { ev('odds', id, `${label(id)}: ${side(a)} → ${side(b)}`, { from: a, to: b }); anchors.odds[id] = b; } else anchors.odds[id] = a;
+      const st = id.split('-')[1], pa = pD(p);
+      if (STATES[st] && nowMs >= closeTime(st) && (b >= 0.99 || b <= 0.01) && !(pa >= 0.99 || pa <= 0.01)) ev('projected', id, `${label(id)}: market now projects ${b >= 0.5 ? 'D' : 'R'} (${side(b)})`, { to: b });
     }
     for (const ch of ['senate', 'house']) {
       const p = prev.markets.control?.[ch], n = next.markets.control?.[ch];
       if (!p || !n) continue;
-      const a = p.d / (p.d + p.r), b = n.d / (n.d + n.r);
-      if (Math.abs(b - a) >= 0.01) ev('control', ch, `${ch === 'senate' ? 'Senate' : 'House'} control: ${side(a)} → ${side(b)}`, { from: a, to: b });
+      const b = n.d / (n.d + n.r), a = anchors.control[ch] ?? p.d / (p.d + p.r);
+      if (Math.abs(b - a) >= 0.01) { ev('control', ch, `${ch === 'senate' ? 'Senate' : 'House'} control: ${side(a)} → ${side(b)}`, { from: a, to: b }); anchors.control[ch] = b; } else anchors.control[ch] = a;
     }
   }
 

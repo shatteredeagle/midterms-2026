@@ -110,8 +110,9 @@ await writeFile(`${OUT}/status.json`, JSON.stringify({ updated: now(), sources: 
 // One file for the browser: a single request per refresh (kept under the GitHub API's unauthenticated rate limit).
 const [m, po, re, st] = await Promise.all(['markets', 'polls', 'results', 'status'].map(readJ));
 // Change feed: diff against the previous run, keep the newest 300 events.
-const fresh = diffSnapshots(before, { markets: m, polls: po, results: re });
+const anchors = log.anchors || { odds: {}, control: {} };
+const fresh = diffSnapshots(before, { markets: m, polls: po, results: re }, Date.now(), anchors);
 const changes = { updated: now(), events: [...fresh.reverse(), ...(log.events || [])].slice(0, 300) };
-await writeFile(`${OUT}/changes.json`, JSON.stringify(changes));
+await writeFile(`${OUT}/changes.json`, JSON.stringify({ ...changes, anchors })); // anchors stay server-side; the bundle and site get events only
 await writeFile(`${OUT}/bundle.json`, JSON.stringify({ updated: now(), markets: m, polls: po, results: re, status: st, changes }));
 console.log(JSON.stringify(status));
