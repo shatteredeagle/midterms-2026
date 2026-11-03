@@ -1,0 +1,8 @@
+{
+  "updated": "2026-11-03T20:10:00Z",
+  "note": "Headline figures quoted from each publisher's public page, with a link. Entered by hand, not scraped; FiftyPlusOne sells its data through a paid API, so this page only quotes the published headline.",
+  "generic": [
+    {"source": "FiftyPlusOne", "url": "https://fiftyplusone.news/polls/generic-ballot", "dem": 52.8, "rep": 44.1, "label": "D+9", "asOf": "Final, as of 12:00 AM Nov 3", "note": "Published as Democrats +9"},
+    {"source": "Silver Bulletin", "url": "https://www.natesilver.net/p/generic-ballot-average-2026-nate-silver-bulletin-congress-polls", "label": "D+8.9", "asOf": "Updated Nov 2", "note": "D+9.2 with the likely-voter adjustment in their forecast"}
+  ]
+}

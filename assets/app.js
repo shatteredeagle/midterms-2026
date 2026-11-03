@@ -10,7 +10,7 @@ const pct = (x, d = 0) => (x * 100).toFixed(d) + '%';
 const FIPS = {};
 for (const [st, v] of Object.entries(STATES)) FIPS[v[1]] = st;
 
-const S = { ballot: null, bqState: 'MA', changes: null, chgF: 'all', chgAll: false, chgSeen: 0, markets: null, polls: null, results: null, status: null, exit: null, control: null, paths: null, kind: 'S', sel: null, rkind: 'S', sort: 'close', q: '', showAll: false, fetchedAt: {} };
+const S = { otherAvgs: null, ballot: null, bqState: 'MA', changes: null, chgF: 'all', chgAll: false, chgSeen: 0, markets: null, polls: null, results: null, status: null, exit: null, control: null, paths: null, kind: 'S', sel: null, rkind: 'S', sort: 'close', q: '', showAll: false, fetchedAt: {} };
 
 // ---------- data ----------
 // raw.githubusercontent.com caches 5 min regardless of query string, so the browser reads the bundle through the
@@ -31,6 +31,7 @@ async function loadAll() {
   const [b, exit] = await Promise.all([getBundle(), fetch('data/exit-polls.json', { cache: 'no-store' }).then((r) => r.json()).catch(() => null)]);
   if (b) Object.assign(S, { changes: b.changes || S.changes, markets: b.markets || S.markets, polls: b.polls || S.polls, results: b.results || S.results, status: b.status || S.status });
   if (exit) S.exit = exit;
+  if (!S.otherAvgs) S.otherAvgs = await fetch('data/other-averages.json', { cache: 'no-store' }).then((r) => r.json()).catch(() => null);
   if (!S.ballot) S.ballot = await fetch('data/ballot-questions.json', { cache: 'no-store' }).then((r) => r.json()).catch(() => null);
   S.fetchedAt.main = Date.now();
 }
@@ -287,8 +288,10 @@ function renderPolls() {
   const dots = ps.map((p) => { const c = p.margin >= 0 ? 'var(--d)' : 'var(--r)'; return `<circle cx="${X(p.t)}" cy="${Y(Math.abs(p.margin) > 16 ? 16 : p.margin)}" r="5" fill="${p.dup ? 'none' : c}" stroke="${c}" stroke-width="1.5" opacity="${p.dup ? .8 : .75}"><title>${esc(p.pollster)} · ${esc(p.date)} · ${p.margin >= 0 ? 'D' : 'R'}+${Math.abs(p.margin)} (${p.pop}, n=${p.n})${p.dup ? ' · not in average' : ''}</title></circle>`; }).join('');
   const fmtD = (t) => new Date(t).toLocaleDateString([], { month: 'short', day: 'numeric', timeZone: 'UTC' });
   const rows = ps.slice(0, S.showPolls ? 40 : 8).map((p) => `<tr><td>${esc(p.pollster)}${p.dup ? ' <span class="tag" title="Another version of the same survey is in the average">alt. version</span>' : ''}</td><td>${esc(p.date)}</td><td class="num">${p.n.toLocaleString()} ${p.pop}</td><td class="num" style="color:var(--d)">${p.dem}</td><td class="num" style="color:var(--r)">${p.rep}</td><td class="num"><b>${p.margin >= 0 ? 'D' : 'R'}+${Math.abs(p.margin)}</b></td></tr>`).join('');
+  const oa = S.otherAvgs?.generic || [];
+  const avgCards = `<div class="avgs" aria-label="Generic ballot averages from other publishers"><div class="avg"><b>PollCheck</b><span class="lbl">${g.margin >= 0 ? 'D' : 'R'}+${Math.abs(g.margin).toFixed(1)}</span><span class="small">${g.dem}% – ${g.rep}% · live</span></div>${oa.map((x) => `<a class="avg" href="${esc(x.url)}" target="_blank" rel="noopener"><b>${esc(x.source)} ↗</b><span class="lbl">${esc(x.label)}</span><span class="small">${x.dem ? `${x.dem}% – ${x.rep}% · ` : ''}${esc(x.asOf)}</span></a>`).join('')}</div>`;
   el.innerHTML = `<div><div class="gb"><div><b class="d">${g.dem}%</b><div class="small">Democratic</div></div><div><b class="r">${g.rep}%</b><div class="small">Republican</div></div><div><b>${g.margin >= 0 ? 'D' : 'R'}+${Math.abs(g.margin).toFixed(1)}</b><div class="small">Margin</div></div></div>
-    <p class="small" style="margin-top:14px">Average by PollCheck across likely-voter polls. Filled dots are in the average; hollow dots are alternate versions of the same survey. Hover a dot for details.</p>
+    ${avgCards}<p class="small" style="margin-top:14px">Chart and table: PollCheck average across likely-voter polls. Filled dots are in the average; hollow dots are alternate versions of the same survey. Hover a dot for details.</p>
     <svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Generic ballot polls by date, margin in points">${grid}<line x1="${L}" x2="${W - R}" y1="${Y(g.margin)}" y2="${Y(g.margin)}" stroke="var(--text)" stroke-dasharray="4 4"/><text x="${W - R}" y="${Y(g.margin) - 6}" text-anchor="end" style="fill:var(--text)">avg ${g.margin >= 0 ? 'D' : 'R'}+${Math.abs(g.margin).toFixed(1)}</text>${dots}<text x="${L}" y="${H - 6}">${fmtD(t0)}</text><text x="${W - R}" y="${H - 6}" text-anchor="end">${fmtD(t1)}</text></svg></div>
     <div class="table-scroll"><table><thead><tr><th>Pollster</th><th>Fielded</th><th class="num">Sample</th><th class="num">D</th><th class="num">R</th><th class="num">Spread</th></tr></thead><tbody>${rows}</tbody></table>
     <div class="more"><button type="button" id="morePolls">${S.showPolls ? 'Show fewer' : 'Show 40 latest'}</button></div></div>`;

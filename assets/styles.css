@@ -196,3 +196,8 @@ svg.chart .grid{stroke:var(--line)}
 .sbc .split{margin:4px 0 0;height:9px}
 .sbc.poll .split i{background-image:repeating-linear-gradient(135deg,rgb(255 255 255/.38) 0 3px,transparent 3px 6px)}
 .sbc .split .t{background:var(--t)}
+
+.avgs{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-top:16px}
+.avg{display:grid;gap:2px;padding:9px 11px;border:1px solid var(--line);border-left:4px solid #e0a21b;border-radius:10px;background:var(--surface-2);color:var(--text);text-decoration:none}
+a.avg:hover{border-color:var(--focus)}
+.avg b{font-size:12px;color:var(--muted)}.avg .lbl{font-size:20px;font-weight:700}
