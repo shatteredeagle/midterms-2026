@@ -119,13 +119,23 @@ function renderCompare() {
     ${hs ? row('House control', ...hs) : ''}${ss ? row('Senate control', ...ss) : ''}${sweeps}
     <p class="meta">Last row: Democratic sweep vs. Republican sweep of both chambers.</p>`;
   const g = S.polls?.generic;
-  const rs = Object.values(S.polls?.races || {}).filter((r) => r.kind === 'S');
-  const side = (r) => (/ D$/.test(r.rating) ? 'D' : / R$/.test(r.rating) ? 'R' : 'T');
-  const nd = 34 + rs.filter((r) => side(r) === 'D').length, nr = 31 + rs.filter((r) => side(r) === 'R').length, nt = rs.filter((r) => side(r) === 'T').length;
+  // Every Senate race: PollCheck rating when it has one; otherwise the market lean (PollCheck's table omits safe seats).
+  const ids = new Set([...Object.keys(S.polls?.races || {}), ...Object.keys(S.markets?.races || {})].filter((k) => k[0] === 'S'));
+  const sideOf = (id) => {
+    const p = S.polls?.races?.[id];
+    if (p) return / D$/.test(p.rating) ? 'D' : / R$/.test(p.rating) ? 'R' : 'T';
+    const m = S.markets?.races?.[id];
+    if (!m) return null;
+    const d = m.d / ((m.d + m.r) || 1);
+    return d >= .62 ? 'D' : d <= .38 ? 'R' : 'T';
+  };
+  const sides = [...ids].map(sideOf).filter(Boolean);
+  const rs = sides;
+  const nd = 34 + sides.filter((s) => s === 'D').length, nr = 31 + sides.filter((s) => s === 'R').length, nt = sides.filter((s) => s === 'T').length;
   $('#cardPolls').innerHTML = `<header><h3>Polling average</h3><span class="what">Share of voters, from surveys</span></header>
     ${g ? row('Generic ballot', g.dem, g.rep, 0, (x) => x.toFixed(1) + '%') : ''}
-    ${rs.length ? row('Senate seats by rating', nd, nr, nt, (x) => String(x), 'Toss-up') : ''}
-    <p class="meta">${g ? `Generic ballot margin ${g.margin >= 0 ? 'D' : 'R'}+${Math.abs(g.margin).toFixed(1)}. ` : ''}Senate row counts each race by its PollCheck rating, plus seats not up.</p>`;
+    ${rs.length ? row('Senate seats', nd, nr, nt, (x) => String(x), 'Toss-up') : ''}
+    <p class="meta">${g ? `Generic ballot margin ${g.margin >= 0 ? 'D' : 'R'}+${Math.abs(g.margin).toFixed(1)}. ` : ''}Senate row counts each race by its PollCheck rating (market lean where unrated), plus seats not up.</p>`;
 }
 
 // ---------- map ----------
