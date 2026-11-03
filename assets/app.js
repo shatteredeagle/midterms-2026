@@ -10,7 +10,7 @@ const pct = (x, d = 0) => (x * 100).toFixed(d) + '%';
 const FIPS = {};
 for (const [st, v] of Object.entries(STATES)) FIPS[v[1]] = st;
 
-const S = { history: null, early: null, turnout: null, otherAvgs: null, ballot: null, bqState: 'MA', changes: null, chgF: 'all', chgAll: false, chgSeen: 0, markets: null, polls: null, results: null, status: null, exit: null, control: null, paths: null, kind: 'S', sel: null, rkind: 'S', sort: 'close', q: '', showAll: false, fetchedAt: {} };
+const S = { pollTab: 'H', senAll: false, history: null, early: null, turnout: null, otherAvgs: null, ballot: null, bqState: 'MA', changes: null, chgF: 'all', chgAll: false, chgSeen: 0, markets: null, polls: null, results: null, status: null, exit: null, control: null, paths: null, kind: 'S', sel: null, rkind: 'S', sort: 'close', q: '', showAll: false, fetchedAt: {} };
 
 // ---------- data ----------
 // raw.githubusercontent.com caches 5 min regardless of query string, so the browser reads the bundle through the
@@ -353,7 +353,47 @@ function wireTable() {
 // ---------- polls ----------
 const MONTHS = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
 const parseDate = (s) => { const [d, m, y] = s.split(' '); return Date.UTC(+y, MONTHS[m], +d); };
+// Senate has no national ballot, so this is an index: the plain average of every polled Senate race's polling-average margin.
+function senatePollRows() {
+  return Object.values(S.polls?.races || {}).filter((r) => r.kind === 'S').map((r) => {
+    const d = r.cands.find((c) => c.p === 'D'), q = r.cands.find((c) => c.p === 'R');
+    return d && q ? { st: r.state, id: r.id, rating: r.rating, special: r.special, d: d.pct, r: q.pct, margin: Math.round((d.pct - q.pct) * 10) / 10, polls: r.polls, dn: d.n, rn: q.n } : null;
+  }).filter(Boolean);
+}
+const mean = (xs) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null);
+const fm = (m) => `${m >= 0 ? 'D' : 'R'}+${Math.abs(m).toFixed(1)}`;
+function renderSenatePolls() {
+  const el = $('#polls-body'), rows = senatePollRows();
+  if (!rows.length) { el.innerHTML = '<p class="small">No Senate polling averages available.</p>'; return; }
+  const all = mean(rows.map((x) => x.margin)), comp = rows.filter((x) => /Toss|Lean/.test(x.rating)), cm = mean(comp.map((x) => x.margin));
+  const dLead = rows.filter((x) => x.margin > 0).length;
+  const shown = [...rows].sort((a, b) => Math.abs(a.margin) - Math.abs(b.margin)).slice(0, S.senAll ? rows.length : 12).sort((a, b) => b.margin - a.margin);
+  const SC = 20; // bar scale: +/-20 points fills each half
+  const hist = (S.history?.senate || []);
+  el.innerHTML = `<div class="sen-stats"><div><b style="color:var(--${all >= 0 ? 'd' : 'r'})">${fm(all)}</b><span class="small">all ${rows.length} polled races</span></div>
+      <div><b style="color:var(--${cm >= 0 ? 'd' : 'r'})">${comp.length ? fm(cm) : '—'}</b><span class="small">${comp.length} competitive (toss-up and lean)</span></div>
+      <div><b>${dLead}<span class="small"> of ${rows.length}</span></b><span class="small">races where D leads</span></div></div>
+    ${hist.length > 2 ? `<div class="trend"><div class="trend-h"><span class="small">Index over time (recorded since tonight)</span></div>${spark(hist, { lo: -5, hi: 8, mid: 0, label: 'Senate polling index over time' })}</div>` : ''}
+    <p class="small" style="margin:6px 0 12px">Simple average of each race's polling-average margin. It is an index of the races that have polls, not a national poll or a vote forecast: states differ in size and 16 Senate races have no polling average. Click a row to open the state.</p>
+    <div role="list">${shown.map((x) => `<div class="sen-row" role="listitem" tabindex="0" data-st="${x.st}"><span class="nm">${esc(STATES[x.st][0])}${x.special ? ' (sp.)' : ''}<span class="rt">${esc(x.rating)} · ${x.polls} polls</span></span><div class="sen-bar" role="img" aria-label="${esc(STATES[x.st][0])}: ${fm(x.margin)}"><i class="${x.margin >= 0 ? 'D' : 'R'}" style="${x.margin >= 0 ? `left:50%;width:${Math.min(50, x.margin / SC * 50)}%` : `right:50%;width:${Math.min(50, -x.margin / SC * 50)}%`}"></i></div><span class="sen-val ${x.margin >= 0 ? 'D' : 'R'}">${fm(x.margin)}</span></div>`).join('')}</div>
+    <div class="more"><button type="button" id="senMore">${S.senAll ? 'Show closest 12' : `Show all ${rows.length}`}</button></div>`;
+  $('#senMore').onclick = () => { S.senAll = !S.senAll; renderSenatePolls(); };
+}
+function wirePolls() {
+  $('#pollTabs').addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    S.pollTab = b.dataset.p;
+    for (const x of document.querySelectorAll('#pollTabs button')) x.setAttribute('aria-selected', x === b);
+    renderPolls();
+  });
+  const pick = (t) => { const r = t.closest('.sen-row'); if (r) { select(r.dataset.st); $('#map').scrollIntoView({ behavior: 'smooth', block: 'start' }); } };
+  $('#polls-body').addEventListener('click', (e) => pick(e.target));
+  $('#polls-body').addEventListener('keydown', (e) => { if (e.key === 'Enter') pick(e.target); });
+}
 function renderPolls() {
+  $('#pollsH').textContent = S.pollTab === 'S' ? 'Senate polling' : 'Generic ballot';
+  $('#pollsSub').textContent = S.pollTab === 'S' ? 'There is no national Senate ballot, so this combines the polling average in each contested race.' : 'National House polling average, with the individual polls behind it.';
+  if (S.pollTab === 'S') return renderSenatePolls();
   const g = S.polls?.generic;
   const el = $('#polls-body');
   if (!g) { el.innerHTML = '<p class="small">Polling data unavailable.</p>'; return; }
@@ -500,7 +540,7 @@ async function boot() {
   const th = $('#theme');
   th.onclick = () => { const cur = document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); const n = cur === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = n; try { localStorage.setItem('theme', n); } catch {} };
   S.paths = await (await fetch('assets/map-paths.json')).json();
-  drawMap(); wireMap(); wireTable(); wireChanges(); wireBallot(); wireFlips();
+  drawMap(); wireMap(); wireTable(); wireChanges(); wireBallot(); wireFlips(); wirePolls();
   await Promise.all([loadAll(), loadControl(), loadHistory()]);
   renderAll();
   setInterval(() => { renderClock(); renderLive(); }, 1000);

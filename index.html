@@ -112,7 +112,13 @@
   </section>
 
   <section id="polls" class="panel" aria-labelledby="pollsH">
-    <div class="panel-head"><div><h2 id="pollsH">Generic ballot</h2><p class="sub">National House polling average, with the individual polls behind it.</p></div></div>
+    <div class="panel-head">
+      <div><h2 id="pollsH">Generic ballot</h2><p class="sub" id="pollsSub">National House polling average, with the individual polls behind it.</p></div>
+      <div class="seg" role="tablist" aria-label="Chamber" id="pollTabs">
+        <button role="tab" data-p="H" aria-selected="true">House</button>
+        <button role="tab" data-p="S" aria-selected="false">Senate</button>
+      </div>
+    </div>
     <div id="polls-body" class="polls-grid"></div>
   </section>
 

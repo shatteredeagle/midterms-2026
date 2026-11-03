@@ -147,6 +147,10 @@ async function history() {
   const gm = po?.generic?.margin;
   if (typeof gm === 'number' && h.generic[h.generic.length - 1]?.[1] !== gm) h.generic.push([t, gm]);
   if (h.generic.length > 2000) h.generic.splice(0, h.generic.length - 2000);
+  // Senate polling index: mean of (D% - R%) across Senate races with both parties in the polling average.
+  const sm = Object.values(po?.races || {}).filter((r) => r.kind === 'S').map((r) => { const d = r.cands.find((x) => x.p === 'D'), q = r.cands.find((x) => x.p === 'R'); return d && q ? d.pct - q.pct : null; }).filter((x) => x !== null);
+  h.senate ||= [];
+  if (sm.length) { const idx = Math.round((sm.reduce((a, b) => a + b, 0) / sm.length) * 100) / 100; if (h.senate[h.senate.length - 1]?.[1] !== idx) h.senate.push([t, idx]); if (h.senate.length > 2000) h.senate.splice(0, h.senate.length - 2000); }
   return { ...h, updated: now() };
 }
 
