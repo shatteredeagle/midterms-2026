@@ -1,5 +1,5 @@
-import { STATES, closeTime } from './states.js?v=fd3592cb';
-import { fetchControl } from './markets.js?v=fd3592cb';
+import { STATES, closeTime } from './states.js?v=bdae9140';
+import { fetchControl } from './markets.js?v=bdae9140';
 
 const REPO = 'ShatteredEagle/midterms-2026';
 const RAW = `https://raw.githubusercontent.com/${REPO}/data/`;

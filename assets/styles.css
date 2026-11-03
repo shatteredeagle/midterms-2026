@@ -30,7 +30,7 @@ h1,h2,h3{line-height:1.2;margin:0}
 :focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:4px}
 
 .top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-.bar{display:flex;align-items:center;gap:20px;height:56px}
+.topbar{display:flex;align-items:center;gap:20px;height:56px}
 .brand{display:flex;align-items:center;gap:10px}
 .brand h1{font-size:17px;letter-spacing:-.01em}
 .logo{width:22px;height:22px;border-radius:6px;background:linear-gradient(90deg,var(--d) 50%,var(--r) 50%)}
@@ -147,9 +147,9 @@ svg.chart .grid{stroke:var(--line)}
 .foot{padding:24px clamp(14px,3vw,28px) 48px;color:var(--muted);font-size:13px}
 .foot p{max-width:90ch}
 
-@media (max-width:980px){.hero{grid-template-columns:1fr 1fr}.pair{grid-template-columns:1fr}.map-grid,.polls-grid{grid-template-columns:1fr}.bar{flex-wrap:wrap;height:auto;padding:8px 0;gap:8px 12px}nav{order:3;flex-basis:100%;margin:0;overflow-x:auto;scrollbar-width:none}nav a[aria-current=page]::after{bottom:-1px}.bar-right{margin-left:auto}}
+@media (max-width:980px){.hero{grid-template-columns:1fr 1fr}.pair{grid-template-columns:1fr}.map-grid,.polls-grid{grid-template-columns:1fr}.topbar{flex-wrap:wrap;height:auto;padding:8px 0;gap:8px 12px}nav{order:3;flex-basis:100%;margin:0;overflow-x:auto;scrollbar-width:none}nav a[aria-current=page]::after{bottom:-1px}.bar-right{margin-left:auto}}
 @media (max-width:760px){.hero{grid-template-columns:1fr}}
-@media (max-width:560px){.hero{grid-template-columns:1fr}.bar{gap:10px}.brand h1{font-size:15px}#liveText{max-width:130px;overflow:hidden;text-overflow:ellipsis}.search input{min-width:0;width:100%}.search{flex:1}}
+@media (max-width:560px){.hero{grid-template-columns:1fr}.topbar{gap:10px}.brand h1{font-size:15px}#liveText{max-width:130px;overflow:hidden;text-overflow:ellipsis}.search input{min-width:0;width:100%}.search{flex:1}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 
 .chg{list-style:none;margin:0;padding:0;display:grid}
