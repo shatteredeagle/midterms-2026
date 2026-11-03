@@ -282,3 +282,10 @@ td.num{white-space:nowrap}
 .icon{display:inline-grid;place-items:center}
 .seg button{white-space:nowrap}
 @media (max-width:560px){.seg button{padding:6px 10px}.seg{max-width:100%;overflow-x:auto}}
+
+.qd{border:1px solid var(--line);border-radius:12px;margin:0 0 10px;background:var(--surface)}
+.qd>summary{cursor:pointer;font-weight:700;font-size:15px;padding:12px 14px;list-style:none;display:flex;justify-content:space-between;gap:10px}
+.qd>summary::after{content:"+";color:var(--muted);font-weight:400}
+.qd[open]>summary::after{content:"−"}
+.qd>summary::-webkit-details-marker{display:none}
+.qd .q{margin:0;padding:0 14px 12px}
