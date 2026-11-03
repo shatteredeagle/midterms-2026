@@ -350,7 +350,7 @@ function renderExit() {
 }
 
 // ---------- change feed ----------
-const CHG_GROUP = { odds: 'odds', control: 'odds', projected: 'count', count: 'count', lead: 'count', polls: 'polls', rating: 'polls', source: 'count' };
+const CHG_GROUP = { odds: 'odds', control: 'odds', projected: 'count', count: 'count', lead: 'count', polls: 'polls', rating: 'polls', source: 'count', exit: 'reports', ballot: 'reports', average: 'reports', early: 'reports' };
 const ago = (iso) => { const s = Math.max(0, Math.round((now() - Date.parse(iso)) / 1000)); return s < 90 ? `${s}s ago` : s < 5400 ? `${Math.round(s / 60)}m ago` : `${Math.round(s / 3600)}h ago`; };
 function renderChanges() {
   const evs = (S.changes?.events || []).filter((e) => S.chgF === 'all' || CHG_GROUP[e.type] === S.chgF);
@@ -376,13 +376,15 @@ function renderTurnout() {
   const n = (x) => Number(x).toLocaleString('en-US');
   const cards = [];
   for (const s of S.early?.states || []) {
-    const up = ((s.ballots / s.total2022 - 1) * 100).toFixed(0);
+    const up = s.total2022 ? ((s.ballots / s.total2022 - 1) * 100).toFixed(0) : null;
+    const links = [{ label: s.source, url: s.url }, ...(s.links || [])];
     cards.push(`<article class="tcard"><h3><span>${esc(s.name)} · early vote</span><span class="tag live">${esc(s.asOf)}</span></h3>
-      <div class="big2">${n(s.ballots)} <span class="small">ballots · ${s.turnoutPct}% of registered</span></div>
-      <p class="small" style="margin:0"><b>${up > 0 ? '+' : ''}${up}%</b> vs. ${n(s.total2022)} total absentee and early ballots in 2022. In person ${n(s.inPerson)}, mail ${n(s.mail)}.</p>
-      <div class="stack" role="img" aria-label="Early ballots by party: ${s.byParty.map((p) => `${p.label} ${p.share}%`).join(', ')}">${s.byParty.map((p) => `<i class="${p.party}" style="width:${p.share}%"></i>`).join('')}</div>
-      <div class="legend2">${s.byParty.filter((p) => p.share >= 1).map((p) => `<span class="${p.party}">${esc(p.label)} ${p.share}%</span>`).join('')}</div>
-      <p class="small" style="margin:0">Who voted early, not how they voted. <a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.source)} ↗</a></p></article>`);
+      <div class="big2">${s.ballotsLabel ? esc(s.ballotsLabel) : n(s.ballots)} <span class="small">ballots${s.turnoutPct ? ` · ${s.turnoutPct}% of registered` : ''}</span></div>
+      ${up !== null ? `<p class="small" style="margin:0"><b>${up > 0 ? '+' : ''}${up}%</b> vs. ${n(s.total2022)} total absentee and early ballots in 2022.${s.inPerson ? ` In person ${n(s.inPerson)}, mail ${n(s.mail)}.` : ''}</p>` : ''}
+      ${s.byParty ? `<div class="stack" role="img" aria-label="Early ballots by party: ${s.byParty.map((p) => `${p.label} ${p.share}%`).join(', ')}">${s.byParty.map((p) => `<i class="${p.party}" style="width:${p.share}%"></i>`).join('')}</div>
+      <div class="legend2">${s.byParty.filter((p) => p.share >= 1).map((p) => `<span class="${p.party}">${esc(p.label)} ${p.share}%</span>`).join('')}</div>` : ''}
+      ${(s.notes || []).map((t) => `<p class="small" style="margin:0">${esc(t)}</p>`).join('')}
+      <p class="small" style="margin:0">${s.byParty ? 'Who voted early, not how they voted. ' : ''}${links.map((l) => `<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`).join(' · ')}</p></article>`);
   }
   const fl = S.turnout?.FL;
   if (fl) cards.push(`<article class="tcard"><h3><span>Florida · Election Day turnout</span><span class="tag live">live</span></h3>

@@ -64,3 +64,34 @@ export function diffSnapshots(prev, next, nowMs = Date.now(), anchors = { odds: 
   }
   return out;
 }
+
+// Hand-maintained files (exit polls, ballot results, other averages, early vote) get log entries when they change,
+// so everything added to the page also shows up in "What changed". `prev` null/empty means everything present counts as added.
+const n0 = (x) => Number(x).toLocaleString('en-US');
+const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+export function diffManual(prev = {}, next = {}, nowMs = Date.now()) {
+  const t = new Date(nowMs).toISOString();
+  const out = [];
+  const ev = (type, id, text) => out.push({ t, type, id, text });
+
+  const pe = prev.exit || {}, ne = next.exit || {};
+  if ((ne.questions?.length || 0) > 0 && !same([pe.sources, pe.questions], [ne.sources, ne.questions])) {
+    const names = (ne.sources || []).map((s) => s.name).join(', ');
+    ev('exit', 'exit', `Exit polls ${pe.questions?.length ? 'updated' : 'added'} (${ne.status || 'preliminary'}): ${ne.questions.length} question${ne.questions.length > 1 ? 's' : ''}${names ? ` from ${names}` : ''}`);
+  }
+
+  const pb = prev.ballot?.states || {}, nb = next.ballot?.states || {};
+  for (const [st, s] of Object.entries(nb)) {
+    for (const q of s.questions || []) {
+      const old = (pb[st]?.questions || []).find((x) => x.id === q.id);
+      if (q.result && !same(old?.result, q.result)) ev('ballot', q.id, `${s.name} ${q.n ? `Question ${q.n}` : q.title}: ${old?.result ? 'updated, ' : ''}Yes ${q.result.yes}%${q.result.reporting ? ` (${q.result.reporting})` : ''}${q.result.source ? ` · ${q.result.source}` : ''}`);
+    }
+  }
+
+  const pa = Object.fromEntries((prev.averages?.generic || []).map((x) => [x.source, x]));
+  for (const x of next.averages?.generic || []) if (!same(pa[x.source], x)) ev('average', x.source, `${x.source} generic ballot average ${pa[x.source] ? 'updated' : 'added'}: ${x.label} (${x.asOf})`);
+
+  const pv = Object.fromEntries((prev.early?.states || []).map((x) => [x.code, x]));
+  for (const x of next.early?.states || []) if (!same(pv[x.code], x)) ev('early', x.code, `${x.name} early vote report ${pv[x.code] ? 'updated' : 'added'}: ${n0(x.ballots)} ballots${x.turnoutPct ? ` (${x.turnoutPct}% turnout)` : ''} · ${x.asOf}`);
+  return out;
+}

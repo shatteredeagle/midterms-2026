@@ -4,7 +4,7 @@ import { mkdir, writeFile, readFile, stat } from 'node:fs/promises';
 import { GAMMA, BALLOT_SLUGS, parseEvents } from '../assets/markets.js';
 import { NAME_TO_ST } from '../assets/states.js';
 import { FEEDS } from './feeds.mjs';
-import { diffSnapshots } from './diff.mjs';
+import { diffSnapshots, diffManual } from './diff.mjs';
 
 const OUT = process.argv[2] || 'out';
 const UA = 'midterms-2026-dashboard/1.0 (+https://github.com/ShatteredEagle/midterms-2026)';
@@ -124,9 +124,16 @@ await writeFile(`${OUT}/status.json`, JSON.stringify({ updated: now(), sources: 
 // One file for the browser: a single request per refresh (kept under the GitHub API's unauthenticated rate limit).
 const [m, po, re, st, tu] = await Promise.all(['markets', 'polls', 'results', 'status', 'turnout'].map(readJ));
 // Change feed: diff against the previous run, keep the newest 300 events.
+// Hand-entered data files from the repo (data/*.json): diffed against the last seen copy.
+const DATA = new URL('../data/', import.meta.url);
+const readData = async (f) => { try { return JSON.parse(await readFile(new URL(f, DATA), 'utf8')); } catch { return null; } };
+const manualNow = { exit: await readData('exit-polls.json'), ballot: await readData('ballot-questions.json'), averages: await readData('other-averages.json'), early: await readData('early-vote.json') };
+const manualPrev = (await readJ('manual')) || {};
+await writeFile(`${OUT}/manual.json`, JSON.stringify(manualNow));
 const anchors = log.anchors || { odds: {}, control: {} };
 const fresh = diffSnapshots(before, { markets: m, polls: po, results: re }, Date.now(), anchors);
-const changes = { updated: now(), events: [...fresh.reverse(), ...(log.events || [])].slice(0, 300) };
+const added = diffManual(manualPrev, manualNow);
+const changes = { updated: now(), events: [...added, ...fresh.reverse(), ...(log.events || [])].slice(0, 300) };
 await writeFile(`${OUT}/changes.json`, JSON.stringify({ ...changes, anchors })); // anchors stay server-side; the bundle and site get events only
 await writeFile(`${OUT}/bundle.json`, JSON.stringify({ updated: now(), markets: m, polls: po, results: re, status: st, turnout: tu, changes }));
 console.log(JSON.stringify(status));

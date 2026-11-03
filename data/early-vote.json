@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-03T21:40:00Z",
+  "updated": "2026-11-03T22:00:00Z",
   "note": "Quoted from official state reports, entered by hand with a link. Early-vote party splits show who voted early, not who they voted for.",
   "states": [
     {
@@ -15,10 +15,51 @@
       "mail": 93597,
       "total2022": 2155459,
       "byParty": [
-        {"party": "D", "label": "Democratic", "ballots": 1081910, "share": 38.37},
-        {"party": "R", "label": "Republican", "ballots": 737349, "share": 26.15},
-        {"party": "O", "label": "Unaffiliated", "ballots": 991939, "share": 35.18},
-        {"party": "O", "label": "Libertarian and Green", "ballots": 8723, "share": 0.31}
+        {
+          "party": "D",
+          "label": "Democratic",
+          "ballots": 1081910,
+          "share": 38.37
+        },
+        {
+          "party": "R",
+          "label": "Republican",
+          "ballots": 737349,
+          "share": 26.15
+        },
+        {
+          "party": "O",
+          "label": "Unaffiliated",
+          "ballots": 991939,
+          "share": 35.18
+        },
+        {
+          "party": "O",
+          "label": "Libertarian and Green",
+          "ballots": 8723,
+          "share": 0.31
+        }
+      ]
+    },
+    {
+      "code": "GA",
+      "name": "Georgia",
+      "asOf": "Early voting closed Oct 30; detail as of Oct 26",
+      "source": "Fox 5 Atlanta (citing the Georgia Secretary of State's unofficial turnout dashboard) and Atlanta News First",
+      "url": "https://www.fox5atlanta.com/election/georgia-enters-final-week-early-voting-1-8m-ballots-cast",
+      "links": [
+        {
+          "label": "Atlanta News First",
+          "url": "https://www.atlantanewsfirst.com/2026/10/14/by-numbers-georgias-daily-early-voting-totals-ahead-november-election/?outputType=apps"
+        }
+      ],
+      "ballots": 2700000,
+      "ballotsLabel": "more than 2.7 million",
+      "notes": [
+        "Final total: \"more than 2.7 million Georgians cast their ballots early\" (Atlanta News First, updated Oct 31; no breakdown given).",
+        "As of Oct 26: 1,781,209 accepted ballots, 23.7% of 7,530,073 active voters: 1,698,469 in person and 82,740 absentee (Fox 5 Atlanta).",
+        "In-person early voting was 12% ahead of the same point in 2022 as of Oct 20, per the Secretary of State's office; absentee requests ran well below 2022.",
+        "Georgia does not register voters by party. A modeled split attributed to TargetSmart put early voters at about 54% Democratic and 41% Republican; that is an estimate, not an official count."
       ]
     }
   ]
