@@ -164,3 +164,19 @@ svg.chart .grid{stroke:var(--line)}
 .bq .res .split .d{background:var(--d)}
 .bq .res .split .r{background:var(--r)}
 .bq-note{margin:14px 0 0}
+
+.sb{margin:12px 0 0;padding:10px 12px 8px;border-radius:10px;border:1px solid var(--line);border-left-width:4px;background:var(--surface)}
+.sb header{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.sb h5{margin:0;font-size:13px;letter-spacing:.02em}
+.sb .what{font-size:12px;color:var(--muted)}
+.sb .sb-meta{margin:2px 0 4px}
+.sb.market{border-left-color:#8b6cf0}
+.sb.market h5{color:#8b6cf0}
+:root[data-theme=light] .sb.market h5,:root:not([data-theme=dark]) .sb.market h5{color:#6a4bd6}
+.sb.poll{border-left-color:#e0a21b}
+.sb.poll h5{color:#c98a00}
+.sb.official{border-left-color:#1fa464}
+.sb.official h5{color:#1fa464}
+/* Different bar encodings: market = solid bar, poll = striped, official = thick solid */
+.sb.poll .cand .bar i{background-image:repeating-linear-gradient(135deg,rgb(255 255 255/.38) 0 3px,transparent 3px 6px)}
+.sb.official .cand .bar{height:9px}

@@ -152,18 +152,23 @@ function paintMap() {
   const closedN = Object.keys(STATES).filter(isClosed).length;
   $('#mapSub').textContent = S.kind === 'H' ? 'Expected House seats by state, summed from per-district market odds. Updates as markets move.' : `${KIND[S.kind]} races colored by market odds (${closedN} states closed). Official counts appear in the detail panel as feeds publish.`;
 }
+const PORDER = { D: 0, R: 1, O: 2 };
+const money = (n) => (n >= 1e6 ? `$${(n / 1e6).toFixed(1)}M` : `$${Math.round(n / 1e3)}k`);
 function candRows(cands, mode) {
-  return cands.map((c) => `<div class="cand" data-p="${esc(c.p)}"><span>${esc(c.n)} <span class="small">(${esc(c.p)})</span></span><b>${mode === 'votes' ? `${Number(c.pct).toFixed(1)}%` : mode === 'poll' ? `${c.pct}%` : pct(c.price)}</b><div class="bar"><i style="width:${Math.min(100, mode === 'market' ? c.price * 100 : c.pct)}%"></i></div></div>`).join('');
+  const sorted = [...cands].sort((x, y) => (PORDER[x.p] ?? 2) - (PORDER[y.p] ?? 2));
+  return sorted.map((c) => `<div class="cand" data-p="${esc(c.p)}"><span>${esc(c.n)} <span class="small">(${esc(c.p)})</span></span><b>${mode === 'votes' ? `${Number(c.pct).toFixed(1)}%` : mode === 'poll' ? `${c.pct}%` : pct(c.price)}</b><div class="bar"><i style="width:${Math.min(100, mode === 'market' ? c.price * 100 : c.pct)}%"></i></div></div>`).join('');
 }
+// One labeled block per data source so counts, market odds and polls never read as the same thing.
+const block = (cls, title, what, meta, body) => `<section class="sb ${cls}"><header><h5>${title}</h5><span class="what">${what}</span></header>${meta ? `<p class="small sb-meta">${meta}</p>` : ''}${body}</section>`;
 function raceBlock(id) {
   const r = race(id);
   if (!r) return '';
   const o = r.o;
   let h = `<div class="race"><h4>${KIND[r.kind]}${r.p?.special ? ' (special)' : ''} ${r.kind === 'H' ? esc(r.m?.district || '') : ''}</h4>`;
-  if (o && o.totalVotes > 0) h += `<p><span class="tag live">Official count</span> <span class="small">${esc(o.source)} · ${esc(o.reporting)}</span></p>${candRows(o.cands.map((c) => ({ ...c })), 'votes')}`;
+  if (o && o.totalVotes > 0) h += block('official', 'Votes counted', 'Official count', `${esc(o.source)} · ${esc(o.reporting)}`, candRows(o.cands.map((c) => ({ ...c })), 'votes'));
   else if (r.closed) h += `<p class="small">Polls closed. No free official feed for this race — check the state election office.</p>`;
-  if (r.m) h += `<p class="small" style="margin-top:8px"><b>Market odds</b> · $${(r.m.vol / 1e3).toFixed(0)}k traded${r.projected ? ' · <span class="tag live">projected</span>' : ''}</p>${candRows(r.m.cands.filter((c) => c.price >= .01), 'market')}`;
-  if (r.p) h += `<p class="small" style="margin-top:8px"><b>Polling average</b> · ${esc(r.p.rating)} · ${r.p.polls} polls, ${r.p.pollsters} pollsters${r.p.lead ? ` · ${esc(r.p.lead)}` : ''}</p>${candRows(r.p.cands, 'poll')}`;
+  if (r.m) h += block('market', 'Market odds', 'Chance to win, set by traders', `${money(r.m.vol)} traded${r.projected ? ' · <span class="tag live">projected</span>' : ''}`, candRows(r.m.cands.filter((c) => c.price >= .01), 'market'));
+  if (r.p) h += block('poll', 'Polling average', 'Share of voters, from surveys', `${esc(r.p.rating)} · ${r.p.polls} polls, ${r.p.pollsters} pollsters${r.p.lead ? ` · <b>${esc(r.p.lead)}</b>` : ''}`, candRows(r.p.cands, 'poll'));
   return h + '</div>';
 }
 function renderDetail() {
@@ -313,13 +318,12 @@ function renderBallot() {
   const b = S.ballot?.states?.[S.bqState], el = $('#ballot-body');
   if (!b) { el.innerHTML = '<p class="small">Ballot question data unavailable.</p>'; return; }
   $('#ballotSub').textContent = `${b.name} statewide questions on the Nov 3 ballot. ${b.threshold}`;
-  const money = (n) => `$${(n / 1e6).toFixed(0)}M`;
   const card = (q) => {
     const mk = S.markets?.ballot?.[q.id], r = q.result;
     const res = r ? `<div class="res"><div class="cand" data-p="D"><span>Yes</span><b>${r.yes.toFixed(1)}%</b></div><div class="split" role="img" aria-label="Yes ${r.yes}%, No ${(100 - r.yes).toFixed(1)}%"><i class="d" style="width:${r.yes}%"></i><i class="r" style="width:${100 - r.yes}%"></i></div><p class="small">${esc(r.reporting || '')} · ${esc(r.source || '')}</p></div>` : '<span class="tag">Results pending</span>';
     return `<article class="bq"><h3>${q.n ? `<span class="n">Q${q.n}</span>` : ''}<span>${esc(q.title)}${q.amount ? ` <span class="small">· ${money(q.amount)}</span>` : ''}</span></h3>
       <p><b>Yes:</b> ${esc(q.yes)}</p>${q.flag ? `<p class="small"><span class="tag">${esc(q.flag)}</span></p>` : ''}
-      ${res}${mk ? `<p class="small">Market odds this passes: <b>${pct(mk.yes)}</b> · $${(mk.vol / 1e3).toFixed(0)}k traded</p>` : ''}</article>`;
+      ${res}${mk ? `<p class="small">Market odds this passes: <b>${pct(mk.yes)}</b> · ${money(mk.vol)} traded</p>` : ''}</article>`;
   };
   el.innerHTML = `<div class="bq-grid">${b.questions.map(card).join('')}</div>${b.orderNote ? `<p class="small bq-note">${esc(b.orderNote)}</p>` : ''}
     <p class="small bq-note">${esc(S.ballot.note)}</p><div class="links" style="margin-top:10px">${b.links.map((l) => `<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`).join('')}</div>`;
