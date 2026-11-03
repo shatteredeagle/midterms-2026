@@ -215,7 +215,15 @@ function drawMap() {
   svg.innerHTML = defs + paths + labels;
   $('#smallStates').innerHTML = ['CT', 'RI', 'NJ', 'DE', 'MD', 'DC', 'VT', 'NH', 'MA'].map((s) => `<button class="chip" data-st="${s}" type="button" aria-label="${STATES[s][0]}">${s}</button>`).join('');
 }
+const earlyOf = (st) => (S.early?.states || []).find((s) => s.code === st);
+const earlyPct = (s) => s.turnoutPct ?? s.turnoutApprox ?? null;
 function stateInfo(st) {
+  if (S.kind === 'E') {
+    const s = earlyOf(st);
+    if (!s) return { bin: 'none', text: 'No early-vote report this page can read' };
+    const p = earlyPct(s);
+    return { bin: p === null ? 'none' : p >= 40 ? 'e4' : p >= 30 ? 'e3' : p >= 20 ? 'e2' : 'e1', text: `${s.ballotsLabel || s.ballots.toLocaleString('en-US')} early ballots${p !== null ? ` · ${s.turnoutPct ? '' : '≈'}${p}% turnout` : ''} · ${s.asOf}` };
+  }
   if (S.kind === 'H') {
     const h = houseState(st);
     return h ? { bin: h.share >= .95 ? 'D3' : h.share >= .75 ? 'D2' : h.share >= .55 ? 'D1' : h.share > .45 ? 'T' : h.share > .25 ? 'R1' : h.share > .05 ? 'R2' : 'R3', text: `${h.d.toFixed(1)} D · ${h.r.toFixed(1)} R of ${h.n} seats (expected)` } : { bin: 'none', text: 'No market data' };
@@ -235,8 +243,10 @@ function paintMap() {
   for (const c of document.querySelectorAll('.chip')) c.classList.toggle('sel', c.dataset.st === S.sel);
   const sw = (cls, label) => `<span><i class="b-${cls}" style="background:${cls === 'T' ? 'repeating-linear-gradient(45deg,var(--t) 0 3px,var(--hatch) 3px 5px)' : `var(--${{ D3: 'd', D2: 'd-2', D1: 'd-1', R1: 'r-1', R2: 'r-2', R3: 'r', none: 'none' }[cls]})`}"></i>${label}</span>`;
   $('#legend').innerHTML = sw('D3', 'D ≥95%') + sw('D2', 'D 80–95%') + sw('D1', 'D 62–80%') + sw('T', 'Toss-up') + sw('R1', 'R 62–80%') + sw('R2', 'R 80–95%') + sw('R3', 'R ≥95%') + sw('none', S.kind === 'H' ? 'No data' : 'No race') + '<span>Bold outline = projected after polls close</span><span><i style="background:none;border:2px dashed #f2b01e"></i>Gold dashed = favored to flip</span>';
+  const eSw = (v, label) => `<span><i style="background:var(--${v})"></i>${label}</span>`;
+  if (S.kind === 'E') $('#legend').innerHTML = eSw('e1', 'Under 20%') + eSw('e2', '20–30%') + eSw('e3', '30–40%') + eSw('e4', '40%+') + sw('none', 'No readable report') + '<span>Shade = early-vote turnout of registered or active voters</span>';
   const closedN = Object.keys(STATES).filter(isClosed).length;
-  $('#mapSub').textContent = S.kind === 'H' ? 'Expected House seats by state, summed from per-district market odds. Updates as markets move.' : `${KIND[S.kind]} races colored by market odds (${closedN} states closed). Official counts appear in the detail panel as feeds publish.`;
+  $('#mapSub').textContent = S.kind === 'E' ? 'Early-vote turnout where a state publishes a report this page can use. Most states do not, so most of the map is gray. This shows how many people voted early, not who they voted for.' : S.kind === 'H' ? 'Expected House seats by state, summed from per-district market odds. Updates as markets move.' : `${KIND[S.kind]} races colored by market odds (${closedN} states closed). Official counts appear in the detail panel as feeds publish.`;
 }
 const PORDER = { D: 0, R: 1, O: 2 };
 const money = (n) => (n >= 1e6 ? `$${(n / 1e6).toFixed(1)}M` : `$${Math.round(n / 1e3)}k`);
@@ -268,7 +278,9 @@ function renderDetail() {
   const st = S.sel, [name, , ] = STATES[st];
   const h = houseState(st);
   const ct = new Date(closeTime(st)).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
-  const racesHtml = raceBlock(`S-${st}`) + raceBlock(`G-${st}`);
+  const es = earlyOf(st);
+  const earlyHtml = es ? `<section class="eb"><h5>Early vote</h5><p class="small" style="margin:0"><b>${esc(es.ballotsLabel || es.ballots.toLocaleString('en-US'))}</b> ballots${earlyPct(es) !== null ? ` · ${es.turnoutPct ? '' : '≈'}${earlyPct(es)}% turnout` : ''} · ${esc(es.asOf)}. <a href="#turnout">Details ↓</a></p></section>` : '';
+  const racesHtml = earlyHtml + raceBlock(`S-${st}`) + raceBlock(`G-${st}`);
   el.innerHTML = `<h3>${esc(name)}</h3><p class="small">Polls close ${isClosed(st) ? '(closed)' : 'about'} ${ct} · <a href="https://ballotpedia.org/${name.replace(/ /g, '_')}_elections,_2026" target="_blank" rel="noopener">Ballotpedia</a></p>
     ${racesHtml || '<p class="small" style="margin-top:12px">No Senate or governor race here in 2026.</p>'}
     ${h ? `<div class="race"><h4>House · ${h.n} districts</h4><p>Expected <b style="color:var(--d)">${h.d.toFixed(1)} D</b> · <b style="color:var(--r)">${h.r.toFixed(1)} R</b> <span class="small">(sum of district market odds)</span></p><p class="small">Closest: ${allRaces('H').filter((r) => r.st === st && r.m && r.pD !== null).sort((a, b) => Math.abs(a.pD - .5) - Math.abs(b.pD - .5)).slice(0, 3).map((r) => `${st}-${r.m.district} ${leanText(r.pD)}`).join(', ')}</p></div>` : ''}`;

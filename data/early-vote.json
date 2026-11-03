@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-03T22:00:00Z",
+  "updated": "2026-11-03T22:20:00Z",
   "note": "Quoted from official state reports, entered by hand with a link. Early-vote party splits show who voted early, not who they voted for.",
   "states": [
     {
@@ -60,7 +60,9 @@
         "As of Oct 26: 1,781,209 accepted ballots, 23.7% of 7,530,073 active voters: 1,698,469 in person and 82,740 absentee (Fox 5 Atlanta).",
         "In-person early voting was 12% ahead of the same point in 2022 as of Oct 20, per the Secretary of State's office; absentee requests ran well below 2022.",
         "Georgia does not register voters by party. A modeled split attributed to TargetSmart put early voters at about 54% Democratic and 41% Republican; that is an estimate, not an official count."
-      ]
+      ],
+      "turnoutApprox": 35.9,
+      "turnoutNote": "Computed, not published: 2.7 million ballots divided by 7,530,073 active voters (the Oct 26 figure), so treat it as about 36%."
     }
   ]
 }
