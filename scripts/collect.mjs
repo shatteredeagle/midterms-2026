@@ -114,10 +114,47 @@ async function turnout() {
   return { updated: now(), FL: { electionDay: rows.reduce((a, r) => a + r.votes, 0), counties: rows.length, lastReportedET: latest || null, source: 'Florida Division of Elections', url: 'https://floridaelectionwatch.gov/ElectionDayTurnout' } };
 }
 
+// ---- Trends: Polymarket price history (backfill) plus our own samples of counts and the generic ballot ----
+const GAP = 25; // seconds-per-request pacing is not needed; requests run in small batches
+async function history() {
+  const [m, po, re] = await Promise.all([readJ('markets'), readJ('polls'), readJ('results')]);
+  const h = (await readJ('history')) || { series: {}, counts: {}, generic: [], backfilledAt: 0 };
+  const t = Math.floor(Date.now() / 1000);
+  // 1) Odds history for chamber control and every Senate/governor race that is not a foregone conclusion. Refreshed every 10 minutes.
+  if (m && Date.now() - (h.backfilledAt || 0) > 600000) {
+    const targets = [];
+    for (const k of ['senate', 'house']) if (m.control?.[k]?.dTok) targets.push([`control-${k}`, m.control[k].dTok]);
+    for (const r of Object.values(m.races)) if (r.kind !== 'H' && r.dTok && r.d / ((r.d + r.r) || 1) > 0.03 && r.d / ((r.d + r.r) || 1) < 0.97) targets.push([r.id, r.dTok]);
+    for (let i = 0; i < targets.length; i += 6) {
+      await Promise.all(targets.slice(i, i + 6).map(async ([id, tok]) => {
+        try {
+          const j = await get(`https://clob.polymarket.com/prices-history?market=${tok}&interval=1w&fidelity=60`);
+          if (j.history?.length > 3) h.series[id] = j.history.map((x) => [x.t, Math.round(x.p * 1000) / 1000]);
+        } catch (e) { console.error('history', id, e.message); }
+      }));
+    }
+    h.backfilledAt = Date.now();
+  }
+  // 2) Our own live samples: official count margin (percentage points, leader minus runner-up) and PollCheck's generic ballot margin.
+  for (const r of Object.values(re?.races || {})) {
+    if (!(r.totalVotes > 0) || r.cands.length < 2) continue;
+    const arr = (h.counts[r.id] ||= []);
+    const pt = [t, r.pct, Math.round((r.cands[0].pct - r.cands[1].pct) * 10) / 10, r.totalVotes, r.cands[0].n, r.cands[1].n];
+    const last = arr[arr.length - 1];
+    if (!last || last[1] !== pt[1] || last[3] !== pt[3]) arr.push(pt);
+    if (arr.length > 800) arr.splice(0, arr.length - 800);
+  }
+  const gm = po?.generic?.margin;
+  if (typeof gm === 'number' && h.generic[h.generic.length - 1]?.[1] !== gm) h.generic.push([t, gm]);
+  if (h.generic.length > 2000) h.generic.splice(0, h.generic.length - 2000);
+  return { ...h, updated: now() };
+}
+
 await mkdir(OUT, { recursive: true });
 const before = { markets: await readJ('markets'), polls: await readJ('polls'), results: await readJ('results') };
 const log = (await readJ('changes')) || { events: [] };
 await Promise.all([run('markets', markets), run('polls', polls, 270000), run('results', results), run('turnout', turnout)]);
+await run('history', history); // after the others: reads this run's markets/results
 let prev = {};
 try { prev = JSON.parse(await readFile(`${OUT}/status.json`, 'utf8')); } catch {}
 await writeFile(`${OUT}/status.json`, JSON.stringify({ updated: now(), sources: { ...prev.sources, ...status } }));

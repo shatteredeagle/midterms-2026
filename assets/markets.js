@@ -16,18 +16,23 @@ const lastName = (n) => String(n).toLowerCase().replace(/[^a-z\s'-]/g, ' ').trim
 function raceFrom(ev, id, kind, state, extra = {}, hints = []) {
   const hintMap = new Map(hints.map((h) => [lastName(h.n), h.p]));
   const cands = [];
-  for (const m of ev.markets || []) {
+  for (const mk of ev.markets || []) {
+    const m = mk;
     const p = yes(m);
     if (!Number.isFinite(p) || /^(Person|Party|Candidate) [A-Z]$/.test(m.groupItemTitle || '')) continue;
     const name = clean(m.groupItemTitle);
     let pty = party(m);
     if (pty === 'O' && hintMap.has(lastName(name))) pty = hintMap.get(lastName(name));
-    cands.push({ n: name, p: pty, price: p });
+    let tok = null;
+    try { tok = JSON.parse(mk.clobTokenIds)[0]; } catch { /* no token */ }
+    cands.push({ n: name, p: pty, price: p, tok });
   }
   if (!cands.length) return null;
   const sum = (k) => cands.filter((c) => c.p === k).reduce((a, c) => a + c.price, 0);
   const d = sum('D'), r = sum('R'), o = sum('O'), tot = d + r + o || 1;
-  return { id, kind, state, d: d / tot, r: r / tot, o: o / tot, vol: Math.round(Number(ev.volume) || 0), cands: cands.sort((a, b) => b.price - a.price).slice(0, 4), slug: ev.slug, ...extra };
+  // Token of the Democratic "Yes" market, used for price history (kept for Senate, governor and chamber control only).
+  const dTok = kind === 'H' ? null : cands.filter((c) => c.p === 'D' && c.tok).sort((a, b) => b.price - a.price)[0]?.tok || null;
+  return { id, kind, state, d: d / tot, r: r / tot, o: o / tot, vol: Math.round(Number(ev.volume) || 0), cands: cands.sort((a, b) => b.price - a.price).slice(0, 4).map(({ tok, ...c }) => c), slug: ev.slug, ...(dTok ? { dTok } : {}), ...extra };
 }
 
 const bucketMid = (label) => {
@@ -66,7 +71,7 @@ export function parseEvents(events, hints = {}) {
       if (r) out.races[r.id] = r;
     } else if (ev.slug === 'which-party-will-win-the-senate-in-2026' || ev.slug === 'which-party-will-win-the-house-in-2026') {
       const r = raceFrom(ev, 'x', 'C', '');
-      if (r) out.control[ev.slug.includes('senate') ? 'senate' : 'house'] = { d: r.d, r: r.r, vol: r.vol };
+      if (r) out.control[ev.slug.includes('senate') ? 'senate' : 'house'] = { d: r.d, r: r.r, vol: r.vol, ...(r.dTok ? { dTok: r.dTok } : {}) };
     } else if (ev.slug === 'republican-house-seats-after-the-2026-midterm-elections') out.seats.houseR = seatDist(ev);
     else if (ev.slug.startsWith('republican-senate-seats-after-the-2026-midterm-elections')) out.seats.senateR = seatDist(ev);
     else if (ev.slug === 'balance-of-power-2026-midterms') {

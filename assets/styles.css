@@ -228,3 +228,12 @@ a.avg:hover{border-color:var(--focus)}
 .tcard .stack .D{background:var(--d)}.tcard .stack .R{background:var(--r)}.tcard .stack .O{background:var(--muted)}
 .tcard .legend2{display:flex;gap:12px;flex-wrap:wrap;font-size:13px}
 .tcard .legend2 .D{color:var(--d)}.tcard .legend2 .R{color:var(--r)}.tcard .legend2 .O{color:var(--muted)}
+
+.trend{margin:6px 0 2px}
+.trend-h{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline}
+.spark{width:100%;height:46px;display:block;overflow:visible}
+.spark .line{fill:none;stroke:#8b6cf0;stroke-width:2;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+.spark circle{fill:#8b6cf0}
+.spark .mid{stroke:var(--line);stroke-dasharray:3 3;vector-effect:non-scaling-stroke}
+.sb.official .spark .line{stroke:#1fa464}.sb.official .spark circle{fill:#1fa464}
+.delta{font-weight:700;color:var(--muted)}.delta.up{color:var(--d)}.delta.down{color:var(--r)}
