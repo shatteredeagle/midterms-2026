@@ -1,4 +1,4 @@
-import { STATES, RACES, HOUSE_SEATS, closeTime } from './states.js?v=a97824f1';
+import { STATES, RACES, HOUSE_SEATS, closeTime } from './states.js?v=cac7d5b9';
 
 const REPO = 'ShatteredEagle/midterms-2026';
 const RAW = `https://raw.githubusercontent.com/${REPO}/data/`;
@@ -358,24 +358,7 @@ function raceBlock(id) {
   let h = `<div class="race"><h4>${KIND[r.kind]}${r.p?.special ? ' (special)' : ''}</h4>`;
   if (counted(o)) h += block('official', 'Votes counted', 'Official count', `${esc(o.source)} · ${esc(o.reporting)}${o.winner ? ` · <span class="tag live">State flags winner: ${esc(o.winner)}</span>` : ''}`, candRows(o.cands.map((c) => ({ ...c })), 'votes') + countTrend(id));
   else h += `<p class="small">${r.closed ? (hasFeed(r.st) ? 'Polls closed. Waiting for the state to post votes.' : 'Polls closed. This page has no results feed for this state; check the state election office.') : `Polls close ${fmtTime(r.st)}.`}</p>`;
-  if (r.p) h += block('poll', 'Polling average', 'Share of voters, from surveys before the election', `${r.p.polls} polls, ${r.p.pollsters} pollsters${r.p.lead ? ` · <b>${esc(r.p.lead)}</b>` : ''}`, candRows(r.p.cands, 'poll'));
-  return h + vhBlock(id) + '</div>';
-}
-function partyOfName(id, full) {
-  const last = String(full).trim().split(/\s+/).pop().toLowerCase();
-  const pool = [...(S.results?.races?.[id]?.cands || []), ...(S.polls?.races?.[id]?.cands || [])];
-  return pool.find((c) => c.n.toLowerCase().split(/\s+/).pop() === last)?.p || '';
-}
-function vhBlock(id) {
-  const polls = S.votehub?.races?.[id];
-  if (!polls?.length) return '';
-  const use = polls.filter((p) => !p.partisan).slice(0, 5), base = use.length ? use : polls.slice(0, 5);
-  const sums = {};
-  for (const p of base) for (const a of p.answers) (sums[a.n] ||= []).push(a.pct);
-  const top = Object.entries(sums).map(([n, v]) => ({ n, pct: Math.round((v.reduce((x, y) => x + y, 0) / v.length) * 10) / 10 })).sort((x, y) => y.pct - x.pct).slice(0, 3);
-  const rows = top.map((c) => { const p = partyOfName(id, c.n); return `<div class="cand" data-p="${esc(p || 'O')}"><span>${esc(c.n)}${p ? ` <span class="small">(${esc(p)})</span>` : ''}</span><b>${c.pct}%</b><div class="bar"><i style="width:${Math.min(100, c.pct)}%"></i></div></div>`; }).join('');
-  const list = polls.slice(0, 3).map((p) => `<p class="small" style="margin:2px 0">${p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.pollster)}</a>` : esc(p.pollster)} · ${esc(p.end)} · ${p.answers.slice(0, 2).map((a) => `${esc(a.n.split(' ').pop())} ${a.pct}`).join(', ')}</p>`).join('');
-  return `<section class="sb poll vh"><header><h5>Recent polls (VoteHub)</h5><span class="what">Mean of the latest ${base.length}</span></header>${rows}${list}<p class="small" style="margin:4px 0 0"><a href="https://votehub.com/polls/" target="_blank" rel="noopener">VoteHub</a>, CC BY 4.0</p></section>`;
+  return h + '</div>';
 }
 function houseBlock(st) {
   const ds = Object.values(S.results?.races || {}).filter((r) => r.id?.startsWith(`H-${st}-`)).sort((a, b) => a.id.localeCompare(b.id));
@@ -432,9 +415,8 @@ function renderTable() {
   const row = (r) => `<tr data-st="${r.st}" tabindex="0"><th scope="row" style="text-transform:none;letter-spacing:0;font-size:14px;color:var(--text)">${esc(STATES[r.st][0])}${r.p?.special ? ' (special)' : ''}</th>
       <td>${counted(r.o) || callOf(r.id) ? leadHtml(r.o, callOf(r.id)) : `<span class="small">${r.o?.cands?.length ? matchup(r.o) : '—'}</span>`}</td>
       <td style="min-width:150px">${voteBar(r.o, callOf(r.id))}</td>
-      <td>${esc(r.p?.lead || '—')}</td>
       <td>${statusTag(r)}</td></tr>`;
-  $('#raceTable').innerHTML = `<thead><tr><th>State</th><th>Current result</th><th>Vote share</th><th>Polling average</th><th>Status</th></tr></thead><tbody>${shown.map(row).join('') || '<tr><td colspan="5">No races match.</td></tr>'}</tbody>`;
+  $('#raceTable').innerHTML = `<thead><tr><th>State</th><th>Current result</th><th>Vote share</th><th>Status</th></tr></thead><tbody>${shown.map(row).join('') || '<tr><td colspan="4">No races match.</td></tr>'}</tbody>`;
   const more = $('#moreRow');
   more?.remove();
   if (!q && rs.length > LIMIT) $('#raceTable').insertAdjacentHTML('afterend', `<div class="more" id="moreRow"><button type="button" id="moreBtn">${S.showAll ? 'Show fewer' : `Show all ${rs.length}`}</button></div>`);
@@ -451,79 +433,6 @@ function wireTable() {
   $('#raceTable').addEventListener('click', (e) => pick(e.target));
   $('#raceTable').addEventListener('keydown', (e) => { if (e.key === 'Enter') pick(e.target); });
   document.addEventListener('click', (e) => { if (e.target.id === 'moreBtn') { S.showAll = !S.showAll; renderTable(); } });
-}
-
-// ---------- polls ----------
-const MONTHS = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
-const parseDate = (s) => { const [d, m, y] = s.split(' '); return Date.UTC(+y, MONTHS[m], +d); };
-// Senate has no national ballot, so this is an index: the plain average of every polled Senate race's polling-average margin.
-function senatePollRows() {
-  return Object.values(S.polls?.races || {}).filter((r) => r.kind === 'S').map((r) => {
-    const d = r.cands.find((c) => c.p === 'D'), q = r.cands.find((c) => c.p === 'R');
-    return d && q ? { st: r.state, id: r.id, rating: r.rating, special: r.special, d: d.pct, r: q.pct, margin: Math.round((d.pct - q.pct) * 10) / 10, polls: r.polls, dn: d.n, rn: q.n } : null;
-  }).filter(Boolean);
-}
-const mean = (xs) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null);
-const fm = (m) => `${m >= 0 ? 'D' : 'R'}+${Math.abs(m).toFixed(1)}`;
-function renderSenatePolls() {
-  const el = $('#polls-body'), rows = senatePollRows();
-  if (!rows.length) { el.innerHTML = '<p class="small">No Senate polling averages available.</p>'; return; }
-  const all = mean(rows.map((x) => x.margin)), comp = rows.filter((x) => /Toss|Lean/.test(x.rating)), cm = mean(comp.map((x) => x.margin));
-  const dLead = rows.filter((x) => x.margin > 0).length;
-  const shown = [...rows].sort((a, b) => Math.abs(a.margin) - Math.abs(b.margin)).slice(0, S.senAll ? rows.length : 12).sort((a, b) => b.margin - a.margin);
-  const SC = 20; // bar scale: +/-20 points fills each half
-  const hist = (S.history?.senate || []);
-  el.innerHTML = `<div class="sen-stats"><div><b style="color:var(--${all >= 0 ? 'd' : 'r'})">${fm(all)}</b><span class="small">all ${rows.length} polled races</span></div>
-      <div><b style="color:var(--${cm >= 0 ? 'd' : 'r'})">${comp.length ? fm(cm) : '—'}</b><span class="small">${comp.length} competitive (toss-up and lean)</span></div>
-      <div><b>${dLead}<span class="small"> of ${rows.length}</span></b><span class="small">races where D leads</span></div></div>
-    ${hist.length > 2 ? `<div class="trend"><div class="trend-h"><span class="small">Index over time (recorded since tonight)</span></div>${spark(hist, { lo: -5, hi: 8, mid: 0, label: 'Senate polling index over time' })}</div>` : ''}
-    <p class="small" style="margin:6px 0 12px">Simple average of each race's polling-average margin. It is an index of the races that have polls, not a national poll or a vote forecast: states differ in size and 16 Senate races have no polling average. Click a row to open the state.</p>
-    <div role="list">${shown.map((x) => `<div class="sen-row" role="listitem" tabindex="0" data-st="${x.st}"><span class="nm">${esc(STATES[x.st][0])}${x.special ? ' (sp.)' : ''}<span class="rt">${esc(x.rating)} · ${x.polls} polls</span></span><div class="sen-bar" role="img" aria-label="${esc(STATES[x.st][0])}: ${fm(x.margin)}"><i class="${x.margin >= 0 ? 'D' : 'R'}" style="${x.margin >= 0 ? `left:50%;width:${Math.min(50, x.margin / SC * 50)}%` : `right:50%;width:${Math.min(50, -x.margin / SC * 50)}%`}"></i></div><span class="sen-val ${x.margin >= 0 ? 'D' : 'R'}">${fm(x.margin)}</span></div>`).join('')}</div>
-    <div class="more"><button type="button" id="senMore">${S.senAll ? 'Show closest 12' : `Show all ${rows.length}`}</button></div>`;
-  $('#senMore').onclick = () => { S.senAll = !S.senAll; renderSenatePolls(); };
-}
-function wirePolls() {
-  $('#pollTabs').addEventListener('click', (e) => {
-    const b = e.target.closest('button'); if (!b) return;
-    S.pollTab = b.dataset.p;
-    for (const x of document.querySelectorAll('#pollTabs button')) x.setAttribute('aria-selected', x === b);
-    renderPolls();
-  });
-  const pick = (t) => { const r = t.closest('.sen-row'); if (r) { select(r.dataset.st); goMap(); } };
-  $('#polls-body').addEventListener('click', (e) => pick(e.target));
-  $('#polls-body').addEventListener('keydown', (e) => { if (e.key === 'Enter') pick(e.target); });
-}
-function renderPolls() {
-  $('#pollsH').textContent = S.pollTab === 'S' ? 'Senate polling' : 'Generic ballot';
-  $('#pollsSub').textContent = S.pollTab === 'S' ? 'There is no national Senate ballot, so this combines the polling average in each contested race.' : 'National House polling average, with the individual polls behind it.';
-  if (S.pollTab === 'S') return renderSenatePolls();
-  const g = S.polls?.generic;
-  const el = $('#polls-body');
-  if (!g) { el.innerHTML = '<p class="small">Polling data unavailable.</p>'; return; }
-  const ps = g.polls.map((p) => ({ ...p, t: parseDate(p.date) }));
-  const t0 = Math.min(...ps.map((p) => p.t)), t1 = Math.max(...ps.map((p) => p.t), t0 + 864e5);
-  const W = 640, H = 230, L = 34, B = 24, T = 10, R = 10;
-  const X = (t) => L + ((t - t0) / (t1 - t0)) * (W - L - R), Y = (m) => T + (1 - (m - 0) / 16) * (H - T - B);
-  // 7-day rolling mean of the polls in the average (one point per poll date)
-  const incl = ps.filter((p) => !p.dup).sort((x, y) => x.t - y.t);
-  const roll = [...new Set(incl.map((p) => p.t))].map((day) => { const w = incl.filter((p) => p.t <= day && p.t > day - 7 * 864e5); return [day, w.reduce((s, p) => s + p.margin, 0) / w.length]; });
-  const rollPath = roll.length > 1 ? `<path d="${roll.map((p, i) => `${i ? 'L' : 'M'}${X(p[0]).toFixed(1)} ${Y(p[1]).toFixed(1)}`).join('')}" fill="none" stroke="#e0a21b" stroke-width="2.5"/>` : '';
-  const grid = [0, 4, 8, 12, 16].map((v) => `<line class="grid" x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${L - 6}" y="${Y(v) + 4}" text-anchor="end">${v ? 'D+' + v : '0'}</text>`).join('');
-  const dots = ps.map((p) => { const c = p.margin >= 0 ? 'var(--d)' : 'var(--r)'; return `<circle cx="${X(p.t)}" cy="${Y(Math.abs(p.margin) > 16 ? 16 : p.margin)}" r="5" fill="${p.dup ? 'none' : c}" stroke="${c}" stroke-width="1.5" opacity="${p.dup ? .8 : .75}"><title>${esc(p.pollster)} · ${esc(p.date)} · ${p.margin >= 0 ? 'D' : 'R'}+${Math.abs(p.margin)} (${p.pop}, n=${p.n})${p.dup ? ' · not in average' : ''}</title></circle>`; }).join('');
-  const fmtD = (t) => new Date(t).toLocaleDateString([], { month: 'short', day: 'numeric', timeZone: 'UTC' });
-  const rows = ps.slice(0, S.showPolls ? 40 : 8).map((p) => `<tr><td>${esc(p.pollster)}${p.dup ? ' <span class="tag" title="Another version of the same survey is in the average">alt. version</span>' : ''}</td><td>${esc(p.date)}</td><td class="num">${p.n.toLocaleString()} ${p.pop}</td><td class="num" style="color:var(--d)">${p.dem}</td><td class="num" style="color:var(--r)">${p.rep}</td><td class="num"><b>${p.margin >= 0 ? 'D' : 'R'}+${Math.abs(p.margin)}</b></td></tr>`).join('');
-  const oa = S.otherAvgs?.generic || [];
-  const vh = S.votehub?.generic;
-  const vhCard = vh?.avg?.n ? `<a class="avg" href="https://votehub.com/polls/" target="_blank" rel="noopener"><b>VoteHub ↗</b><span class="lbl">${vh.avg.dem >= vh.avg.rep ? 'D' : 'R'}+${Math.abs(vh.avg.dem - vh.avg.rep).toFixed(1)}</span><span class="small">${vh.avg.dem}% – ${vh.avg.rep}% · mean of ${vh.avg.n} poll${vh.avg.n > 1 ? 's' : ''}, last ${vh.avg.days} days</span></a>` : '';
-  const vhRows = (vh?.polls || []).slice(0, 10).map((p) => `<tr><td>${p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.pollster)}</a>` : esc(p.pollster)}${p.partisan ? ` <span class="tag" title="Sponsored by a partisan group">${esc(p.partisan)}-sponsored</span>` : ''}</td><td>${esc(p.end)}</td><td class="num">${p.n ? p.n.toLocaleString() : ''} ${esc((p.pop || '').toUpperCase())}</td><td class="num" style="color:var(--d)">${p.dem}</td><td class="num" style="color:var(--r)">${p.rep}</td><td class="num"><b>${p.dem >= p.rep ? 'D' : 'R'}+${Math.abs(p.dem - p.rep).toFixed(1)}</b></td></tr>`).join('');
-  const vhTable = vhRows ? `<h3 style="font-size:15px;margin:18px 0 6px">More generic ballot polls (VoteHub)</h3><div class="table-scroll"><table><thead><tr><th>Pollster</th><th>Ended</th><th class="num">Sample</th><th class="num">D</th><th class="num">R</th><th class="num">Spread</th></tr></thead><tbody>${vhRows}</tbody></table></div><p class="small" style="margin-top:6px">Polling data from <a href="https://votehub.com/polls/" target="_blank" rel="noopener">VoteHub</a>, licensed <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>. We take the latest polls and compute the mean ourselves.</p>` : '';
-  const avgCards = `<div class="avgs" aria-label="Generic ballot averages from other publishers"><div class="avg"><b>PollCheck</b><span class="lbl">${g.margin >= 0 ? 'D' : 'R'}+${Math.abs(g.margin).toFixed(1)}</span><span class="small">${g.dem}% – ${g.rep}% · live</span></div>${vhCard}${oa.map((x) => `<a class="avg" href="${esc(x.url)}" target="_blank" rel="noopener"><b>${esc(x.source)} ↗</b><span class="lbl">${esc(x.label)}</span><span class="small">${x.dem ? `${x.dem}% – ${x.rep}% · ` : ''}${esc(x.asOf)}</span></a>`).join('')}</div>`;
-  el.innerHTML = `<div><div class="gb"><div><b class="d">${g.dem}%</b><div class="small">Democratic</div></div><div><b class="r">${g.rep}%</b><div class="small">Republican</div></div><div><b>${g.margin >= 0 ? 'D' : 'R'}+${Math.abs(g.margin).toFixed(1)}</b><div class="small">Margin</div></div></div>
-    ${avgCards}<p class="small" style="margin-top:14px">Chart and table: PollCheck average across likely-voter polls. Filled dots are in the average; hollow dots are alternate versions of the same survey. The gold line is a 7-day rolling mean of those polls. Hover a dot for details.</p>
-    <svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Generic ballot polls by date, margin in points">${grid}<line x1="${L}" x2="${W - R}" y1="${Y(g.margin)}" y2="${Y(g.margin)}" stroke="var(--text)" stroke-dasharray="4 4"/><text x="${W - R}" y="${Y(g.margin) - 6}" text-anchor="end" style="fill:var(--text)">avg ${g.margin >= 0 ? 'D' : 'R'}+${Math.abs(g.margin).toFixed(1)}</text>${rollPath}${dots}<text x="${L}" y="${H - 6}">${fmtD(t0)}</text><text x="${W - R}" y="${H - 6}" text-anchor="end">${fmtD(t1)}</text></svg></div>
-    <div class="table-scroll"><table><thead><tr><th>Pollster</th><th>Fielded</th><th class="num">Sample</th><th class="num">D</th><th class="num">R</th><th class="num">Spread</th></tr></thead><tbody>${rows}</tbody></table>
-    <div class="more"><button type="button" id="morePolls">${S.showPolls ? 'Show fewer' : 'Show 40 latest'}</button></div>${vhTable}</div>`;
-  $('#morePolls').onclick = () => { S.showPolls = !S.showPolls; renderPolls(); };
 }
 
 // ---------- exit polls ----------
@@ -658,7 +567,6 @@ function wireFeed() {
     else if (ty === 'exit') location.hash = '#exit';
     else if (ty === 'ballot') location.hash = '#ballot';
     else if (ty === 'early') location.hash = '#turnout';
-    else if (ty === 'average' || ty === 'polls') location.hash = '#polls';
     else location.hash = '#changes';
     if (window.matchMedia('(max-width:1199px)').matches) open(false);
   };
@@ -719,17 +627,15 @@ function renderSources() {
   const st = S.status?.sources || {};
   const age = (k) => { const t = st[k]?.at; if (!t) return '<span class="tag">no data</span>'; const m = Math.round((now() - Date.parse(t)) / 60000); return `<span class="tag ${st[k].ok && m < 20 ? 'live' : ''}">${st[k].ok ? `${m}m ago` : 'last fetch failed'}</span>`; };
   const cards = [
-    ['PollCheck', 'Polling averages and ratings for Senate, governor races, and the generic ballot.', 'https://www.pollcheck.co.uk/us-midterms-2026', age('polls')],
     ['State election offices', `Official vote counts (Senate, governor and U.S. House districts), straight from the states that publish machine-readable files (all other states use NBC News\' results API): ${Object.entries(S.results?.feeds || {}).map(([k, v]) => `${k}${v.ok ? '' : ' (failing)'}`).join(', ') || 'CA, CO, FL, GA, IA, MN, NC, NE, SD'}. `, 'https://www.usa.gov/election-results', age('results')],
-    ['VoteHub', 'Polling database (generic ballot, Senate and governor polls) from VoteHub\'s public API, licensed CC BY 4.0. We compute the averages shown here ourselves from their polls.', 'https://votehub.com/polls/', age('votehub')],
     ['NBC News Decision Desk', 'Race calls (projected winners) and statewide Senate and governor results for states without their own feed. The collector reads NBC\'s results data every 30 seconds and flashes a banner on a new call. NBC\'s counts and projections are not official results.', 'https://www.nbcnews.com/politics/2026-elections/senate-results', age('calls')],
     ['Exit polls', 'No open feed exists. Entered from published outlet releases (AP VoteCast, SSRS/Edison, networks).', 'https://apnews.com/hub/ap-votecast', S.exit?.updated ? `<span class="tag live">updated ${new Date(S.exit.updated).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</span>` : '<span class="tag">waiting</span>'],
   ];
-  const xs = [['AP', 'https://apnews.com/'], ['Decision Desk HQ', 'https://decisiondeskhq.com/'], ['Silver Bulletin', 'https://www.natesilver.net/'], ['RealClearPolling', 'https://www.realclearpolling.com/'], ['FiftyPlusOne', 'https://www.fiftyplusone.news/'], ['Cook Political', 'https://www.cookpolitical.com/'], ['Sabato’s Crystal Ball', 'https://centerforpolitics.org/crystalball/'], ['Inside Elections', 'https://insideelections.com/'], ['270toWin', 'https://www.270towin.com/']];
+  const xs = [['AP', 'https://apnews.com/'], ['Decision Desk HQ', 'https://decisiondeskhq.com/'], ['Cook Political', 'https://www.cookpolitical.com/'], ['Sabato’s Crystal Ball', 'https://centerforpolitics.org/crystalball/'], ['Inside Elections', 'https://insideelections.com/'], ['270toWin', 'https://www.270towin.com/']];
   $('#src-body').innerHTML = `<div class="src-grid">${cards.map(([n, d, u, s]) => `<div class="src"><h3><a href="${u}" target="_blank" rel="noopener">${n} ↗</a></h3><p class="small" style="margin:0 0 8px">${d}</p>${s}</div>`).join('')}</div>
   <h3 style="font-size:15px;margin-bottom:8px">Cross-check elsewhere</h3><div class="links">${xs.map(([n, u]) => `<a href="${u}" target="_blank" rel="noopener">${n} ↗</a>`).join('')}</div>
   <h3 style="font-size:15px;margin:18px 0 6px">How to read this page</h3>
-  <ul class="small" style="margin:0;padding-left:18px;max-width:80ch"><li><b>Map colors</b> show who leads in the official votes counted so far. Nothing on this page is a forecast, projection or betting odds.</li><li><b>Official count</b> badges appear only where a state publishes a machine-readable file. Everything else links you to the authoritative source.</li><li>Poll-close times are approximate and use the last time any part of a state closes.</li><li>Polling averages are from before the election and are shown for context, separate from the vote counts.</li></ul>`;
+  <ul class="small" style="margin:0;padding-left:18px;max-width:80ch"><li><b>Map colors</b> show who leads in the official votes counted so far. Nothing on this page is a forecast, projection or betting odds.</li><li><b>Official count</b> badges appear only where a state publishes a machine-readable file. Everything else links you to the authoritative source.</li><li>Poll-close times are approximate and use the last time any part of a state closes.</li></ul>`;
 }
 
 // ---------- status pill ----------
@@ -742,7 +648,7 @@ function renderLive() {
 }
 
 // ---------- views (hash router) ----------
-const VIEWS = ['overview', 'control', 'races', 'polls', 'reports', 'changes', 'sources'];
+const VIEWS = ['overview', 'control', 'races', 'reports', 'changes', 'sources'];
 const ALIAS = { map: 'overview', results: 'overview', 'ctl-senate': 'control', 'ctl-house': 'control', turnout: 'reports', exit: 'reports', ballot: 'reports' };
 function showView(v, anchor) {
   for (const el of document.querySelectorAll('.view')) el.hidden = el.dataset.view !== v;
@@ -760,12 +666,12 @@ function route() {
 const goMap = () => { if (location.hash !== '#map') history.replaceState(null, '', '#map'); showView('overview', 'map'); };
 
 // ---------- boot ----------
-function renderAll() { renderClock(); checkCalls(); renderSenate(); renderHouse(); renderResultsSo(); renderControl(); paintMap(); renderDetail(); renderChanges(); renderFeed(); renderTurnout(); renderBallot(); renderTable(); renderPolls(); renderExit(); renderSources(); renderLive(); }
+function renderAll() { renderClock(); checkCalls(); renderSenate(); renderHouse(); renderResultsSo(); renderControl(); paintMap(); renderDetail(); renderChanges(); renderFeed(); renderTurnout(); renderBallot(); renderTable(); renderExit(); renderSources(); renderLive(); }
 async function boot() {
   const th = $('#theme');
   th.onclick = () => { const cur = document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); const n = cur === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = n; try { localStorage.setItem('theme', n); } catch {} };
   S.paths = await (await fetch('assets/map-paths.json')).json();
-  drawMap(); wireMap(); wireTable(); wireChanges(); wireBallot(); wireResults(); wireControl(); wirePolls(); wireFeed(); wireBanner();
+  drawMap(); wireMap(); wireTable(); wireChanges(); wireBallot(); wireResults(); wireControl();  wireFeed(); wireBanner();
   await Promise.all([loadAll(), loadHistory()]);
   S.feedMark = Date.now();
   renderAll();

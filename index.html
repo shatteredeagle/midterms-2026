@@ -3,16 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>2026 Midterm Election Dashboard — live results, polls, odds</title>
-<meta name="description" content="Live aggregate of the 2026 US midterms: results map, polling averages, prediction-market odds, and exit polls. Open data, updated every few minutes.">
+<title>2026 Midterm Election Dashboard — live results</title>
+<meta name="description" content="Live aggregate of the 2026 US midterms: results map from official vote counts and race calls, and exit polls. Open data, updated every few minutes.">
 <meta name="color-scheme" content="light dark">
 <link rel="canonical" href="https://shatteredeagle.github.io/midterms-2026/">
 <meta property="og:title" content="2026 Midterm Election Dashboard">
-<meta property="og:description" content="Live results map, polling averages, market odds, and exit polls for the 2026 US midterms.">
+<meta property="og:description" content="Live results map from counted votes, and exit polls for the 2026 US midterms.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://shatteredeagle.github.io/midterms-2026/">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='16' height='32' fill='%232563c9'/%3E%3Crect x='16' width='16' height='32' fill='%23cc3a3a'/%3E%3Cpath d='M6 17l6 6 14-14' stroke='white' stroke-width='4' fill='none'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="assets/styles.css?v=a97824f1">
+<link rel="stylesheet" href="assets/styles.css?v=cac7d5b9">
 <script>try{const t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t}catch{}</script>
 </head>
 <body>
@@ -21,7 +21,7 @@
   <div class="wide topbar">
     <div class="brand"><span class="logo" aria-hidden="true"></span><h1>2026 Midterms</h1></div>
     <nav aria-label="Sections" id="nav">
-      <a href="#overview" data-v="overview">Overview</a><a href="#control" data-v="control">Control</a><a href="#races" data-v="races">Races</a><a href="#polls" data-v="polls">Polls</a><a href="#reports" data-v="reports">Reports</a><a href="#changes" data-v="changes">Changes</a><a href="#sources" data-v="sources">Sources</a>
+      <a href="#overview" data-v="overview">Overview</a><a href="#control" data-v="control">Control</a><a href="#races" data-v="races">Races</a><a href="#reports" data-v="reports">Reports</a><a href="#changes" data-v="changes">Changes</a><a href="#sources" data-v="sources">Sources</a>
     </nav>
     <div class="bar-right">
       <button id="railBtn" class="pillbtn" type="button" aria-controls="rail" aria-expanded="false">Live feed <span id="railBadge" class="badge" hidden>0</span></button>
@@ -85,7 +85,7 @@
   <div class="view" data-view="races" id="view-races">
 <section id="races" class="panel" aria-labelledby="racesH">
     <div class="panel-head">
-      <div><h2 id="racesH">Races</h2><p class="sub">Current vote counts and the pre-election polling average. Races with votes counted come first.</p></div>
+      <div><h2 id="racesH">Races</h2><p class="sub">Current vote counts. Races with votes counted come first.</p></div>
       <div class="controls">
         <div class="seg" role="tablist" aria-label="Race type" id="raceTabs">
           <button role="tab" data-k="S" aria-selected="true">Senate</button>
@@ -95,19 +95,6 @@
       </div>
     </div>
     <div class="table-scroll"><table id="raceTable"></table></div>
-  </section>
-  </div>
-
-  <div class="view" data-view="polls" id="view-polls">
-<section id="polls" class="panel" aria-labelledby="pollsH">
-    <div class="panel-head">
-      <div><h2 id="pollsH">Generic ballot</h2><p class="sub" id="pollsSub">National House polling average, with the individual polls behind it.</p></div>
-      <div class="seg" role="tablist" aria-label="Chamber" id="pollTabs">
-        <button role="tab" data-p="H" aria-selected="true">House</button>
-        <button role="tab" data-p="S" aria-selected="false">Senate</button>
-      </div>
-    </div>
-    <div id="polls-body" class="polls-grid"></div>
   </section>
   </div>
 
@@ -173,7 +160,7 @@
   <p>Open source (MIT) · <a href="https://github.com/ShatteredEagle/midterms-2026">github.com/ShatteredEagle/midterms-2026</a></p>
 </footer>
 <div id="railBackdrop" class="backdrop" hidden></div>
-<script type="module" src="assets/app.js?v=a97824f1"></script>
+<script type="module" src="assets/app.js?v=cac7d5b9"></script>
 <noscript><p class="wrap">This dashboard needs JavaScript to draw the map and load live data.</p></noscript>
 </body>
 </html>
