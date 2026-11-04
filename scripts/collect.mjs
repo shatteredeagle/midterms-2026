@@ -1,6 +1,6 @@
 // Collector: runs in GitHub Actions every ~5 min. Writes compact JSON into ./out (published to the `data` branch).
 // Dependency-free (Node 20+). Every source is independent: one failing keeps the last good file.
-import { mkdir, writeFile, readFile, stat } from 'node:fs/promises';
+import { mkdir, writeFile, readFile, stat, readdir, rm } from 'node:fs/promises';
 import { GAMMA, BALLOT_SLUGS, parseEvents } from '../assets/markets.js';
 import { NAME_TO_ST } from '../assets/states.js';
 import { FEEDS } from './feeds.mjs';
@@ -215,5 +215,11 @@ anchors.announced ||= {};
 const added = [...diffManual(manualPrev, manualNow), ...diffCalls(ca, re, anchors.announced)];
 const changes = { updated: now(), events: [...added, ...fresh.reverse(), ...(log.events || [])].slice(0, 300) };
 await writeFile(`${OUT}/changes.json`, JSON.stringify({ ...changes, anchors })); // anchors stay server-side; the bundle and site get events only
-await writeFile(`${OUT}/bundle.json`, JSON.stringify({ updated: now(), markets: m, polls: po, results: re, status: st, turnout: tu, calls: ca, changes }));
+const bundleJson = JSON.stringify({ updated: now(), markets: m, polls: po, results: re, status: st, turnout: tu, calls: ca, changes });
+await writeFile(`${OUT}/bundle.json`, bundleJson);
+// Minute-stamped copies (this minute and next). raw.githubusercontent caches each URL for 5 minutes and ignores query strings,
+// so the browser asks for m<minute>.json: a URL nobody has requested yet is always fresh, and data is at most about a minute old.
+const minute = Math.floor(Date.now() / 60000);
+for (const mm of [minute, minute + 1]) await writeFile(`${OUT}/m${mm}.json`, bundleJson);
+for (const f of await readdir(OUT)) { const k = /^m(\d+)\.json$/.exec(f); if (k && Number(k[1]) < minute - 1) await rm(`${OUT}/${f}`); }
 console.log(JSON.stringify(status));

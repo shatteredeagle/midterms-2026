@@ -1,4 +1,4 @@
-import { STATES, RACES, closeTime } from './states.js?v=df8ce385';
+import { STATES, RACES, closeTime } from './states.js?v=e4ffdfbf';
 
 const REPO = 'ShatteredEagle/midterms-2026';
 const RAW = `https://raw.githubusercontent.com/${REPO}/data/`;
@@ -16,7 +16,10 @@ const S = { calls: null, callsSeen: null, key: null, feedF: 'key', feedMark: 0, 
 // GitHub contents API (conditional requests: 304s are free against the rate limit) and falls back to raw, then the seed copy.
 const API = `https://api.github.com/repos/${REPO}/contents/bundle.json?ref=data`;
 async function getBundle() {
+  const mnt = Math.floor(Date.now() / 60000);
   const tries = [
+    () => fetch(`${RAW}m${mnt}.json`),
+    () => fetch(`${RAW}m${mnt - 1}.json`),
     () => fetch(API, { headers: { Accept: 'application/vnd.github.raw' } }),
     () => fetch(`${RAW}bundle.json`),
     () => fetch('data/bundle.json'),
@@ -26,9 +29,8 @@ async function getBundle() {
   }
   return null;
 }
-const HIST_API = `https://api.github.com/repos/${REPO}/contents/history.json?ref=data`;
 async function loadHistory() {
-  for (const t of [() => fetch(HIST_API, { headers: { Accept: 'application/vnd.github.raw' } }), () => fetch(`${RAW}history.json`)]) {
+  for (const t of [() => fetch(`${RAW}history.json`), () => fetch(HIST_API, { headers: { Accept: 'application/vnd.github.raw' } })]) {
     try { const r = await t(); if (r.ok) { S.history = await r.json(); return; } } catch { /* next */ }
   }
 }
@@ -238,10 +240,14 @@ function mapTally() {
   const rs = allRaces(S.kind), t = tally(rs);
   return `${KIND[S.kind]} races fill in as official votes are counted or NBC News calls the race (bold outline = called): color shows who leads, shade shows the margin. Counted or called in ${t.n} of ${rs.length} races (D leads ${t.d}, R leads ${t.r}${t.o ? `, other ${t.o}` : ''}). States with no vote feed fill in only when NBC calls them; the rest stay gray. Early returns can swing as more votes come in.`;
 }
+const prevFill = {};
 function paintMap() {
   for (const el of document.querySelectorAll('#usmap path')) {
     const st = el.dataset.st, i = stateInfo(st);
-    el.setAttribute('class', `b-${i.bin}${i.called ? ' called' : ''}${i.early ? ' early' : ''}${S.sel === st ? ' sel' : ''}`);
+    const key = `${S.kind}|${i.bin}|${i.called ? 1 : 0}`;
+    const changed = prevFill[st] && prevFill[st].startsWith(`${S.kind}|`) && prevFill[st] !== key;
+    prevFill[st] = key;
+    el.setAttribute('class', `b-${i.bin}${i.called ? ' called' : ''}${i.early ? ' early' : ''}${S.sel === st ? ' sel' : ''}${changed ? ' pulse' : ''}`);
     el.setAttribute('aria-label', `${STATES[st][0]}: ${i.text}`);
   }
   for (const c of document.querySelectorAll('.chip')) c.classList.toggle('sel', c.dataset.st === S.sel);
@@ -654,8 +660,8 @@ async function boot() {
   setInterval(() => { renderClock(); renderLive(); }, 1000);
   let busy = false;
   let n = 0;
-  const tick = async () => { if (document.hidden || busy) return; busy = true; try { await Promise.all([loadAll(), ...(++n % 4 === 0 ? [loadHistory()] : [])]); renderAll(); } finally { busy = false; } };
-  setInterval(tick, 90000);
+  const tick = async () => { if (document.hidden || busy) return; busy = true; try { await Promise.all([loadAll(), ...(++n % 6 === 0 ? [loadHistory()] : [])]); renderAll(); } finally { busy = false; } };
+  setInterval(tick, 30000);
   window.addEventListener('hashchange', route);
   route();
   if (/[?&]demoCall/.test(location.search)) { cbState.items = ['S-GA', 'G-GA', 'S-NC', 'H-FL-07', 'H-NC-01'].map((id) => ({ id, label: raceLabel(id), name: 'Demo', p: 'D' })); if (/demoCall=2/.test(location.search)) $('#cbList').hidden = false; renderBanner(true); } // preview only
