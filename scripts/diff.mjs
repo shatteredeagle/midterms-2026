@@ -29,11 +29,12 @@ export function diffSnapshots(prev, next, nowMs = Date.now(), anchors = { odds: 
     for (const [id, r] of Object.entries(next.results.races)) {
       const p = prev.results.races[id];
       if (!p) continue;
-      if (!p.totalVotes && r.totalVotes) ev('count', id, `${label(id)}: first votes reported (${r.pct}% of ${/counties/.test(r.reporting) ? 'counties' : 'precincts'})`, { source: r.source });
+      const isH = id[0] === 'H'; // House districts are many: only 50% and 100% milestones and lead changes, to keep the feed readable
+      if (!isH && !p.totalVotes && r.totalVotes) ev('count', id, `${label(id)}: first votes reported (${r.pct}% of ${/counties/.test(r.reporting) ? 'counties' : 'precincts'})`, { source: r.source });
       const lead = (x) => x.cands[0]?.votes > 0 ? x.cands[0].n : null;
       if (p.totalVotes && lead(p) && lead(r) && lead(p) !== lead(r)) ev('lead', id, `${label(id)}: lead changes to ${lead(r)} (${r.cands[0].pct}%)`, { source: r.source });
       const unit = /counties/.test(r.reporting) ? 'counties' : 'precincts';
-      const crossed = MILESTONES.filter((m) => p.pct < m && r.pct >= m).pop(); // only the highest crossed this run
+      const crossed = (isH ? [50, 100] : MILESTONES).filter((m) => p.pct < m && r.pct >= m).pop(); // only the highest crossed this run
       if (crossed !== undefined) {
         const a = r.cands[0], b = r.cands[1];
         ev('count', id, `${label(id)}: ${a?.votes ? `${a.n} leads ${b ? b.n : ''} ${a.pct}%–${b ? b.pct : ''}%` : 'no leader yet'} · ${r.reporting.replace(' reporting', '')} (${r.pct}%)`.replace(/ {2,}/g, ' '), { source: r.source });
