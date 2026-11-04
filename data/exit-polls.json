@@ -1,13 +1,13 @@
 {
-  "updated": "2026-11-03T23:55:00Z",
+  "updated": "2026-11-04T01:35:00Z",
   "status": "partial",
-  "note": "Early results, re-weighted to the final count later. NBC, ABC, AP, CBS, CNN, Fox News and MS NOW share this one SSRS poll (over 75,000 voters nationally; in person, online and by phone, plus a pre-election survey for early and mail voters), so other networks will repeat these numbers, not add a second opinion. In the vote-by-group tables the columns are NBC's Democrat and Republican columns; they match the U.S. House vote (for example 2% Democratic among those voting to support Trump), but NBC's text does not label them, and no overall House total has been published. Numbers come from NBC's national table; its live blog quotes a few subgroup figures that differ, and those are not used.",
+  "note": "Early results, re-weighted to the final count later. NBC, ABC, AP, CBS, CNN, Fox News and MS NOW share this one SSRS poll (over 75,000 voters nationally; in person, online and by phone, plus a pre-election survey for early and mail voters), so other networks will repeat these numbers, not add a second opinion. In the vote-by-group tables the columns are NBC's Democrat and Republican columns; they match the U.S. House vote (for example 2% Democratic among those voting to support Trump), but NBC's text does not label them, and no overall House total has been published. Numbers come from NBC's national table; its live blog quotes a few subgroup figures that differ, and those are not used. Updated 8:26 PM ET: shares moved by about a point in many rows as more respondents were added. Only rows I could match to NBC's new table were refreshed, so a few groups may lag by a point.",
   "sources": [
     {
       "id": "nbc",
       "name": "NBC News Exit Poll (SSRS)",
       "url": "https://www.nbcnews.com/politics/2026-election/exit-poll-trump-midterms-voters-economy-disapproval-rcna607045",
-      "published": "Nov 3: article 5:06 PM EST (updated 6:14 PM), national tables updated 6:45 PM EST",
+      "published": "Nov 3: article 5:06 PM EST (updated 6:14 PM), national tables updated 8:26 PM ET",
       "kind": "Early results: Election Day interviews plus phone, mail and online for early and mail voters"
     }
   ],
@@ -30,7 +30,7 @@
           "values": {
             "nbc": {
               "dem": 57,
-              "rep": 40
+              "rep": 41
             }
           }
         }
@@ -41,7 +41,7 @@
       "kind": "vote",
       "groups": [
         {
-          "label": "White (72%)",
+          "label": "White (73%)",
           "values": {
             "nbc": {
               "dem": 47,
@@ -62,7 +62,7 @@
           "label": "Latino (10%)",
           "values": {
             "nbc": {
-              "dem": 61,
+              "dem": 60,
               "rep": 35
             }
           }
@@ -129,7 +129,7 @@
           "values": {
             "nbc": {
               "dem": 42,
-              "rep": 54
+              "rep": 55
             }
           }
         },
@@ -227,7 +227,7 @@
       "kind": "vote",
       "groups": [
         {
-          "label": "Democrats (34%)",
+          "label": "Democrats (33%)",
           "values": {
             "nbc": {
               "dem": 97,
@@ -308,7 +308,7 @@
           "label": "Did not vote (5%)",
           "values": {
             "nbc": {
-              "dem": 66,
+              "dem": 67,
               "rep": 25
             }
           }
@@ -323,8 +323,8 @@
           "label": "Urban (20%)",
           "values": {
             "nbc": {
-              "dem": 70,
-              "rep": 27
+              "dem": 69,
+              "rep": 28
             }
           }
         },
@@ -359,7 +359,7 @@
           "label": "Midwest (21%)",
           "values": {
             "nbc": {
-              "dem": 52,
+              "dem": 51,
               "rep": 45
             }
           }
@@ -393,7 +393,7 @@
           "values": {
             "nbc": {
               "dem": 54,
-              "rep": 41
+              "rep": 42
             }
           }
         },
@@ -429,7 +429,7 @@
           "values": {
             "nbc": {
               "dem": 47,
-              "rep": 50
+              "rep": 51
             }
           }
         },
@@ -558,7 +558,7 @@
           "values": {
             "nbc": {
               "dem": 50,
-              "rep": 46
+              "rep": 47
             }
           }
         },
@@ -602,8 +602,8 @@
           "label": "Crime (3%)",
           "values": {
             "nbc": {
-              "dem": 17,
-              "rep": 79
+              "dem": 18,
+              "rep": 78
             }
           }
         }
@@ -626,7 +626,7 @@
           "label": "Not gone far enough (21%)",
           "values": {
             "nbc": {
-              "dem": 7,
+              "dem": 6,
               "rep": 91
             }
           }
@@ -635,8 +635,8 @@
           "label": "About right (23%)",
           "values": {
             "nbc": {
-              "dem": 7,
-              "rep": 90
+              "dem": 6,
+              "rep": 91
             }
           }
         },
@@ -683,11 +683,11 @@
           }
         },
         {
-          "label": "Tariffs hurt the national economy (65%)",
+          "label": "Tariffs hurt the national economy (64%)",
           "values": {
             "nbc": {
               "dem": 78,
-              "rep": 18
+              "rep": 19
             }
           }
         },
