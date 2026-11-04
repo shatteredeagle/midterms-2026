@@ -1,4 +1,4 @@
-import { STATES, RACES, closeTime } from './states.js?v=67202689';
+import { STATES, RACES, closeTime } from './states.js?v=f7331e27';
 
 const REPO = 'ShatteredEagle/midterms-2026';
 const RAW = `https://raw.githubusercontent.com/${REPO}/data/`;
@@ -60,21 +60,32 @@ function statusTag(r) {
   const o = r.o;
   const call = callOf(r.id);
   if (counted(o)) return `<span class="tag live">${o.pct}% in</span>${call ? ` <span class="tag called" title="Projected by ${esc(S.calls.source)}">Called ${esc(call.winner.p)} · ${esc(call.winner.n)}</span>` : ''}${o.winner ? ' <span class="tag live">state flags winner</span>' : ''}`;
+  if (callOf(r.id)) return `<span class="tag called" title="Projected by ${esc(S.calls.source)}">Called ${esc(callOf(r.id).winner.p)} · ${esc(callOf(r.id).winner.n)}</span>`;
   if (r.closed) return `<span class="tag">${hasFeed(r.st) ? 'Closed · waiting for votes' : 'Closed · no feed here'}</span>`;
   return `<span class="tag">Polls close ${fmtTime(r.st)}</span>`;
 }
-function leadHtml(o) {
+function leadHtml(o, call) {
+  if (!counted(o) && call) {
+    const w = call.winner, y = call.runnerUp;
+    return `<b class="lead ${esc(w.p)}">${esc(w.n)} (${esc(w.p)})</b> <span class="small">called by NBC${y ? ` · ${w.pct}%–${y.pct}% over ${esc(y.n)} (${esc(y.p)})` : ''}</span>`;
+  }
   if (!counted(o)) return '<span class="small">—</span>';
   const x = o.cands[0], y = o.cands[1], m = x.pct - (y ? y.pct : 0);
   return `<b class="lead ${esc(x.p)}">${esc(x.n)} (${esc(x.p)})</b> <span class="small">+${m.toFixed(1)}${y ? ` over ${esc(y.n)}` : ''}</span>`;
 }
-function voteBar(o) {
+function voteBar(o, call) {
+  if (!counted(o) && call) {
+    const w = call.winner, y = call.runnerUp, d = w.p === 'D' ? w.pct : y?.p === 'D' ? y.pct : 0, r = w.p === 'R' ? w.pct : y?.p === 'R' ? y.pct : 0, rest = Math.max(0, 100 - d - r);
+    return `<div class="split" role="img" aria-label="Vote share when called: Democrat ${d}%, Republican ${r}%"><i class="d" style="width:${d}%"></i><i style="width:${rest}%;background:var(--muted)"></i><i class="r" style="width:${r}%"></i></div>`;
+  }
   if (!counted(o)) return '';
   const d = o.cands.find((c) => c.p === 'D')?.pct || 0, r = o.cands.find((c) => c.p === 'R')?.pct || 0, rest = Math.max(0, 100 - d - r);
   return `<div class="split" role="img" aria-label="Vote share: Democrat ${d}%, Republican ${r}%"><i class="d" style="width:${d}%"></i><i style="width:${rest}%;background:var(--muted)"></i><i class="r" style="width:${r}%"></i></div>`;
 }
 const matchup = (o) => (o?.cands?.length ? [...o.cands].sort((x, y) => ({ D: 0, R: 1 }[x.p] ?? 2) - ({ D: 0, R: 1 }[y.p] ?? 2)).slice(0, 3).map((c) => `${esc(c.n)} (${esc(c.p)})`).join(' vs ') : '');
-const tally = (rs) => { let d = 0, r = 0, o = 0, n = 0; for (const x of rs) if (counted(x.o)) { n++; const p = x.o.cands[0].p; p === 'D' ? d++ : p === 'R' ? r++ : o++; } return { d, r, o, n }; };
+// Leader of a race: counted votes first, otherwise an NBC call. `n` counts races with either.
+const leaderParty = (x) => (counted(x.o) ? x.o.cands[0].p : callOf(x.id)?.winner.p || null);
+const tally = (rs) => { let d = 0, r = 0, o = 0, n = 0; for (const x of rs) { const p = leaderParty(x); if (!p) continue; n++; p === 'D' ? d++ : p === 'R' ? r++ : o++; } return { d, r, o, n }; };
 
 // ---------- trends ----------
 // Sparkline for [[unixSeconds, value], ...]. Domain [lo, hi]; optional guide line at `mid`.
@@ -121,22 +132,22 @@ function renderSenate() {
   $('#cardSenate').innerHTML = `<h3>Senate · 51 for majority</h3>
     <div class="big"><b class="d">${d}</b><small>D holding or leading</small><b class="r">${r}</b><small>R holding or leading</small></div>
     <div class="waffle" role="img" aria-label="Senate seats: ${d} Democratic holding or leading, ${r} Republican, ${unc} races not yet counted. The outlined 51st square decides control: it is currently ${majWho}.">${cells.map((k, i) => `<i class="${k}${i === 50 ? ' maj' : ''}"${i === 50 ? ` title="The 51st seat decides control: currently ${majWho}"` : ''}></i>`).join('')}</div>
-    <div class="waffle-key"><span style="--c:var(--d)">D not up</span><span style="--c:var(--d-2)">D leading</span><span style="--c:var(--none)">Not counted ${unc}</span><span style="--c:var(--r-2)">R leading</span><span style="--c:var(--r)">R not up</span><span class="majkey">Outlined = the 51st seat</span></div>
+    <div class="waffle-key"><span style="--c:var(--d)">D not up</span><span style="--c:var(--d-2)">D leading</span><span style="--c:var(--none)">Not decided ${unc}</span><span style="--c:var(--r-2)">R leading</span><span style="--c:var(--r)">R not up</span><span class="majkey">Outlined = the 51st seat</span></div>
     <p class="meta"><b>The outlined square is where control lands:</b> Democrats need it for 51 seats; if Republicans hold it they keep 50 or more, and the Vice President breaks a 50–50 tie for them. It is currently <b>${majWho}</b>.</p>
-    <p class="meta">Votes counted in ${t.n} of ${rs.length} races. D leads ${t.d}, R leads ${t.r}. Seats not up: D 34, R 31. This counts who leads so far, not a projection. <a href="#control">What Democrats need ↗</a></p>`;
+    <p class="meta">Votes counted or races called in ${t.n} of ${rs.length}. D leads ${t.d}, R leads ${t.r}. Seats not up: D 34, R 31. Calls are NBC News projections; the rest is counted votes. <a href="#control">What Democrats need ↗</a></p>`;
 }
 function renderHouse() {
-  const hs = Object.values(S.results?.races || {}).filter((r) => r.id?.[0] === 'H'), t = tally(hs.map((o) => ({ o })));
+  const ids = [...new Set([...Object.keys(S.results?.races || {}), ...Object.keys(S.calls?.calls || {})].filter((k) => k[0] === 'H'))], hs = ids.map((id) => ({ id, o: S.results?.races?.[id] })), t = tally(hs);
   $('#cardHouse').innerHTML = `<h3>House · 218 for majority</h3>
     <div class="big"><b class="d">${t.d}</b><small>districts D leads</small><b class="r">${t.r}</b><small>districts R leads</small></div>
-    <p class="meta">Votes counted in ${t.n} of ${hs.length} districts that have a results feed (CA, CO, FL, GA, IA, MN, NC, NE). Most House seats have no free district feed, so this is a partial count, not a majority tally. Follow <a href="https://apnews.com/" target="_blank" rel="noopener">AP</a> or <a href="https://www.nbcnews.com/politics/2026-elections/midterms" target="_blank" rel="noopener">NBC</a> for the national House count. <a href="#control">Key districts ↗</a></p>`;
+    <p class="meta">Counted or called in ${t.n} of ${hs.length} districts we have data for (vote feeds: CA, CO, FL, GA, IA, MN, NC, NE; plus NBC calls). This is a partial count, not a majority tally. Follow <a href="https://apnews.com/" target="_blank" rel="noopener">AP</a> or <a href="https://www.nbcnews.com/politics/2026-elections/midterms" target="_blank" rel="noopener">NBC</a> for the national House count. <a href="#control">Key districts ↗</a></p>`;
 }
 
 // ---------- results so far (overview) ----------
 function renderResultsSo() {
   const col = (kind, title) => {
-    const rs = allRaces(kind).filter((r) => counted(r.o)).sort((a, b) => b.o.pct - a.o.pct);
-    return `<div><h3 style="font-size:15px;margin-bottom:8px">${title}</h3><ol class="flip-list">${rs.map((r) => `<li class="res-item" data-st="${r.st}" tabindex="0"><span class="st">${esc(STATES[r.st][0])}${r.p?.special ? ' (sp.)' : ''}</span><span class="rl">${leadHtml(r.o)}</span>${voteBar(r.o)}<span class="p">${r.o.pct}% in</span></li>`).join('') || '<li class="small">No votes counted yet. Rows appear as states report.</li>'}</ol></div>`;
+    const rs = allRaces(kind).filter((r) => counted(r.o) || callOf(r.id)).sort((a, b) => (counted(b.o) ? b.o.pct : 101) - (counted(a.o) ? a.o.pct : 101));
+    return `<div><h3 style="font-size:15px;margin-bottom:8px">${title}</h3><ol class="flip-list">${rs.map((r) => `<li class="res-item" data-st="${r.st}" tabindex="0"><span class="st">${esc(STATES[r.st][0])}${r.p?.special ? ' (sp.)' : ''}</span><span class="rl">${leadHtml(r.o, callOf(r.id))}</span>${voteBar(r.o, callOf(r.id))}<span class="p">${counted(r.o) ? `${r.o.pct}% in` : 'Called'}</span></li>`).join('') || '<li class="small">No votes counted or races called yet. Rows appear as states report.</li>'}</ol></div>`;
   };
   $('#results-body').innerHTML = `<div class="flip-grid">${col('S', 'Senate')}${col('G', 'Governor')}</div><p class="small" style="margin-top:12px">Unofficial totals from state election offices. Early returns often lean toward early and mail ballots and can swing as more votes arrive.</p>`;
 }
@@ -148,31 +159,32 @@ function wireResults() {
 
 // ---------- control: what Democrats need ----------
 function ctlRows(rows) {
-  return `<div class="table-scroll"><table class="ctl"><thead><tr><th>${rows[0]?.house ? 'District' : 'State'}</th><th>Current result</th><th>Vote share</th><th>Status</th></tr></thead><tbody>${rows.map((x) => `<tr data-st="${x.st}" tabindex="0"><th scope="row" style="text-transform:none;letter-spacing:0;font-size:14px;color:var(--text)">${esc(x.label)}${x.sub ? `<div class="small">${x.sub}</div>` : ''}</th><td>${counted(x.o) ? leadHtml(x.o) : `<span class="small">${x.o?.cands?.length ? matchup(x.o) : '—'}</span>`}</td><td style="min-width:150px">${voteBar(x.o)}</td><td>${x.status}</td></tr>`).join('') || '<tr><td colspan="4" class="small">None.</td></tr>'}</tbody></table></div>`;
+  return `<div class="table-scroll"><table class="ctl"><thead><tr><th>${rows[0]?.house ? 'District' : 'State'}</th><th>Current result</th><th>Vote share</th><th>Status</th></tr></thead><tbody>${rows.map((x) => `<tr data-st="${x.st}" tabindex="0"><th scope="row" style="text-transform:none;letter-spacing:0;font-size:14px;color:var(--text)">${esc(x.label)}${x.sub ? `<div class="small">${x.sub}</div>` : ''}</th><td>${counted(x.o) || callOf(x.id) ? leadHtml(x.o, callOf(x.id)) : `<span class="small">${x.o?.cands?.length ? matchup(x.o) : '—'}</span>`}</td><td style="min-width:150px">${voteBar(x.o, callOf(x.id))}</td><td>${x.status}</td></tr>`).join('') || '<tr><td colspan="4" class="small">None.</td></tr>'}</tbody></table></div>`;
 }
 function renderControl() {
   const K = S.key;
   if (!K) return;
   // Senate
-  const sRows = K.senate.races.map((k) => { const r = race(`S-${k.st}`); return { ...k, r, o: r?.o, st: k.st, label: STATES[k.st][0] + (r?.p?.special ? ' (special)' : ''), sub: !counted(r?.o) && r?.p?.lead ? `Polling average: ${esc(r.p.lead)}` : '', status: r ? statusTag(r) : '' }; });
-  const order = (x, y) => (counted(y.o) ? y.o.pct : -1) - (counted(x.o) ? x.o.pct : -1) || closeTime(x.st) - closeTime(y.st);
+  const sRows = K.senate.races.map((k) => { const r = race(`S-${k.st}`); return { ...k, r, id: `S-${k.st}`, o: r?.o, st: k.st, label: STATES[k.st][0] + (r?.p?.special ? ' (special)' : ''), sub: !counted(r?.o) && r?.p?.lead ? `Polling average: ${esc(r.p.lead)}` : '', status: r ? statusTag(r) : '' }; });
+  const order = (x, y) => (counted(y.o) ? y.o.pct : callOf(y.id) ? 100 : -1) - (counted(x.o) ? x.o.pct : callOf(x.id) ? 100 : -1) || closeTime(x.st) - closeTime(y.st);
   const targets = sRows.filter((x) => x.holder === 'R').sort(order), defend = sRows.filter((x) => x.holder === 'D').sort(order);
   const all = tally(allRaces('S')), tT = tally(targets), tD = tally(defend);
+  const ledBy = (x) => leaderParty(x);
   const d = K.senate.notUp.D + all.d, need = K.senate.need;
-  const dFlip = targets.filter((x) => counted(x.o) && x.o.cands[0].p === 'D').length, dLost = defend.filter((x) => counted(x.o) && x.o.cands[0].p !== 'D').length;
+  const dFlip = targets.filter((x) => ledBy(x) === 'D').length, dLost = defend.filter((x) => ledBy(x) && ledBy(x) !== 'D').length;
   $('#ctlSenateSub').textContent = `Democrats hold 47 seats and 34 are not up, so they need 17 of the 35 races on the ballot (51 seats; the Vice President breaks a 50–50 tie for Republicans). That means holding all ${K.senate.dHeldUp} Democratic-held seats and flipping 4 Republican-held ones.`;
   $('#ctl-senate-body').innerHTML = `<div class="ctl-meter"><div class="ctl-nums"><b class="d">${d}</b><span class="small">Democratic seats (34 not up + ${all.d} leading)</span><span class="small need">Need ${need}</span></div>
       <div class="meter" role="img" aria-label="Democrats have ${d} seats of ${need} needed"><i class="d" style="width:${d}%"></i><i class="r" style="width:${31 + all.r}%;margin-left:auto"></i><span class="mark" style="left:${need}%"></span></div>
-      <p class="small">Counted so far: Democrats lead in ${all.d} of 35 races, Republicans in ${all.r}${all.o ? `, others in ${all.o}` : ''}; ${35 - all.n} not counted. Key targets: Democrats lead ${dFlip} of the ${targets.length} Republican-held seats on this list (they need 4). Seats Democrats hold where they trail: ${dLost}.</p></div>
-    <h3 class="ctl-h">Republican-held seats Democrats can flip <span class="small">(${tT.n} of ${targets.length} counted)</span></h3>${ctlRows(targets)}
-    <h3 class="ctl-h">Democratic-held seats Democrats must defend <span class="small">(${tD.n} of ${defend.length} counted)</span></h3>${ctlRows(defend)}
+      <p class="small">Counted or called so far: Democrats lead in ${all.d} of 35 races, Republicans in ${all.r}${all.o ? `, others in ${all.o}` : ''}; ${35 - all.n} undecided. Key targets: Democrats lead ${dFlip} of the ${targets.length} Republican-held seats on this list (they need 4). Seats Democrats hold where they trail: ${dLost}.</p></div>
+    <h3 class="ctl-h">Republican-held seats Democrats can flip <span class="small">(${tT.n} of ${targets.length} counted or called)</span></h3>${ctlRows(targets)}
+    <h3 class="ctl-h">Democratic-held seats Democrats must defend <span class="small">(${tD.n} of ${defend.length} counted or called)</span></h3>${ctlRows(defend)}
     <p class="small">${esc(K.note)}</p>`;
   // House
-  const hRows = K.house.districts.map((dist) => { const [st, n] = dist.split('-'); const r = race(`H-${st}-${n}`); return { house: true, st, label: dist, o: r?.o, status: r ? statusTag(r) : '' }; }).sort(order);
-  const hKey = tally(hRows), hAll = tally(Object.values(S.results?.races || {}).filter((r) => r.id?.[0] === 'H').map((o) => ({ o })));
+  const hRows = K.house.districts.map((dist) => { const [st, n] = dist.split('-'); const r = race(`H-${st}-${n}`); return { house: true, id: `H-${st}-${n}`, st, label: dist, o: r?.o, status: r ? statusTag(r) : '' }; }).sort(order);
+  const hKey = tally(hRows), hAll = tally([...new Set([...Object.keys(S.results?.races || {}), ...Object.keys(S.calls?.calls || {})].filter((k) => k[0] === 'H'))].map((id) => ({ id, o: S.results?.races?.[id] })));
   $('#ctlHouseSub').textContent = 'Democrats need 218 of 435 seats. District results come only from states whose election offices publish a feed (CA, CO, FL, GA, IA, MN, NC, NE); other key districts show their poll-closing time.';
-  $('#ctl-house-body').innerHTML = `<div class="ctl-meter"><div class="ctl-nums"><b>${hKey.n}</b><span class="small">of ${hRows.length} key districts counted</span></div>
-      <p class="small">Key districts counted: Democrats lead ${hKey.d}, Republicans lead ${hKey.r}${hKey.o ? `, others ${hKey.o}` : ''}. All House districts with votes counted so far: Democrats lead ${hAll.d}, Republicans ${hAll.r}. A national House majority tally needs every district, so follow AP or NBC for that.</p></div>${ctlRows(hRows)}`;
+  $('#ctl-house-body').innerHTML = `<div class="ctl-meter"><div class="ctl-nums"><b>${hKey.n}</b><span class="small">of ${hRows.length} key districts counted or called</span></div>
+      <p class="small">Key districts counted or called: Democrats lead ${hKey.d}, Republicans lead ${hKey.r}${hKey.o ? `, others ${hKey.o}` : ''}. All House districts counted or called so far: Democrats lead ${hAll.d}, Republicans ${hAll.r}. A national House majority tally needs every district, so follow AP or NBC for that.</p></div>${ctlRows(hRows)}`;
 }
 function wireControl() {
   const pick = (t) => { const tr = t.closest('tr[data-st]'); if (tr) { select(tr.dataset.st); goMap(); } };
@@ -213,11 +225,16 @@ function stateInfo(st) {
     const bin = m < 1 ? 'T' : party === 'D' ? `D${mag}` : party === 'R' ? `R${mag}` : 'O';
     return { bin, early: o.pct < 50, called: !!o.winner || !!callOf(`${S.kind}-${st}`), text: `${a.n} (${a.p}) leads${b ? ` ${b.n}` : ''} ${a.pct}%–${b ? b.pct : 0}% · ${o.reporting}${o.winner ? ` · state flags winner: ${o.winner}` : ''}${callOf(`${S.kind}-${st}`) ? ` · NBC News projects ${callOf(`${S.kind}-${st}`).winner.n} (${callOf(`${S.kind}-${st}`).winner.p})` : ''}` };
   }
+  const call = callOf(`${S.kind}-${st}`);
+  if (call) {
+    const w = call.winner, m = w.pct - (call.runnerUp ? call.runnerUp.pct : 0), mag = m >= 20 ? 3 : m >= 10 ? 2 : 1;
+    return { bin: m < 1 ? 'T' : w.p === 'D' ? `D${mag}` : w.p === 'R' ? `R${mag}` : 'O', called: true, text: `NBC News projects ${w.n} (${w.p}) wins${call.runnerUp ? ` · ${w.pct}%–${call.runnerUp.pct}% over ${call.runnerUp.n} (${call.runnerUp.p})` : ''}${call.pctIn ? ` · ${call.pctIn} in` : ''}` };
+  }
   return r.closed ? { bin: 'closed', text: o ? 'Polls closed · no votes counted yet' : 'Polls closed · no results feed on this page for this state' } : { bin: 'pend', text: `Polls close ${new Date(closeTime(st)).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}` };
 }
 function mapTally() {
   const rs = allRaces(S.kind), t = tally(rs);
-  return `${KIND[S.kind]} races fill in only as official votes are counted: color shows who leads, shade shows the margin. Votes counted in ${t.n} of ${rs.length} races (D leads ${t.d}, R leads ${t.r}${t.o ? `, other ${t.o}` : ''}). Only states with an official results feed fill in; the rest stay gray. Early returns can swing as more votes come in.`;
+  return `${KIND[S.kind]} races fill in as official votes are counted or NBC News calls the race (bold outline = called): color shows who leads, shade shows the margin. Counted or called in ${t.n} of ${rs.length} races (D leads ${t.d}, R leads ${t.r}${t.o ? `, other ${t.o}` : ''}). States with no vote feed fill in only when NBC calls them; the rest stay gray. Early returns can swing as more votes come in.`;
 }
 function paintMap() {
   for (const el of document.querySelectorAll('#usmap path')) {
@@ -299,11 +316,11 @@ function renderTable() {
   let rs = allRaces(S.rkind);
   const q = S.q.trim().toLowerCase();
   if (q) rs = rs.filter((r) => `${STATES[r.st][0]} ${r.st} ${(r.p?.cands || []).map((c) => c.n).join(' ')} ${(r.o?.cands || []).map((c) => c.n).join(' ')}`.toLowerCase().includes(q));
-  rs.sort((a, b) => (counted(b.o) ? b.o.pct : -1) - (counted(a.o) ? a.o.pct : -1) || (S.sort === 'close' ? closeTime(a.st) - closeTime(b.st) : 0) || STATES[a.st][0].localeCompare(STATES[b.st][0]));
+  rs.sort((a, b) => (counted(b.o) ? b.o.pct : callOf(b.id) ? 100 : -1) - (counted(a.o) ? a.o.pct : callOf(a.id) ? 100 : -1) || (S.sort === 'close' ? closeTime(a.st) - closeTime(b.st) : 0) || STATES[a.st][0].localeCompare(STATES[b.st][0]));
   const LIMIT = 25, shown = S.showAll || q ? rs : rs.slice(0, LIMIT);
   const row = (r) => `<tr data-st="${r.st}" tabindex="0"><th scope="row" style="text-transform:none;letter-spacing:0;font-size:14px;color:var(--text)">${esc(STATES[r.st][0])}${r.p?.special ? ' (special)' : ''}</th>
-      <td>${leadHtml(r.o) === '<span class="small">—</span>' ? `<span class="small">${r.o?.cands?.length ? matchup(r.o) : '—'}</span>` : leadHtml(r.o)}</td>
-      <td style="min-width:150px">${voteBar(r.o)}</td>
+      <td>${counted(r.o) || callOf(r.id) ? leadHtml(r.o, callOf(r.id)) : `<span class="small">${r.o?.cands?.length ? matchup(r.o) : '—'}</span>`}</td>
+      <td style="min-width:150px">${voteBar(r.o, callOf(r.id))}</td>
       <td>${esc(r.p?.lead || '—')}</td>
       <td>${statusTag(r)}</td></tr>`;
   $('#raceTable').innerHTML = `<thead><tr><th>State</th><th>Current result</th><th>Vote share</th><th>Polling average</th><th>Status</th></tr></thead><tbody>${shown.map(row).join('') || '<tr><td colspan="5">No races match.</td></tr>'}</tbody>`;
