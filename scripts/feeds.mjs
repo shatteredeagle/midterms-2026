@@ -1,5 +1,6 @@
 // Official state results feeds. Each feed returns { "S-XX"|"G-XX": { id, source, reporting, pct, totalVotes, cands:[{n,p,votes,pct}] } }.
 // pct = percent of precincts reporting. No winner flags are inferred; counts are unofficial until certified.
+import { STATES, RACES, closeTime } from '../assets/states.js';
 const UA = 'midterms-2026-dashboard/1.0 (+https://github.com/ShatteredEagle/midterms-2026)';
 const get = async (u, json = false) => {
   const r = await fetch(u, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(25000) });
@@ -198,4 +199,35 @@ async function caHouse() {
   return out;
 }
 const CAall = async () => ({ ...(await CA()), ...(await caHouse()) });
+// ---- NBC News state results API (the endpoint behind nbcnews.com/politics/2026-elections/<state>-results) ----
+// Covers every state that lacks its own machine-readable feed: statewide Senate and governor races, plus MA/RI ballot questions.
+// Some races carry vote counts, others only shares ("shareOnly"); both are NBC's reporting of the state's count, not an official file.
+const SLUG = (name) => name.toLowerCase().replace(/[^a-z ]/g, '').replace(/ /g, '-');
+const NBC_PARTY = { dem: 'D', gop: 'R', Dem: 'D', Rep: 'R' };
+export function nbcState(st, name, closed) {
+  return async () => {
+    if (!closed()) return {};
+    const j = await get(`https://www.nbcnews.com/firecracker/api/v2/state-results/2026-elections/${SLUG(name)}-results`, true);
+    const found = [];
+    (function walk(o) { if (Array.isArray(o)) o.forEach(walk); else if (o && typeof o === 'object') { if (o.raceId && o.candidates) found.push(o); Object.values(o).forEach(walk); } })(j);
+    const out = {};
+    for (const r of found) {
+      const m = r.raceId.match(/^2026-11-03P?~([A-Z]{2})~([SG])$/);
+      if (!m || m[1] !== st) continue;
+      const key = `${m[2]}-${st}`;
+      const cands = r.candidates.filter((c) => c.lastName).map((c) => ({ n: tidy(`${c.firstName || ''} ${c.lastName}`), p: NBC_PARTY[c.party] || 'O', votes: Number(c.votes) || 0, pct: Number(c.percentVote) || 0, winner: !!c.isWinner }));
+      if (!cands.length) continue;
+      cands.sort((a, b) => b.pct - a.pct);
+      const total = cands.reduce((a, c) => a + c.votes, 0);
+      const pctIn = parseFloat(r.percentInFormatted) || 0;
+      out[key] = { id: key, source: 'NBC News', reporting: `${r.percentInFormatted || '0%'} of expected vote counted`, pct: pctIn, totalVotes: total, shareOnly: total === 0, cands, ...(cands.some((c) => c.winner) ? { winner: cands.find((c) => c.winner).n } : {}) };
+    }
+    return out;
+  };
+}
+
 export const FEEDS = { CA: CAall, CO, FL, GA, IA, MN, NC, NE, SD };
+// Every other state with a Senate or governor race reads NBC's state API once its polls have closed (at most 8 requests at a time).
+let nbcActive = 0; const nbcWait = [];
+const nbcLimited = (fn) => async () => { while (nbcActive >= 8) await new Promise((r) => nbcWait.push(r)); nbcActive++; try { return await fn(); } finally { nbcActive--; nbcWait.shift()?.(); } };
+for (const st of new Set([...RACES.S, ...RACES.G])) if (!FEEDS[st]) FEEDS[st] = nbcLimited(nbcState(st, STATES[st][0], () => Date.now() >= closeTime(st)));

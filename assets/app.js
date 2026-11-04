@@ -1,4 +1,4 @@
-import { STATES, RACES, closeTime } from './states.js?v=c394bca0';
+import { STATES, RACES, closeTime } from './states.js?v=e4786749';
 
 const REPO = 'ShatteredEagle/midterms-2026';
 const RAW = `https://raw.githubusercontent.com/${REPO}/data/`;
@@ -48,7 +48,7 @@ async function loadAll() {
 const now = () => Date.now();
 const isClosed = (st) => now() >= closeTime(st);
 // Only counted votes are shown as results. No market odds or forecasts are used on this page.
-const counted = (o) => !!(o && o.totalVotes > 0 && o.cands?.[0]?.votes > 0);
+const counted = (o) => !!(o && ((o.totalVotes > 0 && o.cands?.[0]?.votes > 0) || (o.shareOnly && o.pct > 0 && o.cands?.[0]?.pct > 0))); // shareOnly: NBC reports percentages without vote totals
 function race(id) {
   const [k, st] = id.split('-');
   if (k !== 'H' && !RACES[k]?.includes(st)) return null;
@@ -156,7 +156,7 @@ function renderHouse() {
   const ids = [...new Set([...Object.keys(S.results?.races || {}), ...Object.keys(S.calls?.calls || {})].filter((k) => k[0] === 'H'))], hs = ids.map((id) => ({ id, o: S.results?.races?.[id] })), t = tally(hs);
   $('#cardHouse').innerHTML = `<h3>House · 218 for majority</h3>
     <div class="big"><b class="d">${t.d}</b><small>districts D leads</small><b class="r">${t.r}</b><small>districts R leads</small></div>
-    <p class="meta">Counted or called in ${t.n} of ${hs.length} districts we have data for (vote feeds: CA, CO, FL, GA, IA, MN, NC, NE; plus NBC calls). This is a partial count, not a majority tally. Follow <a href="https://apnews.com/" target="_blank" rel="noopener">AP</a> or <a href="https://www.nbcnews.com/politics/2026-elections/midterms" target="_blank" rel="noopener">NBC</a> for the national House count. <a href="#control">Key districts ↗</a></p>`;
+    <p class="meta">Counted or called in ${t.n} of ${hs.length} districts we have data for (district vote feeds: CA, CO, FL, GA, IA, MN, NC, NE; plus NBC calls). This is a partial count, not a majority tally. Follow <a href="https://apnews.com/" target="_blank" rel="noopener">AP</a> or <a href="https://www.nbcnews.com/politics/2026-elections/midterms" target="_blank" rel="noopener">NBC</a> for the national House count. <a href="#control">Key districts ↗</a></p>`;
 }
 
 // ---------- results so far (overview) ----------
@@ -624,8 +624,8 @@ function renderSources() {
   const age = (k) => { const t = st[k]?.at; if (!t) return '<span class="tag">no data</span>'; const m = Math.round((now() - Date.parse(t)) / 60000); return `<span class="tag ${st[k].ok && m < 20 ? 'live' : ''}">${st[k].ok ? `${m}m ago` : 'last fetch failed'}</span>`; };
   const cards = [
     ['PollCheck', 'Polling averages and ratings for Senate, governor races, and the generic ballot.', 'https://www.pollcheck.co.uk/us-midterms-2026', age('polls')],
-    ['State election offices', `Official vote counts (Senate, governor and U.S. House districts), straight from the states that publish machine-readable files: ${Object.entries(S.results?.feeds || {}).map(([k, v]) => `${k}${v.ok ? '' : ' (failing)'}`).join(', ') || 'CA, CO, FL, GA, IA, MN, NC, NE, SD'}. Other states link out; Texas, Washington, Utah and most others had no usable open file.`, 'https://www.usa.gov/election-results', age('results')],
-    ['NBC News Decision Desk', 'Race calls (projected winners). The collector scans NBC\'s results page every minute and flashes a banner on a new call. These are NBC\'s projections, not official results.', 'https://www.nbcnews.com/politics/2026-elections/senate-results', age('calls')],
+    ['State election offices', `Official vote counts (Senate, governor and U.S. House districts), straight from the states that publish machine-readable files (all other states use NBC News\' results API): ${Object.entries(S.results?.feeds || {}).map(([k, v]) => `${k}${v.ok ? '' : ' (failing)'}`).join(', ') || 'CA, CO, FL, GA, IA, MN, NC, NE, SD'}. `, 'https://www.usa.gov/election-results', age('results')],
+    ['NBC News Decision Desk', 'Race calls (projected winners) and statewide Senate and governor results for states without their own feed. The collector reads NBC\'s results data every 30 seconds and flashes a banner on a new call. NBC\'s counts and projections are not official results.', 'https://www.nbcnews.com/politics/2026-elections/senate-results', age('calls')],
     ['Exit polls', 'No open feed exists. Entered from published outlet releases (AP VoteCast, SSRS/Edison, networks).', 'https://apnews.com/hub/ap-votecast', S.exit?.updated ? `<span class="tag live">updated ${new Date(S.exit.updated).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</span>` : '<span class="tag">waiting</span>'],
   ];
   const xs = [['AP', 'https://apnews.com/'], ['Decision Desk HQ', 'https://decisiondeskhq.com/'], ['Silver Bulletin', 'https://www.natesilver.net/'], ['RealClearPolling', 'https://www.realclearpolling.com/'], ['FiftyPlusOne', 'https://www.fiftyplusone.news/'], ['Cook Political', 'https://www.cookpolitical.com/'], ['Sabato’s Crystal Ball', 'https://centerforpolitics.org/crystalball/'], ['Inside Elections', 'https://insideelections.com/'], ['270toWin', 'https://www.270towin.com/']];
