@@ -39,10 +39,11 @@ export function diffSnapshots(prev, next, nowMs = Date.now(), anchors = { odds: 
     for (const [id, r] of Object.entries(next.results.races)) {
       const p = prev.results.races[id];
       if (!p) continue;
-      if (!p.totalVotes && r.totalVotes) ev('count', id, `${label(id)}: first votes reported (${r.pct}% of precincts)`, { source: r.source });
+      if (!p.totalVotes && r.totalVotes) ev('count', id, `${label(id)}: first votes reported (${r.pct}% of ${/counties/.test(r.reporting) ? 'counties' : 'precincts'})`, { source: r.source });
       const lead = (x) => x.cands[0]?.votes > 0 ? x.cands[0].n : null;
       if (p.totalVotes && lead(p) && lead(r) && lead(p) !== lead(r)) ev('lead', id, `${label(id)}: lead changes to ${lead(r)} (${r.cands[0].pct}%)`, { source: r.source });
-      for (const m of MILESTONES) if (p.pct < m && r.pct >= m) ev('count', id, `${label(id)}: ${m}% of precincts reporting${r.cands[0]?.votes ? ` · ${r.cands[0].n} ${r.cands[0].pct}%` : ''}`, { source: r.source });
+      const unit = /counties/.test(r.reporting) ? 'counties' : 'precincts';
+      for (const m of MILESTONES) if (p.pct < m && r.pct >= m) ev('count', id, `${label(id)}: ${m}% of ${unit} reporting${r.cands[0]?.votes ? ` · ${r.cands[0].n} ${r.cands[0].pct}%` : ''}`, { source: r.source });
     }
     for (const [st, f] of Object.entries(next.results.feeds || {})) {
       const was = prev.results.feeds?.[st];
