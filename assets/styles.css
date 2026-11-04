@@ -400,3 +400,12 @@ table.ctl tbody tr{cursor:pointer}
 .waffle i.flip.lead::after{background:linear-gradient(135deg,transparent 50%,rgb(242 176 30/.55) 50%)}
 .waffle.house i.flip.lead{outline-width:1.5px}
 .waffle-key .flipkey.lead::before{background:none;border:2px dashed #f2b01e}
+
+/* ballot question results: explicit Yes / No */
+.yn{display:flex;justify-content:space-between;gap:8px;font-size:14px;margin:2px 0 6px}
+.yn .y,.yn .n{display:inline-flex;align-items:center;gap:6px}
+.yn i{display:inline-block;width:10px;height:10px;border-radius:3px}
+.yn .y i{background:#1f9a8a}.yn .n i{background:#d98c1a}
+.splitYN{display:flex;height:12px;border-radius:99px;overflow:hidden;background:var(--none)}
+.splitYN i{display:block;height:100%}.splitYN .y{background:#1f9a8a}.splitYN .n{background:#d98c1a}
+.sb.vh{border-left-color:#7a8aa0}.sb.vh h5{color:#5d6f88}

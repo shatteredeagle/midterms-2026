@@ -212,6 +212,30 @@ async function calls() {
   return { updated: now(), source: 'NBC News Decision Desk (projections)', url: 'https://www.nbcnews.com/politics/2026-elections/senate-results', calls: out, measures };
 }
 
+// ---- VoteHub polling API (Creative Commons Attribution 4.0: https://votehub.com/polls/api) ----
+async function votehub() {
+  const base = 'https://api.votehub.com/polls';
+  const [gen, sen, gov] = await Promise.all([
+    get(`${base}?poll_type=generic-ballot&from_date=2026-08-01`, true),
+    get(`${base}?poll_type=us-senator&from_date=2026-09-15`, true),
+    get(`${base}?poll_type=governor&from_date=2026-09-15`, true),
+  ]);
+  const slim = (p) => ({ pollster: p.pollster, end: p.end_date, pop: p.population, n: p.sample_size, answers: (p.answers || []).map((a) => ({ n: a.choice, pct: a.pct })), url: p.url || null, partisan: p.partisan || null });
+  const generic = gen.filter((p) => p.answers?.some((a) => a.choice === 'Dem') && p.answers?.some((a) => a.choice === 'Rep')).map((p) => ({ ...slim(p), dem: p.answers.find((a) => a.choice === 'Dem').pct, rep: p.answers.find((a) => a.choice === 'Rep').pct })).sort((a, b) => b.end.localeCompare(a.end));
+  const recent = generic.filter((p) => Date.now() - Date.parse(p.end) < 60 * 86400000 && !p.partisan);
+  const races = {};
+  for (const [kind, list] of [['S', sen], ['G', gov]]) {
+    for (const p of list) {
+      const st = NAME_TO_ST[String(p.subject || '').replace(/^\d{4}\s+/, '').trim().toLowerCase()];
+      if (!st || !p.answers?.length) continue;
+      (races[`${kind}-${st}`] ||= []).push(slim(p));
+    }
+  }
+  for (const k of Object.keys(races)) races[k] = races[k].sort((a, b) => b.end.localeCompare(a.end)).slice(0, 8);
+  const avg = (key) => (recent.length ? Math.round((recent.reduce((s, p) => s + p[key], 0) / recent.length) * 10) / 10 : null);
+  return { updated: now(), source: 'VoteHub', license: 'CC BY 4.0', url: 'https://votehub.com/polls/', generic: { polls: generic.slice(0, 40), avg: { dem: avg('dem'), rep: avg('rep'), n: recent.length, days: 60 } }, races };
+}
+
 await mkdir(OUT, { recursive: true });
 // Start the House worker once (detached) if it is not running.
 try {
@@ -225,13 +249,13 @@ try {
 } catch (e) { console.error('house worker', e.message); }
 const before = { markets: await readJ('markets'), polls: await readJ('polls'), results: await readJ('results') };
 const log = (await readJ('changes')) || { events: [] };
-await Promise.all([run('markets', markets), run('polls', polls, 270000), run('results', results), run('turnout', turnout), run('calls', calls, 40000)]);
+await Promise.all([run('markets', markets), run('polls', polls, 270000), run('results', results), run('turnout', turnout), run('calls', calls, 40000), run('votehub', votehub, 600000)]);
 await run('history', history); // after the others: reads this run's markets/results
 let prev = {};
 try { prev = JSON.parse(await readFile(`${OUT}/status.json`, 'utf8')); } catch {}
 await writeFile(`${OUT}/status.json`, JSON.stringify({ updated: now(), sources: { ...prev.sources, ...status } }));
 // One file for the browser: a single request per refresh (kept under the GitHub API's unauthenticated rate limit).
-const [m, po, re, st, tu, ca] = await Promise.all(['markets', 'polls', 'results', 'status', 'turnout', 'calls'].map(readJ));
+const [m, po, re, st, tu, ca, vhub] = await Promise.all(['markets', 'polls', 'results', 'status', 'turnout', 'calls', 'votehub'].map(readJ));
 // Change feed: diff against the previous run, keep the newest 300 events.
 // Hand-entered data files from the repo (data/*.json): diffed against the last seen copy.
 const DATA = new URL('../data/', import.meta.url);
@@ -245,7 +269,7 @@ anchors.announced ||= {};
 const added = [...diffManual(manualPrev, manualNow), ...diffCalls(ca, re, anchors.announced)];
 const changes = { updated: now(), events: [...added, ...fresh.reverse(), ...(log.events || [])].slice(0, 300) };
 await writeFile(`${OUT}/changes.json`, JSON.stringify({ ...changes, anchors })); // anchors stay server-side; the bundle and site get events only
-const bundleJson = JSON.stringify({ updated: now(), markets: m, polls: po, results: re, status: st, turnout: tu, calls: ca, changes });
+const bundleJson = JSON.stringify({ updated: now(), markets: m, polls: po, results: re, status: st, turnout: tu, calls: ca, votehub: vhub, changes });
 await writeFile(`${OUT}/bundle.json`, bundleJson);
 // 30-second stamped copies (this bucket and the next). raw.githubusercontent caches each URL for 5 minutes and ignores query strings,
 // so the browser asks for s<bucket>.json: a URL nobody has requested yet is always fresh, keeping data about a minute old at most.
