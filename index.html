@@ -12,7 +12,7 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://shatteredeagle.github.io/midterms-2026/">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='16' height='32' fill='%232563c9'/%3E%3Crect x='16' width='16' height='32' fill='%23cc3a3a'/%3E%3Cpath d='M6 17l6 6 14-14' stroke='white' stroke-width='4' fill='none'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="assets/styles.css?v=0f4658ae">
+<link rel="stylesheet" href="assets/styles.css?v=67202689">
 <script>try{const t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t}catch{}</script>
 </head>
 <body>
@@ -31,10 +31,11 @@
   </div>
 </header>
 <div id="callBanner" class="callbanner" role="alert" aria-live="assertive" hidden>
-  <span class="cb-tag">Race called</span>
+  <span class="cb-tag" id="cbTag">Race called</span>
   <button type="button" id="cbText" class="cb-text"></button>
-  <span id="cbMore" class="cb-more" hidden></span>
+  <button type="button" id="cbMore" class="cb-morebtn" aria-expanded="false" aria-controls="cbList" hidden></button>
   <button type="button" id="cbClose" class="cb-close" aria-label="Dismiss">×</button>
+  <ul id="cbList" class="cb-list" hidden></ul>
 </div>
 
 <div class="layout">
@@ -172,7 +173,7 @@
   <p>Open source (MIT) · <a href="https://github.com/ShatteredEagle/midterms-2026">github.com/ShatteredEagle/midterms-2026</a></p>
 </footer>
 <div id="railBackdrop" class="backdrop" hidden></div>
-<script type="module" src="assets/app.js?v=0f4658ae"></script>
+<script type="module" src="assets/app.js?v=67202689"></script>
 <noscript><p class="wrap">This dashboard needs JavaScript to draw the map and load live data.</p></noscript>
 </body>
 </html>

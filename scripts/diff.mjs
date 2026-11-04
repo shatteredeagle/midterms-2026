@@ -32,12 +32,12 @@ export function diffSnapshots(prev, next, nowMs = Date.now(), anchors = { odds: 
       const isH = id[0] === 'H'; // House districts are many: only 50% and 100% milestones and lead changes, to keep the feed readable
       if (!isH && !p.totalVotes && r.totalVotes) ev('count', id, `${label(id)}: first votes reported (${r.pct}% of ${/counties/.test(r.reporting) ? 'counties' : 'precincts'})`, { source: r.source });
       const lead = (x) => x.cands[0]?.votes > 0 ? x.cands[0].n : null;
-      if (p.totalVotes && lead(p) && lead(r) && lead(p) !== lead(r)) ev('lead', id, `${label(id)}: lead changes to ${lead(r)} (${r.cands[0].pct}%)`, { source: r.source });
+      if (p.totalVotes && lead(p) && lead(r) && lead(p) !== lead(r)) ev('lead', id, `${label(id)}: lead changes to ${lead(r)} (${r.cands[0].p}) at ${r.cands[0].pct}%`, { source: r.source });
       const unit = /counties/.test(r.reporting) ? 'counties' : 'precincts';
       const crossed = (isH ? [50, 100] : MILESTONES).filter((m) => p.pct < m && r.pct >= m).pop(); // only the highest crossed this run
       if (crossed !== undefined) {
         const a = r.cands[0], b = r.cands[1];
-        ev('count', id, `${label(id)}: ${a?.votes ? `${a.n} leads ${b ? b.n : ''} ${a.pct}%–${b ? b.pct : ''}%` : 'no leader yet'} · ${r.reporting.replace(' reporting', '')} (${r.pct}%)`.replace(/ {2,}/g, ' '), { source: r.source });
+        ev('count', id, `${label(id)}: ${a?.votes ? `${a.n} (${a.p}) leads ${b ? `${b.n} (${b.p})` : ''} ${a.pct}%–${b ? b.pct : ''}%` : 'no leader yet'} · ${r.reporting.replace(' reporting', '')} (${r.pct}%)`.replace(/ {2,}/g, ' '), { source: r.source });
       }
     }
     for (const [st, f] of Object.entries(next.results.feeds || {})) {
@@ -102,7 +102,7 @@ export function diffCalls(next, results, announced, nowMs = Date.now()) {
     if (announced[id]) continue;
     announced[id] = true;
     if (firstRun && id[0] === 'H') continue;
-    out.push({ t, type: 'call', id, text: `NBC News projects ${full(id, c.winner)} (${c.winner.p}) wins ${label(id)}${c.winner.pct ? ` · ${c.winner.pct}%${c.runnerUp ? `–${c.runnerUp.pct}%` : ''}` : ''}`, source: 'NBC News Decision Desk' });
+    out.push({ t, type: 'call', id, text: `NBC News projects ${full(id, c.winner)} (${c.winner.p}) wins ${label(id)}${c.winner.pct ? ` · ${c.winner.pct}%${c.runnerUp ? `–${c.runnerUp.pct}% over ${c.runnerUp.n} (${c.runnerUp.p})` : ''}` : ''}`, source: 'NBC News Decision Desk' });
   }
   return out.reverse();
 }

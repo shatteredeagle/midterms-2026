@@ -363,3 +363,11 @@ table.ctl tbody tr{cursor:pointer}
 @media (prefers-reduced-motion:reduce){.callbanner.flash{animation:none;background:#f2b01e;color:#14181f}}
 .tag.called{background:#1f7a4d;color:#fff;border-color:#1f7a4d}
 .fi .kind.call{color:#c98a00}
+
+.callbanner{flex-wrap:wrap}
+.cb-morebtn{background:rgb(0 0 0/.2);color:inherit;border:0;border-radius:99px;font:inherit;font-size:12.5px;font-weight:700;padding:4px 12px;cursor:pointer;white-space:nowrap}
+.cb-list{list-style:none;margin:0;padding:6px 0 2px;flex-basis:100%;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:4px 16px;max-height:40vh;overflow:auto}
+.cb-list[hidden]{display:none}
+.cb-list li button{width:100%;text-align:left;background:rgb(0 0 0/.14);color:inherit;border:0;border-radius:8px;font:inherit;font-weight:600;font-size:13.5px;padding:6px 10px;cursor:pointer}
+.cb-list li button:hover{background:rgb(0 0 0/.26)}
+.cb-list .pty{display:inline-block;min-width:18px;text-align:center;border-radius:4px;background:rgb(255 255 255/.85);color:#14181f;font-size:11px;font-weight:800;margin-left:4px;padding:0 4px}

@@ -1,4 +1,4 @@
-import { STATES, RACES, closeTime } from './states.js?v=0f4658ae';
+import { STATES, RACES, closeTime } from './states.js?v=67202689';
 
 const REPO = 'ShatteredEagle/midterms-2026';
 const RAW = `https://raw.githubusercontent.com/${REPO}/data/`;
@@ -9,7 +9,7 @@ const pct = (x, d = 0) => (x * 100).toFixed(d) + '%';
 const FIPS = {};
 for (const [st, v] of Object.entries(STATES)) FIPS[v[1]] = st;
 
-const S = { calls: null, callsSeen: null, callQ: [], key: null, feedF: 'key', feedMark: 0, pollTab: 'H', senAll: false, history: null, early: null, turnout: null, otherAvgs: null, ballot: null, bqState: 'MA', changes: null, chgF: 'all', chgAll: false, chgSeen: 0, markets: null, polls: null, results: null, status: null, exit: null, control: null, paths: null, kind: 'S', sel: null, rkind: 'S', sort: 'close', q: '', showAll: false, fetchedAt: {} };
+const S = { calls: null, callsSeen: null, key: null, feedF: 'key', feedMark: 0, pollTab: 'H', senAll: false, history: null, early: null, turnout: null, otherAvgs: null, ballot: null, bqState: 'MA', changes: null, chgF: 'all', chgAll: false, chgSeen: 0, markets: null, polls: null, results: null, status: null, exit: null, control: null, paths: null, kind: 'S', sel: null, rkind: 'S', sort: 'close', q: '', showAll: false, fetchedAt: {} };
 
 // ---------- data ----------
 // raw.githubusercontent.com caches 5 min regardless of query string, so the browser reads the bundle through the
@@ -421,6 +421,15 @@ function renderExit() {
   el.innerHTML = srcMeta + x.questions.map((q, i) => `<details class="qd" ${i < 4 ? 'open' : ''}><summary>${esc(q.title)}</summary>${q.kind === 'share' ? shareQ(q) : dirQ(q)}</details>`).join('') + links;
 }
 
+// Adds (D)/(R)/(O) after candidate names in event text, using the candidates of the race the event is about.
+const escRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+function withParty(e) {
+  const cs = S.results?.races?.[e.id]?.cands;
+  if (!cs || !e.text) return e.text;
+  let t = e.text;
+  for (const c of [...cs].sort((x, y) => y.n.length - x.n.length)) if (c.n.length > 3) t = t.replace(new RegExp(`${escRe(c.n)}(?! \\([DRO]\\))`, 'g'), `${c.n} (${c.p})`);
+  return t;
+}
 // ---------- change feed ----------
 const HIDDEN = new Set(['odds', 'control', 'projected', 'rating']); // prediction events are no longer shown
 const CHG_GROUP = { call: 'count', count: 'count', lead: 'count', close: 'count', polls: 'polls', source: 'count', exit: 'reports', ballot: 'reports', average: 'reports', early: 'reports' };
@@ -429,7 +438,7 @@ function renderChanges() {
   const evs = (S.changes?.events || []).filter((e) => !HIDDEN.has(e.type) && (S.chgF === 'all' || CHG_GROUP[e.type] === S.chgF));
   const shown = S.chgAll ? evs.slice(0, 100) : evs.slice(0, 12);
   const el = $('#chgList');
-  el.innerHTML = shown.length ? shown.map((e) => `<li class="${Date.parse(e.t) > S.chgSeen && S.chgSeen ? 'new' : ''}"><span class="k ${esc(e.type)}">${esc(e.type)}</span><span>${esc(e.text)}</span><time datetime="${esc(e.t)}" title="${esc(new Date(e.t).toLocaleString())}">${ago(e.t)}</time></li>`).join('') : '<li class="empty">No changes logged yet. Entries appear here as polls close, counts come in, and reports are added.</li>';
+  el.innerHTML = shown.length ? shown.map((e) => `<li class="${Date.parse(e.t) > S.chgSeen && S.chgSeen ? 'new' : ''}"><span class="k ${esc(e.type)}">${esc(e.type)}</span><span>${esc(withParty(e))}</span><time datetime="${esc(e.t)}" title="${esc(new Date(e.t).toLocaleString())}">${ago(e.t)}</time></li>`).join('') : '<li class="empty">No changes logged yet. Entries appear here as polls close, counts come in, and reports are added.</li>';
   $('#chgMore').innerHTML = evs.length > 12 ? `<button type="button" id="chgBtn">${S.chgAll ? 'Show fewer' : `Show more (${Math.min(evs.length, 100)})`}</button>` : '';
   $('#chgJson').href = `${RAW}changes.json`;
   if (S.changes?.events?.length) S.chgSeen = Date.parse(S.changes.events[0].t);
@@ -498,7 +507,7 @@ const feedKey = (e) => !HIDDEN.has(e.type) && (S.feedF === 'all' || e.type !== '
 function renderFeed() {
   const evs = (S.changes?.events || []).filter(feedKey).slice(0, 60);
   const list = $('#railList');
-  list.innerHTML = evs.length ? evs.map((e, i) => `<li class="fi ${S.feedMark && Date.parse(e.t) > S.feedMark ? 'new' : ''}" tabindex="0" data-id="${esc(e.id || '')}" data-type="${esc(e.type)}"><div class="top"><span class="kind ${esc(e.type)}">${esc(FEED_KIND[e.type] || e.type)}</span><time datetime="${esc(e.t)}">${ago(e.t)}</time></div><div class="txt">${esc(e.text)}</div></li>`).join('') : '<li class="rail-empty">Nothing yet. Items appear as polls close, votes come in and reports are added.</li>';
+  list.innerHTML = evs.length ? evs.map((e, i) => `<li class="fi ${S.feedMark && Date.parse(e.t) > S.feedMark ? 'new' : ''}" tabindex="0" data-id="${esc(e.id || '')}" data-type="${esc(e.type)}"><div class="top"><span class="kind ${esc(e.type)}">${esc(FEED_KIND[e.type] || e.type)}</span><time datetime="${esc(e.t)}">${ago(e.t)}</time></div><div class="txt">${esc(withParty(e))}</div></li>`).join('') : '<li class="rail-empty">Nothing yet. Items appear as polls close, votes come in and reports are added.</li>';
   const fresh = (S.changes?.events || []).filter((e) => Date.parse(e.t) > S.feedMark && !HIDDEN.has(e.type) && e.type !== 'source').length;
   const b = $('#railBadge');
   if (b) { b.textContent = fresh > 99 ? '99+' : fresh; b.hidden = !fresh || document.body.classList.contains('rail-open'); }
@@ -526,33 +535,47 @@ function wireFeed() {
 }
 
 // ---------- race-called banner ----------
+// Shows only for calls that happen while the page is open: everything already called at load is treated as seen.
+// Calls that arrive together are merged into one banner (newest first) with an expandable list, never stacked.
 let cbTimer = null;
-function showNextCall() {
-  const b = $('#callBanner');
-  const c = S.callQ.shift();
-  if (!c) { b.hidden = true; b.classList.remove('flash'); return; }
-  const text = c.text || (S.changes?.events || []).find((e) => e.type === 'call' && e.id === c.id)?.text || `NBC News projects ${c.winner.n} (${c.winner.p}) wins ${c.id}`;
-  $('#cbText').textContent = text; $('#cbText').dataset.id = c.id;
-  const more = $('#cbMore'); more.hidden = !S.callQ.length; more.textContent = `+${S.callQ.length} more`;
-  b.hidden = false; b.classList.remove('flash'); void b.offsetWidth; b.classList.add('flash');
-  clearTimeout(cbTimer); cbTimer = setTimeout(showNextCall, 12000);
+const cbState = { items: [] };
+const raceLabel = (id) => { const [k, st, n] = id.split('-'); return k === 'H' ? `${st}-${n} House` : `${STATES[st]?.[0] || st} ${KIND[k]}`; };
+function callItem(c) {
+  const cands = S.results?.races?.[c.id]?.cands || [];
+  const hit = cands.find((x) => x.p === c.winner.p && x.n.toLowerCase().includes(String(c.winner.n).toLowerCase()));
+  return { id: c.id, label: raceLabel(c.id), name: hit ? hit.n : c.winner.n, p: c.winner.p, pct: c.winner.pct };
+}
+function renderBanner(flash) {
+  const b = $('#callBanner'), n = cbState.items.length;
+  if (!n) { b.hidden = true; b.classList.remove('flash'); return; }
+  const first = cbState.items[0];
+  $('#cbTag').textContent = n > 1 ? `${n} races called` : 'Race called';
+  $('#cbText').textContent = `${first.label}: ${first.name} (${first.p}) wins`;
+  $('#cbText').dataset.id = first.id;
+  const more = $('#cbMore');
+  more.hidden = n < 2;
+  more.textContent = `${$('#cbList').hidden ? 'See all' : 'Hide'} ${n} ▾`;
+  more.setAttribute('aria-expanded', String(!$('#cbList').hidden));
+  $('#cbList').innerHTML = cbState.items.map((c) => `<li><button type="button" data-id="${esc(c.id)}">${esc(c.label)}: ${esc(c.name)}<span class="pty">${esc(c.p)}</span></button></li>`).join('');
+  b.hidden = false;
+  if (flash) { b.classList.remove('flash'); void b.offsetWidth; b.classList.add('flash'); }
+  clearTimeout(cbTimer); cbTimer = setTimeout(() => { if ($('#cbList').hidden) { cbState.items = []; renderBanner(false); } }, 90000);
 }
 function checkCalls() {
   const ids = Object.keys(S.calls?.calls || {});
-  if (S.callsSeen === null) { // first load: don't replay old calls, but do flash Senate/governor calls made in the last 15 minutes
-    if (!S.calls) return;
-    const recent = ids.filter((id) => id[0] !== 'H' && Date.now() - Date.parse(S.calls.calls[id].firstSeen) < 15 * 60000);
-    S.callsSeen = new Set(ids.filter((id) => !recent.includes(id)));
-    S.callsSeen.size < ids.length && (() => { for (const id of recent) { S.callsSeen.add(id); S.callQ.push(S.calls.calls[id]); } showNextCall(); })();
-    return;
-  }
+  if (S.callsSeen === null) { if (S.calls) S.callsSeen = new Set(ids); return; } // first load: nothing flashes
   const fresh = ids.filter((id) => !S.callsSeen.has(id));
-  for (const id of fresh) { S.callsSeen.add(id); S.callQ.push(S.calls.calls[id]); }
-  if (fresh.length && $('#callBanner').hidden) showNextCall(); else if (fresh.length) { const m = $('#cbMore'); m.hidden = false; m.textContent = `+${S.callQ.length} more`; }
+  if (!fresh.length) return;
+  for (const id of fresh) S.callsSeen.add(id);
+  cbState.items = [...fresh.map((id) => callItem(S.calls.calls[id])), ...cbState.items];
+  renderBanner(true);
 }
+function openRace(id) { const st = id?.split('-')[1]; if (id && STATES[st]) { select(st); goMap(); } }
 function wireBanner() {
-  $('#cbClose').addEventListener('click', () => { clearTimeout(cbTimer); showNextCall(); });
-  $('#cbText').addEventListener('click', (e) => { const id = e.currentTarget.dataset.id, st = id?.split('-')[1]; if (id && STATES[st]) { select(st); goMap(); } });
+  $('#cbClose').addEventListener('click', () => { clearTimeout(cbTimer); cbState.items = []; $('#cbList').hidden = true; renderBanner(false); });
+  $('#cbText').addEventListener('click', (e) => openRace(e.currentTarget.dataset.id));
+  $('#cbMore').addEventListener('click', () => { $('#cbList').hidden = !$('#cbList').hidden; renderBanner(false); });
+  $('#cbList').addEventListener('click', (e) => { const btn = e.target.closest('button[data-id]'); if (btn) openRace(btn.dataset.id); });
 }
 
 // ---------- sources ----------
@@ -616,7 +639,7 @@ async function boot() {
   setInterval(tick, 90000);
   window.addEventListener('hashchange', route);
   route();
-  if (/[?&]demoCall/.test(location.search)) { S.callQ.push({ id: 'S-GA', winner: { n: 'Demo', p: 'D' }, text: 'TEST: NBC News projects Jon Ossoff (D) wins Georgia Senate (banner preview, not a real call)' }); showNextCall(); }
+  if (/[?&]demoCall/.test(location.search)) { cbState.items = ['S-GA', 'G-GA', 'S-NC', 'H-FL-07', 'H-NC-01'].map((id) => ({ id, label: raceLabel(id), name: 'Demo', p: 'D' })); if (/demoCall=2/.test(location.search)) $('#cbList').hidden = false; renderBanner(true); } // preview only
   document.addEventListener('visibilitychange', () => !document.hidden && tick());
 }
 boot().catch((e) => { console.error(e); $('#liveText').textContent = 'Failed to load'; });
