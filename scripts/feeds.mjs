@@ -205,9 +205,7 @@ const CAall = async () => ({ ...(await CA()), ...(await caHouse()) });
 const SLUG = (name) => name.toLowerCase().replace(/[^a-z ]/g, '').replace(/ /g, '-');
 const NBC_PARTY = { dem: 'D', gop: 'R', Dem: 'D', Rep: 'R' };
 export function nbcState(st, name, closed) {
-  return async () => {
-    if (!closed()) return {};
-    const j = await get(`https://www.nbcnews.com/firecracker/api/v2/state-results/2026-elections/${SLUG(name)}-results`, true);
+  const parse = (j) => {
     const found = [];
     (function walk(o) { if (Array.isArray(o)) o.forEach(walk); else if (o && typeof o === 'object') { if (o.raceId && o.candidates) found.push(o); Object.values(o).forEach(walk); } })(j);
     const out = {};
@@ -221,6 +219,19 @@ export function nbcState(st, name, closed) {
       const total = cands.reduce((a, c) => a + c.votes, 0);
       const pctIn = parseFloat(r.percentInFormatted) || 0;
       out[key] = { id: key, source: 'NBC News', reporting: `${r.percentInFormatted || '0%'} of expected vote counted`, pct: pctIn, totalVotes: total, shareOnly: total === 0, cands, ...(cands.some((c) => c.winner) ? { winner: cands.find((c) => c.winner).n } : {}) };
+    }
+    return out;
+  };
+  return async () => {
+    if (!closed()) return {};
+    const slug = SLUG(name);
+    let out = {};
+    try { out = parse(await get(`https://www.nbcnews.com/firecracker/api/v2/state-results/2026-elections/${slug}-results`, true)); } catch { /* try the page */ }
+    // The API sometimes returns only the nationwide "latest results" module; the state page always carries the statewide races.
+    if (!Object.keys(out).length && (RACES.S.includes(st) || RACES.G.includes(st))) {
+      const html = await get(`https://www.nbcnews.com/politics/2026-elections/${slug}-results`, false);
+      const m = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
+      if (m) out = parse(JSON.parse(m[1]));
     }
     return out;
   };
@@ -244,4 +255,4 @@ export const FEEDS = { CA: CAall, CO, FL, GA, IA, MN, NC, NE, SD };
 // Every other state with a Senate or governor race reads NBC's state API once its polls have closed (at most 8 requests at a time).
 let nbcActive = 0; const nbcWait = [];
 const nbcLimited = (fn) => async () => { while (nbcActive >= 8) await new Promise((r) => nbcWait.push(r)); nbcActive++; try { return await fn(); } finally { nbcActive--; nbcWait.shift()?.(); } };
-for (const st of new Set([...RACES.S, ...RACES.G])) if (!FEEDS[st]) FEEDS[st] = nbcLimited(nbcState(st, STATES[st][0], () => Date.now() >= closeTime(st)));
+for (const st of new Set([...RACES.S, ...RACES.G])) if (!FEEDS[st]) FEEDS[st] = nbcLimited(nbcState(st, STATES[st][0], () => Date.now() >= closeTime(st) - 3 * 3600000)); // start early: states with split time zones (TX) report before the last zone closes

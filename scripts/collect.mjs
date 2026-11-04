@@ -98,7 +98,8 @@ async function results() {
   await Promise.all(Object.entries(FEEDS).map(async ([st, fn]) => {
     try {
       const got = await fn(ctx);
-      for (const k of Object.keys(races)) if (k.split('-')[1] === st) delete races[k];
+      // An empty answer (a source that briefly returns nothing) must not wipe what we already have for the state.
+      if (Object.keys(got).length) for (const k of Object.keys(races)) if (k.split('-')[1] === st && !(k in got) && k[0] !== 'H') delete races[k];
       Object.assign(races, got);
       feeds[st] = { ok: true, at: now(), races: Object.keys(got) };
       // Polls closed but the state's own file still shows zero votes for a Senate/governor race: use NBC's numbers until the state posts.
