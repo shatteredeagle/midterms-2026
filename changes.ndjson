@@ -769,3 +769,12 @@
 {"t":"2026-11-04T09:36:12.354Z","type":"count","id":"H-NE-01","text":"NE-01 House: Mike Flood (R) leads Chris Backemeyer (D) 49.9%–46.5% · 414 of 438 precincts (94.5%)","source":"Nebraska Secretary of State"}
 {"t":"2026-11-04T09:36:46.216Z","type":"count","id":"S-NE","text":"Nebraska Senate: Pete Ricketts (R) leads Dan Osborn (O) 50.2%–43.8% · 1,269 of 1,322 precincts (96%)","source":"Nebraska Secretary of State"}
 {"t":"2026-11-04T09:36:46.216Z","type":"count","id":"G-NE","text":"Nebraska Governor: Jim Pillen and Joe Kelly (R) leads Lynne Walz and Ben Steffen (D) 50.6%–42.4% · 1,269 of 1,322 precincts (96%)","source":"Nebraska Secretary of State"}
+{"t":"2026-11-04T09:37:43.634Z","type":"count","id":"S-NE","text":"Nebraska Senate: Pete Ricketts (R) leads Dan Osborn (O) 50.2%–43.8% · 1,269 of 1,322 precincts (96%)","source":"Nebraska Secretary of State"}
+{"t":"2026-11-04T09:37:43.634Z","type":"count","id":"G-NE","text":"Nebraska Governor: Jim Pillen and Joe Kelly (R) leads Lynne Walz and Ben Steffen (D) 50.6%–42.4% · 1,269 of 1,322 precincts (96%)","source":"Nebraska Secretary of State"}
+{"t":"2026-11-04T09:44:03.552Z","type":"count","id":"G-NV","text":"Nevada Governor: Aaron Ford (D) leads Joe Lombardo (R) 51.5%–44.3% · 84.8% of expected vote counted (84.8%)","source":"NBC News"}
+{"t":"2026-11-04T09:44:18.831Z","type":"count","id":"S-ID","text":"Idaho Senate: Jim Risch (R) leads Todd Achilles (O) 56.8%–33.4% · 90.4% of expected vote counted (90.4%)","source":"NBC News"}
+{"t":"2026-11-04T09:46:03.932Z","type":"source","id":"FL","text":"FL official feed is failing; showing last good data"}
+{"t":"2026-11-04T09:46:25.022Z","type":"source","id":"FL","text":"FL official feed recovered"}
+{"t":"2026-11-04T09:48:06.295Z","type":"call","id":"G-NV","text":"NBC News projects Aaron Ford (D) wins Nevada Governor · 51.5%–44.3% over Lombardo (R)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T09:55:27.918Z","type":"count","id":"H-CA-28","text":"CA-28 House: Judy Chu (D) leads April A. Verlato (R) 50.3%–49.7% · 84 of 149 precincts (56.4%)","source":"California Secretary of State"}
+{"t":"2026-11-04T09:55:27.918Z","type":"lead","id":"H-CA-42","text":"CA-42 House: lead changes to Brian Burley (R) at 50.3%","source":"California Secretary of State"}
