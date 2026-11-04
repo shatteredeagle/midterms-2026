@@ -778,3 +778,16 @@
 {"t":"2026-11-04T09:48:06.295Z","type":"call","id":"G-NV","text":"NBC News projects Aaron Ford (D) wins Nevada Governor · 51.5%–44.3% over Lombardo (R)","source":"NBC News Decision Desk"}
 {"t":"2026-11-04T09:55:27.918Z","type":"count","id":"H-CA-28","text":"CA-28 House: Judy Chu (D) leads April A. Verlato (R) 50.3%–49.7% · 84 of 149 precincts (56.4%)","source":"California Secretary of State"}
 {"t":"2026-11-04T09:55:27.918Z","type":"lead","id":"H-CA-42","text":"CA-42 House: lead changes to Brian Burley (R) at 50.3%","source":"California Secretary of State"}
+{"t":"2026-11-04T10:09:55.727Z","type":"count","id":"H-CA-15","text":"CA-15 House: Kevin Mullin (D) leads Charles Hoelter (R) 77.2%–22.8% · 238 of 238 precincts (100%)","source":"California Secretary of State"}
+{"t":"2026-11-04T10:12:05.520Z","type":"count","id":"S-MI","text":"Michigan Senate: Abdul El-Sayed (D) leads Mike Rogers (R) 52.3%–45.7% · 95.3% of expected vote counted (95.3%)","source":"NBC News"}
+{"t":"2026-11-04T10:12:05.520Z","type":"count","id":"H-TX-06","text":"TX-06 House: Jake Ellzey (R) leads Danny Minton (D) 52.2%–47.8% · 97.9% of expected vote counted (97.9%)","source":"NBC News"}
+{"t":"2026-11-04T10:12:05.520Z","type":"count","id":"H-TX-05","text":"TX-05 House: Lance Gooden (R) leads Chelsey Hockett (D) 51.6%–48.4% · 94.6% of expected vote counted (94.6%)","source":"NBC News"}
+{"t":"2026-11-04T10:12:05.520Z","type":"count","id":"H-TX-24","text":"TX-24 House: Beth Van Duyne (R) leads Kevin Burge (D) 53.4%–46.6% · 96.3% of expected vote counted (96.3%)","source":"NBC News"}
+{"t":"2026-11-04T10:12:05.520Z","type":"count","id":"H-TX-33","text":"TX-33 House: Colin Allred (D) leads Patrick Gillespie (R) 78.7%–21.3% · 90% of expected vote counted (90%)","source":"NBC News"}
+{"t":"2026-11-04T10:12:05.520Z","type":"count","id":"H-TX-32","text":"TX-32 House: Jace Yarbrough (R) leads Dan Barrios (D) 51.5%–48.5% · 94.1% of expected vote counted (94.1%)","source":"NBC News"}
+{"t":"2026-11-04T10:12:05.520Z","type":"count","id":"H-TX-30","text":"TX-30 House: Frederick Haynes (D) leads Everett Jackson (R) 82.6%–17.4% · 92.8% of expected vote counted (92.8%)","source":"NBC News"}
+{"t":"2026-11-04T10:12:50.847Z","type":"count","id":"G-MI","text":"Michigan Governor: Jocelyn Benson (D) leads John James (R) 54.3%–44% · 95% of expected vote counted (95%)","source":"NBC News"}
+{"t":"2026-11-04T10:14:44.775Z","type":"count","id":"G-MI","text":"Michigan Governor: Jocelyn Benson (D) leads John James (R) 54.3%–44% · 95.2% of expected vote counted (95.2%)","source":"NBC News"}
+{"t":"2026-11-04T10:15:38.645Z","type":"count","id":"H-CA-18","text":"CA-18 House: Zoe Lofgren (D) leads Shane Lewis (R) 80.7%–19.3% · 40 of 40 precincts (100%)","source":"California Secretary of State"}
+{"t":"2026-11-04T10:15:38.645Z","type":"count","id":"H-CA-19","text":"CA-19 House: Jimmy Panetta (D) leads Peter Coe Verbica (R) 81.4%–18.6% · 161 of 161 precincts (100%)","source":"California Secretary of State"}
+{"t":"2026-11-04T10:17:08.129Z","type":"lead","id":"H-ME-02","text":"ME-02 House: lead changes to Matthew Dunlap (D) at 50.1%","source":"NBC News"}
