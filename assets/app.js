@@ -1,4 +1,4 @@
-import { STATES, RACES, closeTime } from './states.js?v=802d03c7';
+import { STATES, RACES, closeTime } from './states.js?v=0f4658ae';
 
 const REPO = 'ShatteredEagle/midterms-2026';
 const RAW = `https://raw.githubusercontent.com/${REPO}/data/`;
@@ -539,7 +539,13 @@ function showNextCall() {
 }
 function checkCalls() {
   const ids = Object.keys(S.calls?.calls || {});
-  if (S.callsSeen === null) { if (S.calls) S.callsSeen = new Set(ids); return; } // first load: don't replay calls already made
+  if (S.callsSeen === null) { // first load: don't replay old calls, but do flash Senate/governor calls made in the last 15 minutes
+    if (!S.calls) return;
+    const recent = ids.filter((id) => id[0] !== 'H' && Date.now() - Date.parse(S.calls.calls[id].firstSeen) < 15 * 60000);
+    S.callsSeen = new Set(ids.filter((id) => !recent.includes(id)));
+    S.callsSeen.size < ids.length && (() => { for (const id of recent) { S.callsSeen.add(id); S.callQ.push(S.calls.calls[id]); } showNextCall(); })();
+    return;
+  }
   const fresh = ids.filter((id) => !S.callsSeen.has(id));
   for (const id of fresh) { S.callsSeen.add(id); S.callQ.push(S.calls.calls[id]); }
   if (fresh.length && $('#callBanner').hidden) showNextCall(); else if (fresh.length) { const m = $('#cbMore'); m.hidden = false; m.textContent = `+${S.callQ.length} more`; }

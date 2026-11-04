@@ -194,11 +194,11 @@ const DATA = new URL('../data/', import.meta.url);
 const readData = async (f) => { try { return JSON.parse(await readFile(new URL(f, DATA), 'utf8')); } catch { return null; } };
 const manualNow = { exit: await readData('exit-polls.json'), ballot: await readData('ballot-questions.json'), averages: await readData('other-averages.json'), early: await readData('early-vote.json') };
 const manualPrev = (await readJ('manual')) || {};
-const callsBefore = await readJ('calls');
 await writeFile(`${OUT}/manual.json`, JSON.stringify(manualNow));
 const anchors = log.anchors || { odds: {}, control: {} };
 const fresh = diffSnapshots(before, { markets: m, polls: po, results: re }, Date.now(), anchors);
-const added = [...diffManual(manualPrev, manualNow), ...diffCalls(callsBefore, ca, re)];
+anchors.announced ||= {};
+const added = [...diffManual(manualPrev, manualNow), ...diffCalls(ca, re, anchors.announced)];
 const changes = { updated: now(), events: [...added, ...fresh.reverse(), ...(log.events || [])].slice(0, 300) };
 await writeFile(`${OUT}/changes.json`, JSON.stringify({ ...changes, anchors })); // anchors stay server-side; the bundle and site get events only
 await writeFile(`${OUT}/bundle.json`, JSON.stringify({ updated: now(), markets: m, polls: po, results: re, status: st, turnout: tu, calls: ca, changes }));

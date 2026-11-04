@@ -88,17 +88,20 @@ export function diffManual(prev = {}, next = {}, nowMs = Date.now()) {
   return out;
 }
 
-// New race calls (NBC News Decision Desk projections). On the very first run nothing is announced (no replay of old calls).
-export function diffCalls(prev, next, results, nowMs = Date.now()) {
-  if (!next?.calls || !prev?.calls) return [];
-  const t = new Date(nowMs).toISOString(), out = [];
+// New race calls (NBC News Decision Desk projections). `announced` remembers which calls already produced an event.
+// The first time it runs (empty), old House calls are marked announced silently; Senate/governor calls always announce.
+export function diffCalls(next, results, announced, nowMs = Date.now()) {
+  if (!next?.calls) return [];
+  const t = new Date(nowMs).toISOString(), out = [], firstRun = Object.keys(announced).length === 0;
   const full = (id, w) => {
     const cands = results?.races?.[id]?.cands || [];
     const hit = cands.find((c) => c.p === w.p && c.n.toLowerCase().includes(String(w.n).toLowerCase()));
     return hit ? hit.n.replace(/ \([^)]*\)$/, '') : w.n;
   };
   for (const [id, c] of Object.entries(next.calls)) {
-    if (prev.calls[id]) continue;
+    if (announced[id]) continue;
+    announced[id] = true;
+    if (firstRun && id[0] === 'H') continue;
     out.push({ t, type: 'call', id, text: `NBC News projects ${full(id, c.winner)} (${c.winner.p}) wins ${label(id)}${c.winner.pct ? ` · ${c.winner.pct}%${c.runnerUp ? `–${c.runnerUp.pct}%` : ''}` : ''}`, source: 'NBC News Decision Desk' });
   }
   return out.reverse();
