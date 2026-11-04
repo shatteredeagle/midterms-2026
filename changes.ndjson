@@ -574,3 +574,40 @@
 {"t":"2026-11-04T06:14:11.922Z","type":"call","id":"H-TX-08","text":"NBC News projects Jessica Hart Steinmann (R) wins TX-08 House · 55.3%–44.7% over Jones (D)","source":"NBC News Decision Desk"}
 {"t":"2026-11-04T06:14:42.096Z","type":"count","id":"G-HI","text":"Hawaii Governor: first votes reported (12.1% of precincts)","source":"NBC News"}
 {"t":"2026-11-04T06:14:42.096Z","type":"count","id":"G-HI","text":"Hawaii Governor: Josh Green (D) leads Gary Cordery (R) 78.4%–21.6% · 12.1% of expected vote counted (12.1%)","source":"NBC News"}
+{"t":"2026-11-04T06:15:42.701Z","type":"count","id":"S-SD","text":"South Dakota Senate: Mike Rounds (R) leads Brian L Bengs (O) 61.5%–38.5% · 537 of 671 precincts (80%)","source":"South Dakota Secretary of State"}
+{"t":"2026-11-04T06:15:42.701Z","type":"count","id":"G-SD","text":"South Dakota Governor: Larry Rhoden and Tony Venhuizen (R) leads Dan Ahlers and Steven McCleerey (D) 64.6%–35.4% · 537 of 671 precincts (80%)","source":"South Dakota Secretary of State"}
+{"t":"2026-11-04T06:15:42.701Z","type":"count","id":"H-CA-06","text":"CA-06 House: Richard Pan (D) leads Kevin Kiley (O) 69.9%–30.1% · 10 of 10 precincts (100%)","source":"California Secretary of State"}
+{"t":"2026-11-04T06:15:42.701Z","type":"count","id":"H-CA-08","text":"CA-08 House: John Garamendi (D) leads Rudy Recile (R) 78.4%–21.6% · 12 of 12 precincts (100%)","source":"California Secretary of State"}
+{"t":"2026-11-04T06:16:11.880Z","type":"source","id":"FL","text":"FL official feed is failing; showing last good data"}
+{"t":"2026-11-04T06:16:42.530Z","type":"source","id":"FL","text":"FL official feed recovered"}
+{"t":"2026-11-04T06:18:12.953Z","type":"call","id":"G-MI","text":"NBC News projects Jocelyn Benson (D) wins Michigan Governor · 53.8%–44.5% over James (R)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T06:18:12.953Z","type":"call","id":"H-MI-01","text":"NBC News projects Jack Bergman (R) wins MI-01 House · 53.1%–44.8% over Barr (D)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T06:18:42.123Z","type":"count","id":"S-ME","text":"Maine Senate: first votes reported (72.3% of precincts)","source":"NBC News"}
+{"t":"2026-11-04T06:19:12.247Z","type":"call","id":"H-MN-06","text":"NBC News projects Tom Emmer (R) wins MN-06 House · 54.5%–45.4% over Chapin (D)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T06:20:11.472Z","type":"call","id":"H-HI-02","text":"NBC News projects Jill Tokuda (D) wins HI-02 House · 74.1%–25.9% over Awa (R)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T06:20:11.472Z","type":"call","id":"G-AZ","text":"NBC News projects Katie Hobbs (D) wins Arizona Governor · 57.8%–40.7% over Biggs (R)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T06:20:11.472Z","type":"call","id":"H-TX-24","text":"NBC News projects Beth Van Duyne (R) wins TX-24 House · 52.9%–47.1% over Burge (D)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T06:20:42.820Z","type":"count","id":"H-MN-03","text":"MN-03 House: Kelly Morrison (D) leads Tyler Bass (R) 64.1%–35.9% · 229 of 229 precincts (100%)","source":"Minnesota Secretary of State"}
+{"t":"2026-11-04T06:20:42.820Z","type":"count","id":"H-ID-01","text":"ID-01 House: Russ Fulcher (R) leads Kaylee Peterson (D) 61.9%–31.2% · 56.5% of expected vote counted (56.5%)","source":"NBC News"}
+{"t":"2026-11-04T06:21:12.395Z","type":"count","id":"G-HI","text":"Hawaii Governor: Josh Green (D) leads Gary Cordery (R) 76.8%–23.2% · 50.6% of expected vote counted (50.6%)","source":"NBC News"}
+{"t":"2026-11-04T06:21:12.397Z","type":"call","id":"S-AZ","text":"NBC News projects Fontes (D) wins Arizona Senate · 57%–41.8% over Kolodin (R)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T06:21:41.808Z","type":"count","id":"G-HI","text":"Hawaii Governor: Josh Green (D) leads Gary Cordery (R) 77.1%–22.9% · 63.6% of expected vote counted (63.6%)","source":"NBC News"}
+{"t":"2026-11-04T06:22:41.574Z","type":"count","id":"H-HI-02","text":"HI-02 House: Jill Tokuda (D) leads Brenton Awa (R) 71.2%–28.8% · 60.9% of expected vote counted (60.9%)","source":"NBC News"}
+{"t":"2026-11-04T06:22:41.574Z","type":"count","id":"H-HI-01","text":"HI-01 House: Ed Case (D) leads Adriel Lam (R) 76%–19.6% · 61.6% of expected vote counted (61.6%)","source":"NBC News"}
+{"t":"2026-11-04T06:24:12.706Z","type":"call","id":"H-HI-01","text":"NBC News projects Ed Case (D) wins HI-01 House · 76%–19.6% over Lam (R)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T06:24:12.706Z","type":"call","id":"H-TN-07","text":"NBC News projects Matt Van Epps (R) wins TN-07 House · 50.3%–48.1% over Copeland (D)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T06:25:11.895Z","type":"call","id":"H-CA-45","text":"NBC News projects Derek Tran (D) wins CA-45 House · 60.7%–39.3% over Vo (R)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T06:25:42.119Z","type":"count","id":"H-CA-01","text":"CA-01 House: James Gallagher (R) leads Mike McGuire (D) 68.3%–31.7% · 21 of 38 precincts (55.3%)","source":"California Secretary of State"}
+{"t":"2026-11-04T06:26:12.896Z","type":"source","id":"FL","text":"FL official feed is failing; showing last good data"}
+{"t":"2026-11-04T06:26:12.898Z","type":"call","id":"H-OR-06","text":"NBC News projects Andrea Salinas (D) wins OR-06 House · 58.1%–41.8% over Russ (R)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T06:26:42.429Z","type":"source","id":"FL","text":"FL official feed recovered"}
+{"t":"2026-11-04T06:27:41.686Z","type":"count","id":"S-ID","text":"Idaho Senate: Jim Risch (R) leads Todd Achilles (O) 54.3%–35.9% · 75.4% of expected vote counted (75.4%)","source":"NBC News"}
+{"t":"2026-11-04T06:27:41.686Z","type":"count","id":"G-ID","text":"Idaho Governor: Brad Little (R) leads Terri Pickens (D) 55%–34.4% · 75.7% of expected vote counted (75.7%)","source":"NBC News"}
+{"t":"2026-11-04T06:27:41.686Z","type":"count","id":"S-MT","text":"Montana Senate: Kurt Alme (R) leads Seth Bodnar (O) 47.1%–39.1% · 71% of expected vote counted (71%)","source":"NBC News"}
+{"t":"2026-11-04T06:28:12.417Z","type":"count","id":"S-VA","text":"Virginia Senate: Mark Warner (D) leads Bert Mizusawa (R) 60.9%–38.8% · 95.7% of expected vote counted (95.7%)","source":"NBC News"}
+{"t":"2026-11-04T06:30:12.619Z","type":"call","id":"H-UT-04","text":"NBC News projects Mike Kennedy (R) wins UT-04 House · 52.4%–41.1% over Larsen (D)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T06:31:12.372Z","type":"call","id":"H-MI-08","text":"NBC News projects Kristen McDonald Rivet (D) wins MI-08 House · 54.4%–43% over Smith (R)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T06:33:11.796Z","type":"count","id":"G-WI","text":"Wisconsin Governor: David Crowley (D) leads Tom Tiffany (R) 53.3%–46.7% · 95.7% of expected vote counted (95.7%)","source":"NBC News"}
+{"t":"2026-11-04T06:33:11.797Z","type":"call","id":"H-AZ-09","text":"NBC News projects Paul Gosar (R) wins AZ-09 House · 56.3%–43.7% over Sterbinsky (D)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T06:33:42.673Z","type":"count","id":"S-MN","text":"Minnesota Senate: Peggy Flanagan (D) leads Michele Tafoya (R) 54.4%–43% · 3,902 of 4,105 precincts (95.1%)","source":"Minnesota Secretary of State"}
+{"t":"2026-11-04T06:33:42.673Z","type":"count","id":"G-MN","text":"Minnesota Governor: Amy Klobuchar and Ben Schierer (D) leads Lisa Demuth and Ryan Wilson (R) 56.1%–42.1% · 3,902 of 4,105 precincts (95.1%)","source":"Minnesota Secretary of State"}
