@@ -1,5 +1,5 @@
-import { STATES, closeTime } from './states.js?v=be964948';
-import { fetchControl } from './markets.js?v=be964948';
+import { STATES, closeTime } from './states.js?v=8c5c298c';
+import { fetchControl } from './markets.js?v=8c5c298c';
 
 const REPO = 'ShatteredEagle/midterms-2026';
 const RAW = `https://raw.githubusercontent.com/${REPO}/data/`;
@@ -10,7 +10,7 @@ const pct = (x, d = 0) => (x * 100).toFixed(d) + '%';
 const FIPS = {};
 for (const [st, v] of Object.entries(STATES)) FIPS[v[1]] = st;
 
-const S = { pollTab: 'H', senAll: false, history: null, early: null, turnout: null, otherAvgs: null, ballot: null, bqState: 'MA', changes: null, chgF: 'all', chgAll: false, chgSeen: 0, markets: null, polls: null, results: null, status: null, exit: null, control: null, paths: null, kind: 'S', sel: null, rkind: 'S', sort: 'close', q: '', showAll: false, fetchedAt: {} };
+const S = { feedF: 'key', feedMark: 0, pollTab: 'H', senAll: false, history: null, early: null, turnout: null, otherAvgs: null, ballot: null, bqState: 'MA', changes: null, chgF: 'all', chgAll: false, chgSeen: 0, markets: null, polls: null, results: null, status: null, exit: null, control: null, paths: null, kind: 'S', sel: null, rkind: 'S', sort: 'close', q: '', showAll: false, fetchedAt: {} };
 
 // ---------- data ----------
 // raw.githubusercontent.com caches 5 min regardless of query string, so the browser reads the bundle through the
@@ -517,6 +517,45 @@ function wireBallot() {
   });
 }
 
+// ---------- live feed rail ----------
+const FEED_KIND = { close: 'Polls', count: 'Count', lead: 'Lead change', projected: 'Projected', exit: 'Exit poll', ballot: 'Ballot', early: 'Early vote', average: 'Polls', polls: 'Polls', rating: 'Rating', control: 'Control', odds: 'Odds', source: 'Feed' };
+// "Key" hides House-district noise and small odds moves; "All" shows everything the collector logged.
+const feedKey = (e) => {
+  if (e.type === 'source') return false;
+  if (e.type !== 'odds') return true;
+  if (e.id?.startsWith('H-')) return false;
+  return typeof e.from === 'number' && (Math.abs(e.to - e.from) >= 0.08 || (e.from - 0.5) * (e.to - 0.5) < 0);
+};
+function renderFeed() {
+  const evs = (S.changes?.events || []).filter((e) => S.feedF === 'all' || feedKey(e)).slice(0, 60);
+  const list = $('#railList');
+  list.innerHTML = evs.length ? evs.map((e, i) => `<li class="fi ${S.feedMark && Date.parse(e.t) > S.feedMark ? 'new' : ''}" tabindex="0" data-id="${esc(e.id || '')}" data-type="${esc(e.type)}"><div class="top"><span class="kind ${esc(e.type)}">${esc(FEED_KIND[e.type] || e.type)}</span><time datetime="${esc(e.t)}">${ago(e.t)}</time></div><div class="txt">${esc(e.text)}</div></li>`).join('') : '<li class="rail-empty">Nothing yet. Items appear as polls close, votes come in and odds move.</li>';
+  const fresh = (S.changes?.events || []).filter((e) => Date.parse(e.t) > S.feedMark && feedKey(e)).length;
+  const b = $('#railBadge');
+  if (b) { b.textContent = fresh > 99 ? '99+' : fresh; b.hidden = !fresh || document.body.classList.contains('rail-open'); }
+}
+function wireFeed() {
+  const open = (v) => { document.body.classList.toggle('rail-open', v); $('#railBtn').setAttribute('aria-expanded', v); $('#railBackdrop').hidden = !v; if (v) { S.feedMark = Date.now(); renderFeed(); } };
+  $('#railBtn').addEventListener('click', () => open(!document.body.classList.contains('rail-open')));
+  $('#railClose').addEventListener('click', () => open(false));
+  $('#railBackdrop').addEventListener('click', () => open(false));
+  $('#railTabs').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; S.feedF = b.dataset.f; for (const x of document.querySelectorAll('#railTabs button')) x.setAttribute('aria-selected', x === b); renderFeed(); });
+  const go = (li) => {
+    if (!li) return;
+    const id = li.dataset.id, ty = li.dataset.type, st = id.split('-')[1];
+    if (/^[SGH]-/.test(id) && STATES[st]) { select(st); goMap(); }
+    else if (ty === 'exit') location.hash = '#exit';
+    else if (ty === 'ballot') location.hash = '#ballot';
+    else if (ty === 'early') location.hash = '#turnout';
+    else if (ty === 'average' || ty === 'polls') location.hash = '#polls';
+    else location.hash = '#changes';
+    if (window.matchMedia('(max-width:1199px)').matches) open(false);
+  };
+  $('#railList').addEventListener('click', (e) => go(e.target.closest('.fi')));
+  $('#railList').addEventListener('keydown', (e) => { if (e.key === 'Enter') go(e.target.closest('.fi')); });
+  setInterval(() => { for (const t of document.querySelectorAll('#railList time')) t.textContent = ago(t.getAttribute('datetime')); }, 5000);
+}
+
 // ---------- sources ----------
 function renderSources() {
   const st = S.status?.sources || {};
@@ -562,13 +601,14 @@ function route() {
 const goMap = () => { if (location.hash !== '#map') history.replaceState(null, '', '#map'); showView('overview', 'map'); };
 
 // ---------- boot ----------
-function renderAll() { renderClock(); renderSenate(); renderHouse(); renderCompare(); renderFlips(); paintMap(); renderDetail(); renderChanges(); renderTurnout(); renderBallot(); renderTable(); renderPolls(); renderExit(); renderSources(); renderLive(); }
+function renderAll() { renderClock(); renderSenate(); renderHouse(); renderCompare(); renderFlips(); paintMap(); renderDetail(); renderChanges(); renderFeed(); renderTurnout(); renderBallot(); renderTable(); renderPolls(); renderExit(); renderSources(); renderLive(); }
 async function boot() {
   const th = $('#theme');
   th.onclick = () => { const cur = document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); const n = cur === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = n; try { localStorage.setItem('theme', n); } catch {} };
   S.paths = await (await fetch('assets/map-paths.json')).json();
-  drawMap(); wireMap(); wireTable(); wireChanges(); wireBallot(); wireFlips(); wirePolls();
+  drawMap(); wireMap(); wireTable(); wireChanges(); wireBallot(); wireFlips(); wirePolls(); wireFeed();
   await Promise.all([loadAll(), loadControl(), loadHistory()]);
+  S.feedMark = Date.now();
   renderAll();
   setInterval(() => { renderClock(); renderLive(); }, 1000);
   let busy = false;

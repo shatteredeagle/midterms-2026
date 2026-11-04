@@ -5,7 +5,7 @@ const KIND = { S: 'Senate', G: 'Governor', H: 'House' };
 const label = (id) => { const [k, st, d] = id.split('-'); return k === 'H' ? `${st}-${d} House` : `${STATES[st]?.[0] || st} ${KIND[k]}`; };
 const pD = (r) => r.d / ((r.d + r.r) || 1);
 const side = (p) => (p >= 0.5 ? `D ${Math.round(p * 100)}%` : `R ${Math.round((1 - p) * 100)}%`);
-const MILESTONES = [10, 25, 50, 75, 90, 100];
+const MILESTONES = [5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 100];
 
 // `anchors` holds the last LOGGED level per race/control so slow drifts still fire once they total the threshold
 // (comparing only to the previous 30-second snapshot misses any move smaller than the threshold per run).
@@ -34,6 +34,14 @@ export function diffSnapshots(prev, next, nowMs = Date.now(), anchors = { odds: 
     }
   }
 
+  // Polls closing: one event per close time, listing the states (prev snapshot time < close <= now)
+  const prevT = Date.parse(prev.markets?.updated || prev.results?.updated || '') || 0;
+  if (prevT) {
+    const byTime = {};
+    for (const st of Object.keys(STATES)) { const ct = closeTime(st); if (ct > prevT && ct <= nowMs) (byTime[ct] ||= []).push(st); }
+    for (const [ct, sts] of Object.entries(byTime)) ev('close', 'close', `Polls closed in ${sts.join(', ')} (${new Date(+ct).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/New_York' })} ET)`);
+  }
+
   // Official results
   if (prev.results && next.results) {
     for (const [id, r] of Object.entries(next.results.races)) {
@@ -43,7 +51,11 @@ export function diffSnapshots(prev, next, nowMs = Date.now(), anchors = { odds: 
       const lead = (x) => x.cands[0]?.votes > 0 ? x.cands[0].n : null;
       if (p.totalVotes && lead(p) && lead(r) && lead(p) !== lead(r)) ev('lead', id, `${label(id)}: lead changes to ${lead(r)} (${r.cands[0].pct}%)`, { source: r.source });
       const unit = /counties/.test(r.reporting) ? 'counties' : 'precincts';
-      for (const m of MILESTONES) if (p.pct < m && r.pct >= m) ev('count', id, `${label(id)}: ${m}% of ${unit} reporting${r.cands[0]?.votes ? ` · ${r.cands[0].n} ${r.cands[0].pct}%` : ''}`, { source: r.source });
+      const crossed = MILESTONES.filter((m) => p.pct < m && r.pct >= m).pop(); // only the highest crossed this run
+      if (crossed !== undefined) {
+        const a = r.cands[0], b = r.cands[1];
+        ev('count', id, `${label(id)}: ${a?.votes ? `${a.n} leads ${b ? b.n : ''} ${a.pct}%–${b ? b.pct : ''}%` : 'no leader yet'} · ${r.reporting.replace(' reporting', '')} (${r.pct}%)`.replace(/ {2,}/g, ' '), { source: r.source });
+      }
     }
     for (const [st, f] of Object.entries(next.results.feeds || {})) {
       const was = prev.results.feeds?.[st];

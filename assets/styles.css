@@ -48,7 +48,7 @@ nav a[aria-current=page]::after{content:"";position:absolute;left:12px;right:12p
 .icon{border:1px solid var(--line);background:var(--surface);color:var(--text);width:34px;height:34px;border-radius:9px;cursor:pointer;font-size:16px}
 .icon:hover{background:var(--surface-2)}
 
-main.wrap{padding-top:20px;display:grid;gap:20px}
+main{display:grid;gap:20px}
 .card,.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
 .panel{padding:clamp(14px,2.2vw,24px)}
 .panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:16px}
@@ -144,7 +144,7 @@ svg.chart .grid{stroke:var(--line)}
 .src-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:18px}
 .src{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--surface-2)}
 .src h3{font-size:15px;margin-bottom:4px;display:flex;justify-content:space-between;gap:8px;align-items:center}
-.foot{padding:24px clamp(14px,3vw,28px) 48px;color:var(--muted);font-size:13px}
+.foot{padding-top:24px;padding-bottom:48px;color:var(--muted);font-size:13px}
 .foot p{max-width:90ch}
 
 @media (max-width:980px){.hero{grid-template-columns:1fr 1fr}.pair{grid-template-columns:1fr}.map-grid,.polls-grid{grid-template-columns:1fr}.topbar{flex-wrap:wrap;height:auto;padding:8px 0;gap:8px 12px}nav{order:3;flex-basis:100%;margin:0;overflow-x:auto;scrollbar-width:none}nav a[aria-current=page]::after{bottom:-1px}.bar-right{margin-left:auto}}
@@ -289,3 +289,36 @@ td.num{white-space:nowrap}
 .qd[open]>summary::after{content:"−"}
 .qd>summary::-webkit-details-marker{display:none}
 .qd .q{margin:0;padding:0 14px 12px}
+
+/* live feed rail */
+.wide{max-width:1640px;margin:0 auto;padding-left:clamp(14px,3vw,28px);padding-right:clamp(14px,3vw,28px)}
+.layout{max-width:1640px;margin:0 auto;padding:20px clamp(14px,3vw,28px) 0;display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;align-items:start}
+.layout main{display:grid;gap:20px;min-width:0}
+.rail{position:sticky;top:72px;max-height:calc(100vh - 92px);display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.rail-h{display:flex;align-items:center;gap:10px;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.rail-h h2{font-size:16px;display:flex;align-items:center;gap:8px}
+.rail-h h2::before{content:"";width:8px;height:8px;border-radius:50%;background:#1fa464;box-shadow:0 0 0 0 rgb(31 164 100/.6);animation:pulse 2s infinite}
+.rail-list{list-style:none;margin:0;padding:0;overflow-y:auto;flex:1}
+.fi{padding:10px 14px;border-bottom:1px solid var(--line);cursor:pointer;display:grid;gap:3px}
+.fi:hover{background:var(--surface-2)}
+.fi.new{background:color-mix(in srgb,var(--focus) 9%,transparent);box-shadow:inset 3px 0 0 var(--focus)}
+.fi .top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.fi .kind{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.fi .kind.count,.fi .kind.lead,.fi .kind.projected,.fi .kind.close{color:#1fa464}
+.fi .kind.exit,.fi .kind.ballot{color:#8b6cf0}
+.fi .kind.early,.fi .kind.average{color:#c98a00}
+.fi time{font-size:11.5px;color:var(--muted);white-space:nowrap}
+.fi .txt{font-size:13.5px;line-height:1.35}
+.rail-empty{padding:18px 14px;color:var(--muted);font-size:13.5px}
+.railclose,.pillbtn,.backdrop{display:none}
+.pillbtn{border:1px solid var(--line);background:var(--surface);color:var(--text);font:inherit;font-weight:600;font-size:13px;padding:6px 12px;border-radius:99px;cursor:pointer;align-items:center;gap:6px}
+.badge{background:var(--r);color:#fff;border-radius:99px;font-size:11px;padding:0 6px;min-width:18px;text-align:center}
+@media (max-width:1199px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+  .pillbtn{display:inline-flex}
+  .rail{position:fixed;top:56px;right:0;bottom:0;width:min(400px,92vw);max-height:none;border-radius:0;transform:translateX(105%);transition:transform .25s;z-index:40}
+  body.rail-open .rail{transform:none}
+  .railclose{display:inline-grid;width:30px;height:30px}
+  .backdrop{position:fixed;inset:56px 0 0 0;background:rgb(0 0 0/.4);z-index:35}
+  body.rail-open .backdrop{display:block}
+}

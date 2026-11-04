@@ -12,25 +12,27 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://shatteredeagle.github.io/midterms-2026/">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='16' height='32' fill='%232563c9'/%3E%3Crect x='16' width='16' height='32' fill='%23cc3a3a'/%3E%3Cpath d='M6 17l6 6 14-14' stroke='white' stroke-width='4' fill='none'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="assets/styles.css?v=be964948">
+<link rel="stylesheet" href="assets/styles.css?v=8c5c298c">
 <script>try{const t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t}catch{}</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <header class="top">
-  <div class="wrap topbar">
+  <div class="wide topbar">
     <div class="brand"><span class="logo" aria-hidden="true"></span><h1>2026 Midterms</h1></div>
     <nav aria-label="Sections" id="nav">
       <a href="#overview" data-v="overview">Overview</a><a href="#races" data-v="races">Races</a><a href="#polls" data-v="polls">Polls</a><a href="#reports" data-v="reports">Reports</a><a href="#changes" data-v="changes">Changes</a><a href="#sources" data-v="sources">Sources</a>
     </nav>
     <div class="bar-right">
+      <button id="railBtn" class="pillbtn" type="button" aria-controls="rail" aria-expanded="false">Live feed <span id="railBadge" class="badge" hidden>0</span></button>
       <span id="live" class="pill" role="status" aria-live="polite"><i class="dot"></i><span id="liveText">Loading…</span></span>
       <button id="theme" class="icon" type="button" aria-label="Toggle dark mode" title="Toggle dark mode"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor"/></svg></button>
     </div>
   </div>
 </header>
 
-<main class="wrap" id="main" tabindex="-1">
+<div class="layout">
+<main id="main" tabindex="-1">
   <div class="view" data-view="overview" id="view-overview">
 <div class="clockbar card" id="clock"></div>
     <section class="hero" aria-label="Chamber control">
@@ -144,12 +146,25 @@
   </section>
   </div>
 </main>
+<aside id="rail" class="rail" aria-label="Live feed">
+  <header class="rail-h">
+    <div><h2>Live feed</h2><span class="small" id="railSub">What the feeds just saw</span></div>
+    <div class="seg" role="tablist" aria-label="Feed filter" id="railTabs">
+      <button role="tab" data-f="key" aria-selected="true">Key</button>
+      <button role="tab" data-f="all" aria-selected="false">All</button>
+    </div>
+    <button id="railClose" class="icon railclose" type="button" aria-label="Close live feed">×</button>
+  </header>
+  <ol id="railList" class="rail-list" aria-live="polite"></ol>
+</aside>
+</div>
 
-<footer class="wrap foot">
+<footer class="wide foot">
   <p><strong>Not official results.</strong> Market-implied projections are probabilities from trading prices, not race calls. Official counts appear only for the states listed under Sources; for everything else follow your state election office and AP. Data may be delayed or briefly wrong.</p>
   <p>Open source (MIT) · <a href="https://github.com/ShatteredEagle/midterms-2026">github.com/ShatteredEagle/midterms-2026</a></p>
 </footer>
-<script type="module" src="assets/app.js?v=be964948"></script>
+<div id="railBackdrop" class="backdrop" hidden></div>
+<script type="module" src="assets/app.js?v=8c5c298c"></script>
 <noscript><p class="wrap">This dashboard needs JavaScript to draw the map and load live data.</p></noscript>
 </body>
 </html>
