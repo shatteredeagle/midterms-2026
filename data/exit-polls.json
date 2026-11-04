@@ -1,13 +1,13 @@
 {
-  "updated": "2026-11-04T02:30:00Z",
+  "updated": "2026-11-04T02:32:00Z",
   "status": "partial",
-  "note": "Early results, re-weighted to the final count later. NBC, ABC, AP, CBS, CNN, Fox News and MS NOW share this one SSRS poll (over 75,000 voters nationally; in person, online and by phone, plus a pre-election survey for early and mail voters), so other networks will repeat these numbers, not add a second opinion. In the vote-by-group tables the columns are NBC's Democrat and Republican columns; they match the U.S. House vote (for example 2% Democratic among those voting to support Trump), but NBC's text does not label them, and no overall House total has been published. Numbers come from NBC's national table; its live blog quotes a few subgroup figures that differ, and those are not used. Tables refreshed at 9:15 PM ET: shares move by about a point as more respondents are added; groups I could not match to NBC's current table keep their earlier numbers.",
+  "note": "Early results, re-weighted to the final count later. NBC, ABC, AP, CBS, CNN, Fox News and MS NOW share this one SSRS poll (over 75,000 voters nationally; in person, online and by phone, plus a pre-election survey for early and mail voters), so other networks will repeat these numbers, not add a second opinion. In the vote-by-group tables the columns are NBC's Democrat and Republican columns; they match the U.S. House vote (for example 2% Democratic among those voting to support Trump), but NBC's text does not label them, and no overall House total has been published. Numbers come from NBC's national table; its live blog quotes a few subgroup figures that differ, and those are not used. Tables refreshed at 9:15 PM ET: shares move by about a point as more respondents are added; groups I could not match to NBC's current table keep their earlier numbers. Rows refreshed through NBC's 9:22 PM ET update where they could be matched safely; shares move by about a point as more respondents are added, so a few groups may lag by a point.",
   "sources": [
     {
       "id": "nbc",
       "name": "NBC News Exit Poll (SSRS)",
       "url": "https://www.nbcnews.com/politics/2026-election/exit-poll-trump-midterms-voters-economy-disapproval-rcna607045",
-      "published": "Nov 3: article 5:06 PM EST (updated 6:14 PM), national tables updated 9:15 PM ET",
+      "published": "Nov 3: article 5:06 PM EST (updated 6:14 PM), national tables updated 9:22 PM ET",
       "kind": "Early results: Election Day interviews plus phone, mail and online for early and mail voters"
     }
   ],
