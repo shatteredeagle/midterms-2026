@@ -1,4 +1,4 @@
-import { STATES, RACES, HOUSE_SEATS, closeTime } from './states.js?v=1a3b03fe';
+import { STATES, RACES, HOUSE_SEATS, closeTime } from './states.js?v=a97824f1';
 
 const REPO = 'ShatteredEagle/midterms-2026';
 const RAW = `https://raw.githubusercontent.com/${REPO}/data/`;
@@ -126,7 +126,8 @@ function countTrend(id) {
   const W = 380, H = 150, L = 30, R = 10, T = 14, B = 26;
   const t0 = pts[0].t, t1 = Math.max(last.t, tLock || 0, t0 + 60);
   const X = (t) => L + ((t - t0) / (t1 - t0)) * (W - L - R), Y = (v) => T + (1 - Math.min(100, Math.max(0, v)) / 100) * (H - T - B);
-  const color = { D: 'var(--d)', R: 'var(--r)' }[last.p0] || 'var(--muted)';
+  const p0 = last.p0 !== 'O' ? last.p0 : (S.results?.races?.[id]?.cands || []).find((c) => c.n === last.n0)?.p;
+  const color = { D: 'var(--d)', R: 'var(--r)' }[p0] || 'var(--muted)';
   const path = (f) => pts.map((q, i) => `${i ? 'L' : 'M'}${X(q.t).toFixed(1)} ${Y(f(q)).toFixed(1)}`).join('');
   const area = `${path(lead)}L${X(last.t).toFixed(1)} ${Y(0)}L${X(t0).toFixed(1)} ${Y(0)}Z`;
   const fmt = (t) => new Date(t * 1000).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
