@@ -156,11 +156,11 @@ async function history() {
   }
   // 2) Our own live samples: official count margin (percentage points, leader minus runner-up) and PollCheck's generic ballot margin.
   for (const r of Object.values(re?.races || {})) {
-    if (!(r.totalVotes > 0) || r.cands.length < 2) continue;
+    if (r.id?.[0] === 'H' || r.cands.length < 2 || !(r.totalVotes > 0 || (r.shareOnly && r.pct > 0 && r.cands[0].pct > 0))) continue;
     const arr = (h.counts[r.id] ||= []);
-    const pt = [t, r.pct, Math.round((r.cands[0].pct - r.cands[1].pct) * 10) / 10, r.totalVotes, r.cands[0].n, r.cands[1].n];
+    const pt = [t, r.pct, Math.round((r.cands[0].pct - r.cands[1].pct) * 10) / 10, r.totalVotes, r.cands[0].n, r.cands[1].n, r.cands[0].p];
     const last = arr[arr.length - 1];
-    if (!last || last[1] !== pt[1] || last[3] !== pt[3]) arr.push(pt);
+    if (!last || last[1] !== pt[1] || last[3] !== pt[3] || last[2] !== pt[2]) arr.push(pt);
     if (arr.length > 800) arr.splice(0, arr.length - 800);
   }
   const gm = po?.generic?.margin;

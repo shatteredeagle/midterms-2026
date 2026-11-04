@@ -1,4 +1,4 @@
-import { STATES, RACES, HOUSE_SEATS, closeTime } from './states.js?v=7a605dc3';
+import { STATES, RACES, HOUSE_SEATS, closeTime } from './states.js?v=1a3b03fe';
 
 const REPO = 'ShatteredEagle/midterms-2026';
 const RAW = `https://raw.githubusercontent.com/${REPO}/data/`;
@@ -105,12 +105,45 @@ function spark(pts, { w = 240, h = 46, lo = 0, hi = 1, mid = null, label = 'Tren
   return `<svg class="spark ${cls}" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="${esc(label)}">${mid !== null ? `<line class="mid" x1="0" x2="${w}" y1="${Y(mid)}" y2="${Y(mid)}"/>` : ''}<path class="line" d="${d}"/><circle cx="${X(last[0]).toFixed(1)}" cy="${Y(last[1]).toFixed(1)}" r="3"/></svg>`;
 }
 const since = (pts, secs) => { const cut = pts[pts.length - 1][0] - secs; return pts.filter((p) => p[0] >= cut); };
+// "Lead over time": the leader's lead and the votes still out, both in points of the final vote. Where the lead line rises above the
+// votes-still-out line, no one can catch the leader (estimate: percent reporting is read as the share of the final vote, and every
+// vote still out is assumed to go to the runner-up).
 function countTrend(id) {
-  const c = S.history?.counts?.[id];
-  if (!c || c.length < 2) return '';
-  const pts = c.map((p) => [p[0], p[2]]);
-  const last = c[c.length - 1], m = Math.max(5, ...pts.map((p) => Math.abs(p[1])));
-  return `<div class="trend"><div class="trend-h"><span class="small">Lead over time</span><span class="small"><b>${esc(last[4])} ${last[2] >= 0 ? '+' : '−'}${Math.abs(last[2]).toFixed(1)}</b> at ${last[1]}% reporting</span></div>${spark(pts, { lo: -m, hi: m, mid: 0, label: `Lead margin over time, now ${last[4]} by ${Math.abs(last[2])} points` })}</div>`;
+  const raw = S.history?.counts?.[id];
+  if (!raw || raw.length < 3) return '';
+  const pts = raw.filter((p) => p[1] > 0).map((p) => ({ t: p[0], pf: Math.min(1, p[1] / 100), m: p[2], n0: p[4], n1: p[5], p0: p[6] || 'O' }));
+  if (pts.length < 3) return '';
+  const lead = (q) => q.m * q.pf, out = (q) => (1 - q.pf) * 100;
+  const last = pts[pts.length - 1];
+  // first moment after which the lead is never again smaller than the votes still out
+  let k = -1;
+  for (let i = pts.length - 1; i >= 0; i--) { if (lead(pts[i]) > out(pts[i])) k = i; else break; }
+  let tLock = null;
+  if (k >= 0) {
+    if (k === 0) tLock = pts[0].t;
+    else { const a = pts[k - 1], b = pts[k], da = lead(a) - out(a), db = lead(b) - out(b); tLock = a.t + (b.t - a.t) * (da / (da - db || 1)); }
+  }
+  const W = 380, H = 150, L = 30, R = 10, T = 14, B = 26;
+  const t0 = pts[0].t, t1 = Math.max(last.t, tLock || 0, t0 + 60);
+  const X = (t) => L + ((t - t0) / (t1 - t0)) * (W - L - R), Y = (v) => T + (1 - Math.min(100, Math.max(0, v)) / 100) * (H - T - B);
+  const color = { D: 'var(--d)', R: 'var(--r)' }[last.p0] || 'var(--muted)';
+  const path = (f) => pts.map((q, i) => `${i ? 'L' : 'M'}${X(q.t).toFixed(1)} ${Y(f(q)).toFixed(1)}`).join('');
+  const area = `${path(lead)}L${X(last.t).toFixed(1)} ${Y(0)}L${X(t0).toFixed(1)} ${Y(0)}Z`;
+  const fmt = (t) => new Date(t * 1000).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  const call = callOf(id), tCall = call?.firstSeen ? Date.parse(call.firstSeen) / 1000 : null;
+  const grid = [0, 50, 100].map((v) => `<line class="tg" x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}"/><text class="tl" x="${L - 5}" y="${Y(v) + 3.5}" text-anchor="end">${v}</text>`).join('');
+  const lockX = tLock ? X(tLock) : null;
+  const lockLabel = tLock ? `<line class="lock" x1="${lockX}" x2="${lockX}" y1="${T}" y2="${H - B}"/><circle class="lockdot" cx="${lockX}" cy="${Y(lead({ m: last.m, pf: 1 }) * 0 + (() => { const q = pts.reduce((best, c) => (Math.abs(c.t - tLock) < Math.abs(best.t - tLock) ? c : best), pts[0]); return lead(q); })())}" r="4.5"/><text class="lockt" x="${Math.min(W - R, Math.max(L + 70, lockX))}" y="${T - 3}" text-anchor="${lockX > W - 110 ? 'end' : 'middle'}">Locked in ~${fmt(tLock)}</text>` : '';
+  const callLine = tCall && tCall >= t0 && tCall <= t1 ? `<line class="callm" x1="${X(tCall)}" x2="${X(tCall)}" y1="${T}" y2="${H - B}"/><text class="callt" x="${X(tCall)}" y="${H - B + 20}" text-anchor="middle">NBC call</text>` : '';
+  const gap = lead(last) - out(last);
+  const status = tLock ? `<span class="tag live">Lead locked in (est.) since ~${fmt(tLock)}</span>` : `<span class="tag">Not locked in: lead ${lead(last).toFixed(1)} pts vs ${out(last).toFixed(1)} pts still out</span>`;
+  return `<div class="trend lead-chart"><div class="trend-h"><span class="small"><b>${esc(last.n0)}</b> ${last.m >= 0 ? 'leads' : 'trails'} ${esc(last.n1)} by ${Math.abs(last.m).toFixed(1)} pts at ${(last.pf * 100).toFixed(1)}% in</span>${status}</div>
+    <svg class="lc" viewBox="0 0 ${W} ${H}" role="img" aria-label="Chart of the leader's lead against the votes still out over time. ${tLock ? `The lead became insurmountable around ${fmt(tLock)}.` : 'The lead is not yet insurmountable.'}">${grid}
+      <path class="la" d="${area}" style="fill:${color}"/><path class="lo" d="${path(out)}"/><path class="ll" d="${path(lead)}" style="stroke:${color}"/>${lockLabel}${callLine}
+      <circle cx="${X(last.t)}" cy="${Y(lead(last))}" r="3.2" style="fill:${color}"/><circle class="odot" cx="${X(last.t)}" cy="${Y(out(last))}" r="3"/>
+      <text class="tl" x="${L}" y="${H - 8}" text-anchor="start">${fmt(t0)}</text><text class="tl" x="${W - R}" y="${H - 8}" text-anchor="end">${fmt(last.t)}</text></svg>
+    <div class="lc-key"><span><i class="k1" style="background:${color}"></i>Leader's lead</span><span><i class="k2"></i>Votes still out</span><span class="small">Points of the final vote. Where the lead passes the votes still out, nobody can catch up.</span></div>
+    <p class="small" style="margin:2px 0 0">Estimate only: assumes every vote still out goes to the runner-up. States that count early and mail ballots first can make "percent in" misleading.</p></div>`;
 }
 
 // ---------- hero ----------
