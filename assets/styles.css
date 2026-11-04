@@ -382,3 +382,8 @@ table.ctl tbody tr{cursor:pointer}
 .waffle-key .flipkey::before{background:#f2b01e}
 
 .b-tooearly{fill:url(#hatchGray)}
+
+.waffle.house{grid-template-columns:repeat(29,1fr);gap:1.5px}
+.waffle.house i{border-radius:1.5px}
+.waffle.house i.flip{box-shadow:inset 0 0 0 1.5px #f2b01e}
+.waffle.house i.maj{outline-width:2px;outline-offset:1px}

@@ -173,7 +173,8 @@ async function calls() {
     const party = { Dem: 'D', Rep: 'R' }[w.party] || 'O';
     const lose = r.candidates.filter((c) => !c.isWinner).sort((a, b) => b.percentVote - a.percentVote)[0];
     out[id] = out[id] || { id, firstSeen: now() };
-    Object.assign(out[id], { raceId: r.raceId, status: r.callStatusCode, winner: { n: w.lastName, p: party, pct: w.percentVote }, runnerUp: lose ? { n: lose.lastName, p: { Dem: 'D', Rep: 'R' }[lose.party] || 'O', pct: lose.percentVote } : null, pctIn: r.percentInFormatted || null, url: r.href ? `https://www.nbcnews.com${r.href}` : null });
+    const inc = r.candidates.find((x) => x.isIncumbent);
+    Object.assign(out[id], { incumbentParty: inc ? ({ Dem: 'D', Rep: 'R' }[inc.party] || 'O') : null, raceId: r.raceId, status: r.callStatusCode, winner: { n: w.lastName, p: party, pct: w.percentVote }, runnerUp: lose ? { n: lose.lastName, p: { Dem: 'D', Rep: 'R' }[lose.party] || 'O', pct: lose.percentVote } : null, pctIn: r.percentInFormatted || null, url: r.href ? `https://www.nbcnews.com${r.href}` : null });
   }
   // Massachusetts ballot questions that NBC tracks (it lists only some of the nine), keyed MA-<question number>.
   const measures = {};

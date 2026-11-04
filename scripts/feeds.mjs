@@ -144,7 +144,7 @@ export async function GA() {
     const rs = it.reportingStatus || {};
     out[key] = build(key, 'Georgia Secretary of State', num(rs.reportingUnits), num(rs.totalUnits), it.summaryResults.ballotOptions.filter((o) => !o.isWriteIn).map((o) => ({
       n: tidy(o.name[0].text.replace(/\s*\((Rep|Dem|Lib|Ind|Grn|[A-Za-z]{2,4})\)\s*$/i, '').replace(/\s*\(I\)\s*$/, '')),
-      p: party(o.party?.abbreviation?.replace(/^Dem$/i, 'DEM').replace(/^Rep$/i, 'REP')), votes: num(o.voteCount), winner: o.isWinner === true,
+      p: party(o.party?.abbreviation?.replace(/^Dem$/i, 'DEM').replace(/^Rep$/i, 'REP')), votes: num(o.voteCount), winner: o.isWinner === true, inc: /\(I\)/.test(o.name[0].text),
     })), 'counties');
   }
   return out;

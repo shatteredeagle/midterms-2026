@@ -1,4 +1,4 @@
-import { STATES, RACES, closeTime } from './states.js?v=c550a743';
+import { STATES, RACES, HOUSE_SEATS, closeTime } from './states.js?v=1625299f';
 
 const REPO = 'ShatteredEagle/midterms-2026';
 const RAW = `https://raw.githubusercontent.com/${REPO}/data/`;
@@ -154,11 +154,40 @@ function renderSenate() {
     <p class="meta"><b>The outlined square is where control lands:</b> Democrats need it for 51 seats; if Republicans hold it they keep 50 or more, and the Vice President breaks a 50–50 tie for them. It is currently <b>${majWho}</b>.</p>
     <p class="meta">Votes counted or races called in ${t.n} of ${rs.length}. D leads ${t.d}, R leads ${t.r}. Seats not up: D 34, R 31. Calls are NBC News projections; the rest is counted votes. <a href="#control">What Democrats need ↗</a></p>`;
 }
+// Who held a House seat before: the incumbent's party when an incumbent was running (from NBC's data or the state feed). Open seats have no known holder, so they never show a flip marker.
+function houseHolder(id) {
+  const call = callOf(id)?.incumbentParty;
+  if (call) return call;
+  const inc = S.results?.races?.[id]?.cands?.find((c) => c.inc);
+  return inc ? inc.p : null;
+}
 function renderHouse() {
-  const ids = [...new Set([...Object.keys(S.results?.races || {}), ...Object.keys(S.calls?.calls || {})].filter((k) => k[0] === 'H'))], hs = ids.map((id) => ({ id, o: S.results?.races?.[id] })), t = tally(hs);
+  const ids = [];
+  for (const [st, n] of Object.entries(HOUSE_SEATS)) for (let k = 1; k <= n; k++) ids.push(`H-${st}-${String(k).padStart(2, '0')}`);
+  const items = ids.map((id) => ({ id, o: S.results?.races?.[id] }));
+  const t = tally(items);
+  const cell = (x) => {
+    const p = leaderParty(x);
+    if (!p) return { cls: 'N', title: `${x.id.slice(2)}: not decided yet` };
+    const holder = houseHolder(x.id), flip = !!holder && p !== holder, call = callOf(x.id);
+    const w = counted(x.o) && !tooEarly(x.o) ? x.o.cands[0].n : call?.winner.n;
+    return { cls: p === 'D' ? 'D1' : p === 'R' ? 'R1' : 'O', flip, title: `${x.id.slice(2)}: ${w || p} (${p}) ${call ? 'wins' : 'leads'}${flip ? ` · FLIP from ${holder} to ${p}` : holder ? ` · ${holder} hold` : ''}` };
+  };
+  const all = items.map((x) => ({ x, c: cell(x) }));
+  const dC = all.filter((e) => e.c.cls === 'D1').map((e) => e.c).sort((a, b) => a.flip - b.flip);
+  const rC = all.filter((e) => e.c.cls === 'R1').map((e) => e.c).sort((a, b) => b.flip - a.flip);
+  const oC = all.filter((e) => e.c.cls === 'O').map((e) => e.c);
+  const nC = all.filter((e) => e.c.cls === 'N').map((e) => e.c);
+  const cells = [...dC, ...nC, ...oC, ...rC];
+  const flipsD = dC.filter((c) => c.flip).length, flipsR = rC.filter((c) => c.flip).length;
+  const known = [...dC, ...rC].filter((c) => /hold|FLIP/.test(c.title)).length;
+  const majWho = { D1: 'a Democratic seat', N: 'in a district not yet decided', O: 'held by another party', R1: 'a Republican seat' }[cells[217].cls];
   $('#cardHouse').innerHTML = `<h3>House · 218 for majority</h3>
     <div class="big"><b class="d">${t.d}</b><small>districts D leads</small><b class="r">${t.r}</b><small>districts R leads</small></div>
-    <p class="meta">Counted or called in ${t.n} of ${hs.length} districts we have data for (district vote feeds: CA, CO, FL, GA, IA, MN, NC, NE; plus NBC calls). This is a partial count, not a majority tally. Follow <a href="https://apnews.com/" target="_blank" rel="noopener">AP</a> or <a href="https://www.nbcnews.com/politics/2026-elections/midterms" target="_blank" rel="noopener">NBC</a> for the national House count. <a href="#control">Key districts ↗</a></p>`;
+    <div class="waffle house" role="img" aria-label="435 House districts: ${t.d} Democratic leading or called, ${t.r} Republican, ${nC.length} not decided. Flips so far: Democrats ${flipsD}, Republicans ${flipsR}. The outlined 218th square decides control: it is currently ${majWho}.">${cells.map((c, i) => `<i class="${c.cls}${c.flip ? ' flip' : ''}${i === 217 ? ' maj' : ''}" title="${esc(i === 217 ? `The 218th seat decides control: currently ${majWho}${c.title ? ` (${c.title})` : ''}` : c.title)}"></i>`).join('')}</div>
+    <div class="waffle-key"><span style="--c:var(--d-2)">D leading or called</span><span style="--c:var(--none)">Not decided ${nC.length}</span><span style="--c:var(--r-2)">R leading or called</span><span class="majkey">Outlined = the 218th seat</span><span class="flipkey">Gold corner = flipped seat</span></div>
+    <p class="meta"><b>Flipped so far:</b> Democrats +${flipsD}, Republicans +${flipsR} (net ${flipsD === flipsR ? 'even' : flipsD > flipsR ? `D +${flipsD - flipsR}` : `R +${flipsR - flipsD}`}). A flip needs a known incumbent, so open seats are never marked, and only ${known} of the ${t.n} decided seats have a known holder.</p>
+    <p class="meta"><b>The outlined square is where control lands:</b> a party needs 218 of 435 seats, so the 218th seat from the Democratic side decides it. It is currently <b>${majWho}</b>. Squares fill in from vote feeds (CA, CO, FL, GA, IA, MN, NC, NE) and NBC News calls; other districts stay undecided here. Follow <a href="https://apnews.com/" target="_blank" rel="noopener">AP</a> or <a href="https://www.nbcnews.com/politics/2026-elections/midterms" target="_blank" rel="noopener">NBC</a> for the full count. <a href="#control">Key districts ↗</a></p>`;
 }
 
 // ---------- results so far (overview) ----------
