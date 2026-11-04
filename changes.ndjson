@@ -667,3 +667,22 @@
 {"t":"2026-11-04T07:11:12.686Z","type":"count","id":"S-NE","text":"Nebraska Senate: Pete Ricketts (R) leads Dan Osborn (O) 49.1%–44.9% · 829 of 1,322 precincts (62.7%)","source":"Nebraska Secretary of State"}
 {"t":"2026-11-04T07:11:12.686Z","type":"count","id":"G-NE","text":"Nebraska Governor: Jim Pillen and Joe Kelly (R) leads Lynne Walz and Ben Steffen (D) 49.4%–43.7% · 829 of 1,322 precincts (62.7%)","source":"Nebraska Secretary of State"}
 {"t":"2026-11-04T07:11:12.686Z","type":"count","id":"H-NE-02","text":"NE-02 House: Denise Powell (D) leads Brinker Harding (R) 57.1%–40.3% · 315 of 334 precincts (94.3%)","source":"Nebraska Secretary of State"}
+{"t":"2026-11-04T07:15:42.555Z","type":"count","id":"G-OH","text":"Ohio Governor: Amy Acton (D) leads Vivek Ramaswamy (R) 51.9%–44.8% · 95% of expected vote counted (95%)","source":"NBC News"}
+{"t":"2026-11-04T07:16:11.682Z","type":"count","id":"G-OR","text":"Oregon Governor: Tina Kotek (D) leads Christine Drazan (R) 52.1%–45.2% · 70.1% of expected vote counted (70.1%)","source":"NBC News"}
+{"t":"2026-11-04T07:16:42.240Z","type":"count","id":"G-HI","text":"Hawaii Governor: Josh Green (D) leads Gary Cordery (R) 75.1%–24.9% · 75.1% of expected vote counted (75.1%)","source":"NBC News"}
+{"t":"2026-11-04T07:17:12.536Z","type":"count","id":"H-MI-13","text":"MI-13 House: Donavan McKinney (D) leads T.P. Nykoriak (R) 77.4%–19.1% · 55.3% of expected vote counted (55.3%)","source":"NBC News"}
+{"t":"2026-11-04T07:18:41.658Z","type":"count","id":"S-TX","text":"Texas Senate: James Talarico (D) leads Ken Paxton (R) 54%–44.2% · 90% of expected vote counted (90%)","source":"NBC News"}
+{"t":"2026-11-04T07:18:41.658Z","type":"count","id":"G-TX","text":"Texas Governor: Gina Hinojosa (D) leads Greg Abbott (R) 52.7%–45.8% · 90% of expected vote counted (90%)","source":"NBC News"}
+{"t":"2026-11-04T07:20:42.504Z","type":"count","id":"H-MN-04","text":"MN-04 House: Betty McCollum (D) leads Paul Wikstrom (R) 73.2%–26.8% · 212 of 212 precincts (100%)","source":"Minnesota Secretary of State"}
+{"t":"2026-11-04T07:20:42.504Z","type":"count","id":"S-ME","text":"Maine Senate: Troy Jackson (D) leads Susan Collins (R) 53.9%–46.1% · 80.9% of expected vote counted (80.9%)","source":"NBC News"}
+{"t":"2026-11-04T07:21:11.710Z","type":"count","id":"G-ME","text":"Maine Governor: Hannah Pingree (D) leads Bobby Charles (R) 55.3%–36.7% · 81% of expected vote counted (81%)","source":"NBC News"}
+{"t":"2026-11-04T07:21:11.710Z","type":"count","id":"G-AK","text":"Alaska Governor: Jonathan Kreiss-Tomkins (D) leads Bernadette Wilson (R) 49%–29.5% · 65.4% of expected vote counted (65.4%)","source":"NBC News"}
+{"t":"2026-11-04T07:24:41.610Z","type":"count","id":"G-KS","text":"Kansas Governor: Cindy Holscher (D) leads Ty Masterson (R) 50.3%–49.7% · 95% of expected vote counted (95%)","source":"NBC News"}
+{"t":"2026-11-04T07:25:43.263Z","type":"count","id":"H-CA-01","text":"CA-01 House: James Gallagher (R) leads Mike McGuire (D) 68.4%–31.6% · 38 of 38 precincts (100%)","source":"California Secretary of State"}
+{"t":"2026-11-04T07:27:11.929Z","type":"call","id":"S-MI","text":"NBC News projects El-Sayed (D) wins Michigan Senate · 51.9%–46.1% over Rogers (R)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T07:30:12.224Z","type":"lead","id":"H-AZ-02","text":"AZ-02 House: lead changes to Jonathan Nez (D) at 49.3%","source":"NBC News"}
+{"t":"2026-11-04T07:30:42.445Z","type":"count","id":"H-MN-08","text":"MN-08 House: Pete Stauber (R) leads Trina Swanson (D) 53.1%–46.9% · 834 of 834 precincts (100%)","source":"Minnesota Secretary of State"}
+{"t":"2026-11-04T07:30:42.445Z","type":"lead","id":"S-AK","text":"Alaska Senate: lead changes to Dan S. Sullivan (R) at 48.7%","source":"NBC News"}
+{"t":"2026-11-04T07:30:42.445Z","type":"count","id":"S-AK","text":"Alaska Senate: Dan S. Sullivan (R) leads Mary Peltola (D) 48.7%–47.5% · 66.1% of expected vote counted (66.1%)","source":"NBC News"}
+{"t":"2026-11-04T07:31:11.587Z","type":"count","id":"S-SD","text":"South Dakota Senate: Mike Rounds (R) leads Brian L Bengs (O) 61.1%–38.9% · 610 of 671 precincts (90.9%)","source":"South Dakota Secretary of State"}
+{"t":"2026-11-04T07:31:11.587Z","type":"count","id":"G-SD","text":"South Dakota Governor: Larry Rhoden and Tony Venhuizen (R) leads Dan Ahlers and Steven McCleerey (D) 64.1%–35.9% · 610 of 671 precincts (90.9%)","source":"South Dakota Secretary of State"}
