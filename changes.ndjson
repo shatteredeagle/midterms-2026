@@ -393,3 +393,68 @@
 {"t":"2026-11-04T05:13:12.062Z","type":"call","id":"H-NM-02","text":"NBC News projects Gabriel Vasquez (D) wins NM-02 House · 57.9%–42.1% over Cunningham (R)","source":"NBC News Decision Desk"}
 {"t":"2026-11-04T05:14:12.527Z","type":"call","id":"H-CA-49","text":"NBC News projects Mike Levin (D) wins CA-49 House · 58.9%–41.1% over Kurdian (R)","source":"NBC News Decision Desk"}
 {"t":"2026-11-04T05:14:12.527Z","type":"call","id":"H-CA-51","text":"NBC News projects Sara Jacobs (D) wins CA-51 House · 63.1%–36.9% over Cabrera (R)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T05:15:12.585Z","type":"lead","id":"H-NY-02","text":"NY-02 House: lead changes to Andrew Garbarino (R) at 51.2%","source":"NBC News"}
+{"t":"2026-11-04T05:15:12.587Z","type":"call","id":"H-WA-08","text":"NBC News projects Kim Schrier (D) wins WA-08 House · 57.5%–42.3% over Meline (R)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T05:15:12.587Z","type":"call","id":"H-CA-21","text":"NBC News projects Jim Costa (D) wins CA-21 House · 62.6%–37.4% over Kirkland (R)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T05:15:42.052Z","type":"count","id":"H-CA-24","text":"CA-24 House: Salud Carbajal (D) leads Bob Smith (R) 67.9%–32.1% · 226 of 296 precincts (76.4%)","source":"California Secretary of State"}
+{"t":"2026-11-04T05:15:42.052Z","type":"count","id":"H-CA-26","text":"CA-26 House: Jacqui Irwin (D) leads Sam Gallucci (R) 64.1%–35.9% · 710 of 997 precincts (71.2%)","source":"California Secretary of State"}
+{"t":"2026-11-04T05:15:42.052Z","type":"count","id":"H-CA-32","text":"CA-32 House: Brad Sherman (D) leads Larry Thompson (R) 52.2%–47.8% · 132 of 140 precincts (94.3%)","source":"California Secretary of State"}
+{"t":"2026-11-04T05:15:42.052Z","type":"count","id":"H-ID-02","text":"ID-02 House: Ellie Gilbreath (D) leads Mike Simpson (R) 46.8%–45.7% · 51% of expected vote counted (51%)","source":"NBC News"}
+{"t":"2026-11-04T05:16:12.322Z","type":"call","id":"H-CA-12","text":"NBC News projects Lateefah Simon (D) wins CA-12 House · 80.7%–19.3% over Joyce (D)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T05:16:12.322Z","type":"call","id":"H-TX-28","text":"NBC News projects Henry Cuellar (D) wins TX-28 House · 66.4%–29.2% over Tijerina (R)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T05:16:42.828Z","type":"lead","id":"H-TX-06","text":"TX-06 House: lead changes to Jake Ellzey (R) at 50.9%","source":"NBC News"}
+{"t":"2026-11-04T05:16:42.828Z","type":"lead","id":"H-TX-03","text":"TX-03 House: lead changes to Keith Self (R) at 51.4%","source":"NBC News"}
+{"t":"2026-11-04T05:16:42.828Z","type":"lead","id":"H-TX-05","text":"TX-05 House: lead changes to Lance Gooden (R) at 50.8%","source":"NBC News"}
+{"t":"2026-11-04T05:16:42.828Z","type":"lead","id":"H-TX-10","text":"TX-10 House: lead changes to Chris Gober (R) at 51.8%","source":"NBC News"}
+{"t":"2026-11-04T05:16:42.828Z","type":"lead","id":"H-TX-17","text":"TX-17 House: lead changes to Pete Sessions (R) at 53.6%","source":"NBC News"}
+{"t":"2026-11-04T05:16:42.828Z","type":"lead","id":"H-TX-36","text":"TX-36 House: lead changes to Brian Babin (R) at 52.8%","source":"NBC News"}
+{"t":"2026-11-04T05:17:12.053Z","type":"count","id":"S-TX","text":"Texas Senate: James Talarico (D) leads Ken Paxton (R) 55.6%–42.6% · 80.3% of expected vote counted (80.3%)","source":"NBC News"}
+{"t":"2026-11-04T05:17:12.053Z","type":"count","id":"G-TX","text":"Texas Governor: Gina Hinojosa (D) leads Greg Abbott (R) 53.6%–45.1% · 80.1% of expected vote counted (80.1%)","source":"NBC News"}
+{"t":"2026-11-04T05:17:12.055Z","type":"call","id":"H-CA-39","text":"NBC News projects Mark Takano (D) wins CA-39 House · 65.5%–34.5% over Manos (R)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T05:17:12.055Z","type":"call","id":"H-CA-37","text":"NBC News projects Sydney Kamlager-Dove (D) wins CA-37 House · 65.4%–34.6% over Mota (D)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T05:17:42.260Z","type":"count","id":"H-NY-04","text":"NY-04 House: Laura Gillen (D) leads Jeanine Driscoll (R) 56.2%–43.4% · 80.7% of expected vote counted (80.7%)","source":"NBC News"}
+{"t":"2026-11-04T05:18:13.214Z","type":"lead","id":"H-TX-25","text":"TX-25 House: lead changes to Roger Williams (R) at 53.5%","source":"NBC News"}
+{"t":"2026-11-04T05:18:13.214Z","type":"lead","id":"H-TX-27","text":"TX-27 House: lead changes to Michael Cloud (R) at 50.5%","source":"NBC News"}
+{"t":"2026-11-04T05:19:11.789Z","type":"call","id":"H-MN-02","text":"NBC News projects Matt Little (D) wins MN-02 House · 59.5%–40.4% over Pratt (R)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T05:19:42.248Z","type":"count","id":"G-MA","text":"Massachusetts Governor: Maura Healey (D) leads Michael Minogue (R) 63.4%–33.2% · 50.1% of expected vote counted (50.1%)","source":"NBC News"}
+{"t":"2026-11-04T05:19:42.248Z","type":"lead","id":"H-TX-32","text":"TX-32 House: lead changes to Jace Yarbrough (R) at 51%","source":"NBC News"}
+{"t":"2026-11-04T05:20:41.836Z","type":"count","id":"S-NE","text":"Nebraska Senate: Pete Ricketts (R) leads Dan Osborn (O) 47.9%–46.3% · 267 of 1,322 precincts (20.2%)","source":"Nebraska Secretary of State"}
+{"t":"2026-11-04T05:20:41.836Z","type":"count","id":"G-NE","text":"Nebraska Governor: Jim Pillen and Joe Kelly (R) leads Lynne Walz and Ben Steffen (D) 48%–45.4% · 267 of 1,322 precincts (20.2%)","source":"Nebraska Secretary of State"}
+{"t":"2026-11-04T05:21:11.926Z","type":"call","id":"H-CA-03","text":"NBC News projects Ami Bera (D) wins CA-03 House · 59.8%–40.2% over Tucker (R)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T05:21:42.122Z","type":"count","id":"S-NE","text":"Nebraska Senate: Pete Ricketts (R) leads Dan Osborn (O) 47.9%–46.3% · 267 of 1,322 precincts (20.2%)","source":"Nebraska Secretary of State"}
+{"t":"2026-11-04T05:21:42.122Z","type":"count","id":"G-NE","text":"Nebraska Governor: Jim Pillen and Joe Kelly (R) leads Lynne Walz and Ben Steffen (D) 48%–45.4% · 267 of 1,322 precincts (20.2%)","source":"Nebraska Secretary of State"}
+{"t":"2026-11-04T05:21:42.122Z","type":"count","id":"S-MA","text":"Massachusetts Senate: Ed Markey (D) leads John Deaton (R) 64.5%–30.9% · 50.2% of expected vote counted (50.2%)","source":"NBC News"}
+{"t":"2026-11-04T05:22:42.329Z","type":"count","id":"G-WI","text":"Wisconsin Governor: David Crowley (D) leads Tom Tiffany (R) 53.4%–46.6% · 90% of expected vote counted (90%)","source":"NBC News"}
+{"t":"2026-11-04T05:23:12.599Z","type":"count","id":"S-NC","text":"North Carolina Senate: Roy Cooper (D) leads Michael Whatley (R) 58.7%–39.1% · 2,625 of 2,626 precincts (100%)","source":"NC State Board of Elections"}
+{"t":"2026-11-04T05:23:12.599Z","type":"count","id":"H-NC-02","text":"NC-02 House: Deborah K. Ross (D) leads Eugene F. Douglass (R) 75.1%–23.5% · 156 of 156 precincts (100%)","source":"NC State Board of Elections"}
+{"t":"2026-11-04T05:23:41.858Z","type":"count","id":"H-OR-01","text":"OR-01 House: Suzanne Bonamici (D) leads Barbara Kahl (R) 71.3%–28.5% · 53.5% of expected vote counted (53.5%)","source":"NBC News"}
+{"t":"2026-11-04T05:24:11.930Z","type":"call","id":"H-PA-01","text":"NBC News projects Bob Harvie (D) wins PA-01 House · 52.8%–47.2% over Fitzpatrick (R)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T05:25:12.686Z","type":"call","id":"H-OH-07","text":"NBC News projects Brian Poindexter (D) wins OH-07 House · 54.1%–45.9% over Miller (R)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T05:26:11.888Z","type":"call","id":"H-CA-16","text":"NBC News projects Sam Liccardo (D) wins CA-16 House · 79.3%–20.7% over Soulé (R)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T05:28:11.847Z","type":"count","id":"G-NM","text":"New Mexico Governor: Deb Haaland (D) leads Greggory Hull (R) 56.9%–43.1% · 90.3% of expected vote counted (90.3%)","source":"NBC News"}
+{"t":"2026-11-04T05:28:11.848Z","type":"call","id":"H-WI-01","text":"NBC News projects Mitchell Berman (D) wins WI-01 House · 52.3%–47.7% over Steil (R)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T05:28:11.848Z","type":"call","id":"H-TX-35","text":"NBC News projects Johnny Garcia (D) wins TX-35 House · 57.2%–42.8% over De La Cruz (R)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T05:28:42.183Z","type":"count","id":"H-CT-03","text":"CT-03 House: Rosa DeLauro (D) leads Christopher Lancia (R) 56.3%–40.2% · 53.7% of expected vote counted (53.7%)","source":"NBC News"}
+{"t":"2026-11-04T05:28:42.183Z","type":"count","id":"S-NM","text":"New Mexico Senate: Ben Ray Lujan (D) leads Larry Marker (R) 62.8%–37.2% · 90.3% of expected vote counted (90.3%)","source":"NBC News"}
+{"t":"2026-11-04T05:28:42.183Z","type":"count","id":"G-CT","text":"Connecticut Governor: Ned Lamont (D) leads Ryan Fazio (R) 57.2%–42.8% · 61.4% of expected vote counted (61.4%)","source":"NBC News"}
+{"t":"2026-11-04T05:28:42.183Z","type":"lead","id":"H-ID-02","text":"ID-02 House: lead changes to Mike Simpson (R) at 46.3%","source":"NBC News"}
+{"t":"2026-11-04T05:29:12.498Z","type":"call","id":"H-OR-04","text":"NBC News projects Val Hoyle (D) wins OR-04 House · 55%–42% over DeSpain (R)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T05:29:41.707Z","type":"count","id":"S-MN","text":"Minnesota Senate: Peggy Flanagan (D) leads Michele Tafoya (R) 53.3%–44.1% · 3,407 of 4,105 precincts (83%)","source":"Minnesota Secretary of State"}
+{"t":"2026-11-04T05:29:41.707Z","type":"count","id":"G-MN","text":"Minnesota Governor: Amy Klobuchar and Ben Schierer (D) leads Lisa Demuth and Ryan Wilson (R) 55.1%–43.1% · 3,407 of 4,105 precincts (83%)","source":"Minnesota Secretary of State"}
+{"t":"2026-11-04T05:29:41.707Z","type":"count","id":"G-CA","text":"California Governor: Xavier Becerra (D) leads Steve Hilton (R) 64.9%–35.1% · 12,708 of 23,860 precincts (53.3%)","source":"California Secretary of State"}
+{"t":"2026-11-04T05:29:41.707Z","type":"count","id":"H-CA-16","text":"CA-16 House: Sam Liccardo (D) leads Peter Sundin Soulé (R) 77.2%–22.8% · 242 of 242 precincts (100%)","source":"California Secretary of State"}
+{"t":"2026-11-04T05:29:41.707Z","type":"count","id":"H-CA-17","text":"CA-17 House: Ro Khanna (D) leads Ritesh Tandon (R) 72.1%–27.9% · 218 of 218 precincts (100%)","source":"California Secretary of State"}
+{"t":"2026-11-04T05:29:41.707Z","type":"count","id":"S-MI","text":"Michigan Senate: Abdul El-Sayed (D) leads Mike Rogers (R) 49.5%–48.6% · 50.2% of expected vote counted (50.2%)","source":"NBC News"}
+{"t":"2026-11-04T05:30:12.029Z","type":"count","id":"H-CT-04","text":"CT-04 House: Jim Himes (D) leads Michael Goldstein (R) 63.2%–35% · 55.4% of expected vote counted (55.4%)","source":"NBC News"}
+{"t":"2026-11-04T05:30:12.029Z","type":"count","id":"S-OR","text":"Oregon Senate: Jeff Merkley (D) leads David Brock Smith (R) 57.9%–39.4% · 60.4% of expected vote counted (60.4%)","source":"NBC News"}
+{"t":"2026-11-04T05:30:12.031Z","type":"call","id":"H-OR-05","text":"NBC News projects Janelle Bynum (D) wins OR-05 House · 55.2%–42.9% over Adair (R)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T05:31:11.844Z","type":"count","id":"H-MI-01","text":"MI-01 House: Jack Bergman (R) leads Callie Barr (D) 57.3%–40.7% · 50.4% of expected vote counted (50.4%)","source":"NBC News"}
+{"t":"2026-11-04T05:31:11.845Z","type":"call","id":"H-TX-14","text":"NBC News projects Randy Weber (R) wins TX-14 House · 54.3%–45.7% over Bartie (D)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T05:31:11.845Z","type":"call","id":"H-AL-01","text":"NBC News projects Jerry Carl (R) wins AL-01 House · 59.1%–40.9% over Jones (D)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T05:32:12.332Z","type":"count","id":"S-MT","text":"Montana Senate: Kurt Alme (R) leads Seth Bodnar (O) 46.1%–40.6% · 46.3% of expected vote counted (46.3%)","source":"NBC News"}
+{"t":"2026-11-04T05:32:12.332Z","type":"count","id":"G-MI","text":"Michigan Governor: Jocelyn Benson (D) leads John James (R) 50.9%–47.3% · 53.4% of expected vote counted (53.4%)","source":"NBC News"}
+{"t":"2026-11-04T05:32:12.332Z","type":"lead","id":"H-MT-01","text":"MT-01 House: lead changes to Sam Forstag (D) at 53.2%","source":"NBC News"}
+{"t":"2026-11-04T05:33:12.468Z","type":"count","id":"H-MI-06","text":"MI-06 House: Debbie Dingell (D) leads Heather Smiley (R) 68.6%–29.1% · 59.8% of expected vote counted (59.8%)","source":"NBC News"}
+{"t":"2026-11-04T05:33:12.470Z","type":"call","id":"S-LA","text":"NBC News projects Julia Letlow (R) wins Louisiana Senate · 50.9%–49.1% over Davis (D)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T05:33:12.470Z","type":"call","id":"H-KS-02","text":"NBC News projects Derek Schmidt (R) wins KS-02 House · 51.4%–44.9% over Coover (D)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T05:34:13.220Z","type":"call","id":"H-TN-05","text":"NBC News projects Charlie Hatcher (R) wins TN-05 House · 51.7%–46.7% over Molder (D)","source":"NBC News Decision Desk"}
