@@ -1,4 +1,4 @@
-import { STATES, RACES, HOUSE_SEATS, closeTime } from './states.js?v=aa4ee6bd';
+import { STATES, RACES, HOUSE_SEATS, closeTime } from './states.js?v=9cc02783';
 
 const REPO = 'ShatteredEagle/midterms-2026';
 const RAW = `https://raw.githubusercontent.com/${REPO}/data/`;
@@ -141,7 +141,9 @@ function renderSenate() {
     const w = counted(r.o) ? r.o.cands[0].n : callOf(r.id)?.winner.n;
     return { cls: p === 'D' ? 'D1' : p === 'R' ? 'R1' : 'O', flip, called, holder, p, title: `${STATES[r.st][0]}: ${w || p} (${p}) ${called ? 'wins (called)' : 'leads'}${flip ? ` · ${called ? 'FLIP' : 'LEADING TO FLIP'} from ${holder} to ${p}` : holder ? ` · ${holder} hold` : ''}` };
   };
-  const dC = lead.filter((x) => x.p === 'D').map(cellFor).sort((a, b) => a.flip - b.flip), rC = lead.filter((x) => x.p === 'R').map(cellFor).sort((a, b) => b.flip - a.flip), oC = lead.filter((x) => x.p !== 'D' && x.p !== 'R').map(cellFor);
+  // Called seats sit on the outside of each party's block; uncalled leads (potential flips innermost) sit next to the undecided squares.
+  const rank = (c) => (c.called ? 0 : 2) + (c.flip ? 1 : 0);
+  const dC = lead.filter((x) => x.p === 'D').map(cellFor).sort((a, b) => rank(a) - rank(b)), rC = lead.filter((x) => x.p === 'R').map(cellFor).sort((a, b) => rank(b) - rank(a)), oC = lead.filter((x) => x.p !== 'D' && x.p !== 'R').map(cellFor);
   const holdRank = (c) => (c.hold === 'D' ? 0 : c.hold === 'R' ? 1 : 2); // undecided seats group by current holder: blue dots, then red, then unknown
   const undecided = rs.filter((r) => !leaderParty(r)).map((r) => { const h = holderOf(r.st); return { cls: 'N', hold: h === 'D' || h === 'R' ? h : null, title: `${STATES[r.st][0]}: not decided yet${h ? ` · currently held by ${h}` : ''}` }; }).sort((a, b) => holdRank(a) - holdRank(b));
   const cells = [...Array(34).fill({ cls: 'D0', title: 'Democratic seat, not up this year' }), ...dC, ...undecided, ...oC, ...rC, ...Array(31).fill({ cls: 'R0', title: 'Republican seat, not up this year' })];
@@ -179,8 +181,9 @@ function renderHouse() {
     return { cls: p === 'D' ? 'D1' : p === 'R' ? 'R1' : 'O', flip, called, title: `${x.id.slice(2)}: ${w || p} (${p}) ${called ? 'wins (called)' : 'leads'}${flip ? ` · ${called ? 'FLIP' : 'LEADING TO FLIP'} from ${holder} to ${p}` : holder ? ` · ${holder} hold` : ''}` };
   };
   const all = items.map((x) => ({ x, c: cell(x) }));
-  const dC = all.filter((e) => e.c.cls === 'D1').map((e) => e.c).sort((a, b) => a.flip - b.flip);
-  const rC = all.filter((e) => e.c.cls === 'R1').map((e) => e.c).sort((a, b) => b.flip - a.flip);
+  const rank = (c) => (c.called ? 0 : 2) + (c.flip ? 1 : 0); // called seats outermost, potential flips innermost
+  const dC = all.filter((e) => e.c.cls === 'D1').map((e) => e.c).sort((a, b) => rank(a) - rank(b));
+  const rC = all.filter((e) => e.c.cls === 'R1').map((e) => e.c).sort((a, b) => rank(b) - rank(a));
   const oC = all.filter((e) => e.c.cls === 'O').map((e) => e.c);
   const nC = all.filter((e) => e.c.cls === 'N').map((e) => e.c).sort((a, b) => (a.hold === 'D' ? 0 : a.hold === 'R' ? 1 : 2) - (b.hold === 'D' ? 0 : b.hold === 'R' ? 1 : 2)); // blue-dot seats together, then red
   const cells = [...dC, ...nC, ...oC, ...rC];
