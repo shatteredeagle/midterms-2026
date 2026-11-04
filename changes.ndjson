@@ -752,3 +752,10 @@
 {"t":"2026-11-04T08:54:12.206Z","type":"call","id":"S-NV","text":"NBC News projects Aguilar (D) wins Nevada Senate · 56.8%–39.8% over Marchant (R)","source":"NBC News Decision Desk"}
 {"t":"2026-11-04T08:55:13.569Z","type":"count","id":"S-NH","text":"New Hampshire Senate: Chris Pappas (D) leads John Sununu (R) 56.2%–41.9% · 90.1% of expected vote counted (90.1%)","source":"NBC News"}
 {"t":"2026-11-04T08:55:13.569Z","type":"count","id":"G-NH","text":"New Hampshire Governor: Kelly Ayotte (R) leads Cinde Warmington (D) 51.1%–47.2% · 90.2% of expected vote counted (90.2%)","source":"NBC News"}
+{"t":"2026-11-04T08:57:11.617Z","type":"count","id":"G-IL","text":"Illinois Governor: JB Pritzker (D) leads Darren Bailey (R) 59.6%–37% · 90% of expected vote counted (90%)","source":"NBC News"}
+{"t":"2026-11-04T08:57:42.461Z","type":"lead","id":"H-MI-04","text":"MI-04 House: lead changes to Sean McCann (D) at 49.3%","source":"NBC News"}
+{"t":"2026-11-04T09:00:13.600Z","type":"count","id":"S-ID","text":"Idaho Senate: Jim Risch (R) leads Todd Achilles (O) 56.8%–33.5% · 90.7% of expected vote counted (90.7%)","source":"NBC News"}
+{"t":"2026-11-04T09:00:13.600Z","type":"count","id":"G-ID","text":"Idaho Governor: Brad Little (R) leads Terri Pickens (D) 57.4%–32% · 90.8% of expected vote counted (90.8%)","source":"NBC News"}
+{"t":"2026-11-04T09:08:42.433Z","type":"count","id":"G-KS","text":"Kansas Governor: Cindy Holscher (D) leads Ty Masterson (R) 50.3%–49.7% · 95% of expected vote counted (95%)","source":"NBC News"}
+{"t":"2026-11-04T09:14:12.801Z","type":"source","id":"FL","text":"FL official feed is failing; showing last good data"}
+{"t":"2026-11-04T09:14:42.275Z","type":"source","id":"FL","text":"FL official feed recovered"}
