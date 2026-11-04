@@ -1,7 +1,7 @@
 {
-  "updated": "2026-11-04T02:32:00Z",
+  "updated": "2026-11-04T02:34:00Z",
   "status": "partial",
-  "note": "Early results, re-weighted to the final count later. NBC, ABC, AP, CBS, CNN, Fox News and MS NOW share this one SSRS poll (over 75,000 voters nationally; in person, online and by phone, plus a pre-election survey for early and mail voters), so other networks will repeat these numbers, not add a second opinion. In the vote-by-group tables the columns are NBC's Democrat and Republican columns; they match the U.S. House vote (for example 2% Democratic among those voting to support Trump), but NBC's text does not label them, and no overall House total has been published. Numbers come from NBC's national table; its live blog quotes a few subgroup figures that differ, and those are not used. Tables refreshed at 9:15 PM ET: shares move by about a point as more respondents are added; groups I could not match to NBC's current table keep their earlier numbers. Rows refreshed through NBC's 9:22 PM ET update where they could be matched safely; shares move by about a point as more respondents are added, so a few groups may lag by a point.",
+  "note": "Early results, re-weighted to the final count later. NBC, ABC, AP, CBS, CNN, Fox News and MS NOW share this one SSRS poll (over 75,000 voters nationally; in person, online and by phone, plus a pre-election survey for early and mail voters), so other networks will repeat these numbers, not add a second opinion. In the vote-by-group tables the columns are NBC's Democrat and Republican columns; they match the U.S. House vote (for example 2% Democratic among those voting to support Trump), but NBC's text does not label them, and no overall House total has been published. Numbers come from NBC's national table; its live blog quotes a few subgroup figures that differ, and those are not used. Rows refreshed through NBC's 9:22 PM ET update where they could be matched safely; shares move by about a point as more respondents are added, so a few groups may lag by a point.",
   "sources": [
     {
       "id": "nbc",
@@ -134,11 +134,11 @@
           }
         },
         {
-          "label": "Some college, no degree (92%)",
+          "label": "Some college, no degree (19%)",
           "values": {
             "nbc": {
-              "dem": 50,
-              "rep": 47
+              "dem": 48,
+              "rep": 48
             }
           }
         },
@@ -161,10 +161,10 @@
           }
         },
         {
-          "label": "College graduates (18%)",
+          "label": "College graduates (47%)",
           "values": {
             "nbc": {
-              "dem": 62,
+              "dem": 61,
               "rep": 36
             }
           }
@@ -203,20 +203,20 @@
           }
         },
         {
-          "label": "Voters of color, college degree (27%)",
+          "label": "Voters of color, college degree (12%)",
           "values": {
             "nbc": {
-              "dem": 69,
-              "rep": 27
+              "dem": 72,
+              "rep": 25
             }
           }
         },
         {
-          "label": "Voters of color, no degree (27%)",
+          "label": "Voters of color, no degree (16%)",
           "values": {
             "nbc": {
-              "dem": 69,
-              "rep": 27
+              "dem": 67,
+              "rep": 28
             }
           }
         }
@@ -227,7 +227,7 @@
       "kind": "vote",
       "groups": [
         {
-          "label": "Democrats (34%)",
+          "label": "Democrats (33%)",
           "values": {
             "nbc": {
               "dem": 97,
@@ -503,7 +503,7 @@
           }
         },
         {
-          "label": "Strongly approve (21%)",
+          "label": "Strongly approve (20%)",
           "values": {
             "nbc": {
               "dem": 2,
@@ -539,10 +539,10 @@
           }
         },
         {
-          "label": "Trump not a factor (13%)",
+          "label": "Trump not a factor (41%)",
           "values": {
             "nbc": {
-              "dem": 30,
+              "dem": 28,
               "rep": 67
             }
           }
@@ -554,7 +554,7 @@
       "kind": "vote",
       "groups": [
         {
-          "label": "Economy (92%)",
+          "label": "Economy (39%)",
           "values": {
             "nbc": {
               "dem": 50,
@@ -665,7 +665,7 @@
       "kind": "vote",
       "groups": [
         {
-          "label": "Economy excellent or good (23%)",
+          "label": "Economy excellent or good (25%)",
           "values": {
             "nbc": {
               "dem": 10,
