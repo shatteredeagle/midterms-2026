@@ -60,7 +60,7 @@ for (const fr of todo) {
   writeFileSync(idx, readFileSync(idx, 'utf8').replace('<head>', `<head>${inject}`));
   try {
     await execFileP('google-chrome-stable', ['--headless=new', '--disable-gpu', '--no-sandbox', '--hide-scrollbars', '--window-size=1400,1000', '--virtual-time-budget=12000', `--screenshot=${out}`, `http://localhost:${port}/index.html#overview`], { timeout: 90000 }); // async: the page is fetched from this process's own server, which a sync call would block
-  } catch { console.error('frame failed', n, fr.commit.sha.slice(0, 7)); }
+  } catch { console.error('frame failed', n, fr.commit.sha.slice(0, 7)); if (n > 1) execFileSync('cp', [`${FRAMES}/${String(n - 2).padStart(5, '0')}.png`, out]); } // keep the numbering gapless for ffmpeg
   if (n % 10 === 0) console.log(`${n}/${todo.length}`);
 }
 server.close();
