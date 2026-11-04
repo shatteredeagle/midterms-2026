@@ -611,3 +611,27 @@
 {"t":"2026-11-04T06:33:11.797Z","type":"call","id":"H-AZ-09","text":"NBC News projects Paul Gosar (R) wins AZ-09 House · 56.3%–43.7% over Sterbinsky (D)","source":"NBC News Decision Desk"}
 {"t":"2026-11-04T06:33:42.673Z","type":"count","id":"S-MN","text":"Minnesota Senate: Peggy Flanagan (D) leads Michele Tafoya (R) 54.4%–43% · 3,902 of 4,105 precincts (95.1%)","source":"Minnesota Secretary of State"}
 {"t":"2026-11-04T06:33:42.673Z","type":"count","id":"G-MN","text":"Minnesota Governor: Amy Klobuchar and Ben Schierer (D) leads Lisa Demuth and Ryan Wilson (R) 56.1%–42.1% · 3,902 of 4,105 precincts (95.1%)","source":"Minnesota Secretary of State"}
+{"t":"2026-11-04T06:35:42.063Z","type":"count","id":"G-AK","text":"Alaska Governor: Jonathan Kreiss-Tomkins (D) leads Bernadette Wilson (R) 49.9%–29% · 53.7% of expected vote counted (53.7%)","source":"NBC News"}
+{"t":"2026-11-04T06:37:12.600Z","type":"lead","id":"H-AK-01","text":"AK-01 House: lead changes to Nick Begich (R) at 49.3%","source":"NBC News"}
+{"t":"2026-11-04T06:37:12.600Z","type":"count","id":"H-AK-01","text":"AK-01 House: Nick Begich (R) leads Bill Hill (O) 49.3%–41% · 54% of expected vote counted (54%)","source":"NBC News"}
+{"t":"2026-11-04T06:37:12.602Z","type":"call","id":"G-AL","text":"NBC News projects Tommy Tuberville (R) wins Alabama Governor · 52.1%–47.9% over Jones (D)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T06:39:12.145Z","type":"call","id":"S-MT","text":"NBC News projects Kurt Alme (R) wins Montana Senate · 47.2%–39.1% over Bodnar (O)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T06:42:11.579Z","type":"count","id":"S-AK","text":"Alaska Senate: Mary Peltola (D) leads Dan S. Sullivan (R) 48.1%–48% · 54.3% of expected vote counted (54.3%)","source":"NBC News"}
+{"t":"2026-11-04T06:46:11.694Z","type":"call","id":"H-TX-36","text":"NBC News projects Brian Babin (R) wins TX-36 House · 53.8%–46.2% over Hart (D)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T06:46:11.694Z","type":"call","id":"G-NH","text":"NBC News projects Kelly Ayotte (R) wins New Hampshire Governor · 51.1%–47.3% over Warmington (D)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T06:46:41.956Z","type":"lead","id":"H-NE-01","text":"NE-01 House: lead changes to Mike Flood (R) at 48.9%","source":"Nebraska Secretary of State"}
+{"t":"2026-11-04T06:46:41.956Z","type":"count","id":"S-OR","text":"Oregon Senate: Jeff Merkley (D) leads David Brock Smith (R) 57%–40.2% · 70% of expected vote counted (70%)","source":"NBC News"}
+{"t":"2026-11-04T06:47:12.416Z","type":"lead","id":"H-NE-01","text":"NE-01 House: lead changes to Chris Backemeyer (D) at 48.4%","source":"Nebraska Secretary of State"}
+{"t":"2026-11-04T06:47:12.416Z","type":"count","id":"H-OR-06","text":"OR-06 House: Andrea Salinas (D) leads David Russ (R) 58.1%–41.8% · 56.6% of expected vote counted (56.6%)","source":"NBC News"}
+{"t":"2026-11-04T06:47:42.576Z","type":"lead","id":"H-NE-01","text":"NE-01 House: lead changes to Mike Flood (R) at 48.9%","source":"Nebraska Secretary of State"}
+{"t":"2026-11-04T06:48:41.976Z","type":"lead","id":"H-OH-09","text":"OH-09 House: lead changes to Marcy Kaptur (D) at 50.2%","source":"NBC News"}
+{"t":"2026-11-04T06:48:41.976Z","type":"count","id":"H-OH-09","text":"OH-09 House: Marcy Kaptur (D) leads Derek Merrin (R) 50.2%–49.8% · 66% of expected vote counted (66%)","source":"NBC News"}
+{"t":"2026-11-04T06:49:12.524Z","type":"source","id":"FL","text":"FL official feed is failing; showing last good data"}
+{"t":"2026-11-04T06:49:41.718Z","type":"count","id":"H-CA-02","text":"CA-02 House: Jared Huffman (D) leads Robin Littau (R) 50.5%–49.5% · 16 of 16 precincts (100%)","source":"California Secretary of State"}
+{"t":"2026-11-04T06:49:41.718Z","type":"count","id":"H-CA-11","text":"CA-11 House: Scott Wiener (D) leads Connie Chan (D) 55.4%–44.6% · 436 of 453 precincts (96.2%)","source":"California Secretary of State"}
+{"t":"2026-11-04T06:49:41.718Z","type":"source","id":"FL","text":"FL official feed recovered"}
+{"t":"2026-11-04T06:50:12.004Z","type":"count","id":"G-CT","text":"Connecticut Governor: Ned Lamont (D) leads Ryan Fazio (R) 57.7%–42.3% · 81.4% of expected vote counted (81.4%)","source":"NBC News"}
+{"t":"2026-11-04T06:50:12.004Z","type":"count","id":"G-MI","text":"Michigan Governor: Jocelyn Benson (D) leads John James (R) 53.7%–44.5% · 80% of expected vote counted (80%)","source":"NBC News"}
+{"t":"2026-11-04T06:53:41.700Z","type":"count","id":"S-TX","text":"Texas Senate: James Talarico (D) leads Ken Paxton (R) 53.9%–44.3% · 90.3% of expected vote counted (90.3%)","source":"NBC News"}
+{"t":"2026-11-04T06:53:41.700Z","type":"count","id":"S-WY","text":"Wyoming Senate: Harriet Hageman (R) leads James Byrd (D) 65.2%–34.8% · 95.5% of expected vote counted (95.5%)","source":"NBC News"}
+{"t":"2026-11-04T06:53:41.700Z","type":"count","id":"S-MI","text":"Michigan Senate: Abdul El-Sayed (D) leads Mike Rogers (R) 51.7%–46.3% · 80% of expected vote counted (80%)","source":"NBC News"}
