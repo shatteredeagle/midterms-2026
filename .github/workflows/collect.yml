@@ -19,7 +19,7 @@ jobs:
       - name: Restore last published data (keeps last-good file if a source fails)
         run: |
           mkdir -p out
-          for f in markets polls results status changes history; do
+          for f in markets polls results status changes history calls; do
             curl -fsS "https://raw.githubusercontent.com/${{ github.repository }}/data/$f.json" -o "out/$f.json" || true
           done
       - name: Collect

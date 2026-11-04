@@ -1,4 +1,4 @@
-import { STATES, RACES, closeTime } from './states.js?v=c14a3920';
+import { STATES, RACES, closeTime } from './states.js?v=802d03c7';
 
 const REPO = 'ShatteredEagle/midterms-2026';
 const RAW = `https://raw.githubusercontent.com/${REPO}/data/`;
@@ -9,7 +9,7 @@ const pct = (x, d = 0) => (x * 100).toFixed(d) + '%';
 const FIPS = {};
 for (const [st, v] of Object.entries(STATES)) FIPS[v[1]] = st;
 
-const S = { key: null, feedF: 'key', feedMark: 0, pollTab: 'H', senAll: false, history: null, early: null, turnout: null, otherAvgs: null, ballot: null, bqState: 'MA', changes: null, chgF: 'all', chgAll: false, chgSeen: 0, markets: null, polls: null, results: null, status: null, exit: null, control: null, paths: null, kind: 'S', sel: null, rkind: 'S', sort: 'close', q: '', showAll: false, fetchedAt: {} };
+const S = { calls: null, callsSeen: null, callQ: [], key: null, feedF: 'key', feedMark: 0, pollTab: 'H', senAll: false, history: null, early: null, turnout: null, otherAvgs: null, ballot: null, bqState: 'MA', changes: null, chgF: 'all', chgAll: false, chgSeen: 0, markets: null, polls: null, results: null, status: null, exit: null, control: null, paths: null, kind: 'S', sel: null, rkind: 'S', sort: 'close', q: '', showAll: false, fetchedAt: {} };
 
 // ---------- data ----------
 // raw.githubusercontent.com caches 5 min regardless of query string, so the browser reads the bundle through the
@@ -34,7 +34,7 @@ async function loadHistory() {
 }
 async function loadAll() {
   const [b, exit] = await Promise.all([getBundle(), fetch('data/exit-polls.json', { cache: 'no-store' }).then((r) => r.json()).catch(() => null)]);
-  if (b) Object.assign(S, { turnout: b.turnout || S.turnout, changes: b.changes || S.changes, markets: b.markets || S.markets, polls: b.polls || S.polls, results: b.results || S.results, status: b.status || S.status });
+  if (b) Object.assign(S, { calls: b.calls || S.calls, turnout: b.turnout || S.turnout, changes: b.changes || S.changes, markets: b.markets || S.markets, polls: b.polls || S.polls, results: b.results || S.results, status: b.status || S.status });
   if (exit) S.exit = exit;
   if (!S.key) S.key = await fetch('data/key-races.json', { cache: 'no-store' }).then((r) => r.json()).catch(() => null);
   if (!S.early) S.early = await fetch('data/early-vote.json', { cache: 'no-store' }).then((r) => r.json()).catch(() => null);
@@ -53,11 +53,13 @@ function race(id) {
   return { id, kind: k, st, p: S.polls?.races?.[id], o: S.results?.races?.[id], closed: isClosed(st) };
 }
 const allRaces = (kind) => (RACES[kind] || []).map((st) => race(`${kind}-${st}`));
+const callOf = (id) => S.calls?.calls?.[id] || null;
 const hasFeed = (st) => !!S.results?.feeds?.[st];
 const fmtTime = (st) => new Date(closeTime(st)).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 function statusTag(r) {
   const o = r.o;
-  if (counted(o)) return `<span class="tag live">${o.pct}% in</span>${o.winner ? ' <span class="tag live">winner flagged</span>' : ''}`;
+  const call = callOf(r.id);
+  if (counted(o)) return `<span class="tag live">${o.pct}% in</span>${call ? ` <span class="tag called" title="Projected by ${esc(S.calls.source)}">Called ${esc(call.winner.p)} · ${esc(call.winner.n)}</span>` : ''}${o.winner ? ' <span class="tag live">state flags winner</span>' : ''}`;
   if (r.closed) return `<span class="tag">${hasFeed(r.st) ? 'Closed · waiting for votes' : 'Closed · no feed here'}</span>`;
   return `<span class="tag">Polls close ${fmtTime(r.st)}</span>`;
 }
@@ -209,7 +211,7 @@ function stateInfo(st) {
     const a = o.cands[0], b = o.cands[1], m = a.pct - (b ? b.pct : 0), party = a.p;
     const mag = m >= 20 ? 3 : m >= 10 ? 2 : 1;
     const bin = m < 1 ? 'T' : party === 'D' ? `D${mag}` : party === 'R' ? `R${mag}` : 'O';
-    return { bin, early: o.pct < 50, called: !!o.winner, text: `${a.n} (${a.p}) leads${b ? ` ${b.n}` : ''} ${a.pct}%–${b ? b.pct : 0}% · ${o.reporting}${o.winner ? ` · state flags winner: ${o.winner}` : ''}` };
+    return { bin, early: o.pct < 50, called: !!o.winner || !!callOf(`${S.kind}-${st}`), text: `${a.n} (${a.p}) leads${b ? ` ${b.n}` : ''} ${a.pct}%–${b ? b.pct : 0}% · ${o.reporting}${o.winner ? ` · state flags winner: ${o.winner}` : ''}${callOf(`${S.kind}-${st}`) ? ` · NBC News projects ${callOf(`${S.kind}-${st}`).winner.n} (${callOf(`${S.kind}-${st}`).winner.p})` : ''}` };
   }
   return r.closed ? { bin: 'closed', text: o ? 'Polls closed · no votes counted yet' : 'Polls closed · no results feed on this page for this state' } : { bin: 'pend', text: `Polls close ${new Date(closeTime(st)).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}` };
 }
@@ -421,7 +423,7 @@ function renderExit() {
 
 // ---------- change feed ----------
 const HIDDEN = new Set(['odds', 'control', 'projected', 'rating']); // prediction events are no longer shown
-const CHG_GROUP = { count: 'count', lead: 'count', close: 'count', polls: 'polls', source: 'count', exit: 'reports', ballot: 'reports', average: 'reports', early: 'reports' };
+const CHG_GROUP = { call: 'count', count: 'count', lead: 'count', close: 'count', polls: 'polls', source: 'count', exit: 'reports', ballot: 'reports', average: 'reports', early: 'reports' };
 const ago = (iso) => { const s = Math.max(0, Math.round((now() - Date.parse(iso)) / 1000)); return s < 90 ? `${s}s ago` : s < 5400 ? `${Math.round(s / 60)}m ago` : `${Math.round(s / 3600)}h ago`; };
 function renderChanges() {
   const evs = (S.changes?.events || []).filter((e) => !HIDDEN.has(e.type) && (S.chgF === 'all' || CHG_GROUP[e.type] === S.chgF));
@@ -491,7 +493,7 @@ function wireBallot() {
 }
 
 // ---------- live feed rail ----------
-const FEED_KIND = { close: 'Polls', count: 'Count', lead: 'Lead change', projected: 'Projected', exit: 'Exit poll', ballot: 'Ballot', early: 'Early vote', average: 'Polls', polls: 'Polls', rating: 'Rating', control: 'Control', odds: 'Odds', source: 'Feed' };
+const FEED_KIND = { call: 'Race called', close: 'Polls', count: 'Count', lead: 'Lead change', projected: 'Projected', exit: 'Exit poll', ballot: 'Ballot', early: 'Early vote', average: 'Polls', polls: 'Polls', rating: 'Rating', control: 'Control', odds: 'Odds', source: 'Feed' };
 const feedKey = (e) => !HIDDEN.has(e.type) && (S.feedF === 'all' || e.type !== 'source');
 function renderFeed() {
   const evs = (S.changes?.events || []).filter(feedKey).slice(0, 60);
@@ -523,6 +525,30 @@ function wireFeed() {
   setInterval(() => { for (const t of document.querySelectorAll('#railList time')) t.textContent = ago(t.getAttribute('datetime')); }, 5000);
 }
 
+// ---------- race-called banner ----------
+let cbTimer = null;
+function showNextCall() {
+  const b = $('#callBanner');
+  const c = S.callQ.shift();
+  if (!c) { b.hidden = true; b.classList.remove('flash'); return; }
+  const text = c.text || (S.changes?.events || []).find((e) => e.type === 'call' && e.id === c.id)?.text || `NBC News projects ${c.winner.n} (${c.winner.p}) wins ${c.id}`;
+  $('#cbText').textContent = text; $('#cbText').dataset.id = c.id;
+  const more = $('#cbMore'); more.hidden = !S.callQ.length; more.textContent = `+${S.callQ.length} more`;
+  b.hidden = false; b.classList.remove('flash'); void b.offsetWidth; b.classList.add('flash');
+  clearTimeout(cbTimer); cbTimer = setTimeout(showNextCall, 12000);
+}
+function checkCalls() {
+  const ids = Object.keys(S.calls?.calls || {});
+  if (S.callsSeen === null) { if (S.calls) S.callsSeen = new Set(ids); return; } // first load: don't replay calls already made
+  const fresh = ids.filter((id) => !S.callsSeen.has(id));
+  for (const id of fresh) { S.callsSeen.add(id); S.callQ.push(S.calls.calls[id]); }
+  if (fresh.length && $('#callBanner').hidden) showNextCall(); else if (fresh.length) { const m = $('#cbMore'); m.hidden = false; m.textContent = `+${S.callQ.length} more`; }
+}
+function wireBanner() {
+  $('#cbClose').addEventListener('click', () => { clearTimeout(cbTimer); showNextCall(); });
+  $('#cbText').addEventListener('click', (e) => { const id = e.currentTarget.dataset.id, st = id?.split('-')[1]; if (id && STATES[st]) { select(st); goMap(); } });
+}
+
 // ---------- sources ----------
 function renderSources() {
   const st = S.status?.sources || {};
@@ -530,6 +556,7 @@ function renderSources() {
   const cards = [
     ['PollCheck', 'Polling averages and ratings for Senate, governor races, and the generic ballot.', 'https://www.pollcheck.co.uk/us-midterms-2026', age('polls')],
     ['State election offices', `Official vote counts (Senate, governor and U.S. House districts), straight from the states that publish machine-readable files: ${Object.entries(S.results?.feeds || {}).map(([k, v]) => `${k}${v.ok ? '' : ' (failing)'}`).join(', ') || 'CA, CO, FL, GA, IA, MN, NC, NE, SD'}. Other states link out; Texas, Washington, Utah and most others had no usable open file.`, 'https://www.usa.gov/election-results', age('results')],
+    ['NBC News Decision Desk', 'Race calls (projected winners). The collector scans NBC\'s results page every minute and flashes a banner on a new call. These are NBC\'s projections, not official results.', 'https://www.nbcnews.com/politics/2026-elections/senate-results', age('calls')],
     ['Exit polls', 'No open feed exists. Entered from published outlet releases (AP VoteCast, SSRS/Edison, networks).', 'https://apnews.com/hub/ap-votecast', S.exit?.updated ? `<span class="tag live">updated ${new Date(S.exit.updated).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</span>` : '<span class="tag">waiting</span>'],
   ];
   const xs = [['AP', 'https://apnews.com/'], ['Decision Desk HQ', 'https://decisiondeskhq.com/'], ['Silver Bulletin', 'https://www.natesilver.net/'], ['RealClearPolling', 'https://www.realclearpolling.com/'], ['FiftyPlusOne', 'https://www.fiftyplusone.news/'], ['Cook Political', 'https://www.cookpolitical.com/'], ['Sabato’s Crystal Ball', 'https://centerforpolitics.org/crystalball/'], ['Inside Elections', 'https://insideelections.com/'], ['270toWin', 'https://www.270towin.com/']];
@@ -567,12 +594,12 @@ function route() {
 const goMap = () => { if (location.hash !== '#map') history.replaceState(null, '', '#map'); showView('overview', 'map'); };
 
 // ---------- boot ----------
-function renderAll() { renderClock(); renderSenate(); renderHouse(); renderResultsSo(); renderControl(); paintMap(); renderDetail(); renderChanges(); renderFeed(); renderTurnout(); renderBallot(); renderTable(); renderPolls(); renderExit(); renderSources(); renderLive(); }
+function renderAll() { renderClock(); checkCalls(); renderSenate(); renderHouse(); renderResultsSo(); renderControl(); paintMap(); renderDetail(); renderChanges(); renderFeed(); renderTurnout(); renderBallot(); renderTable(); renderPolls(); renderExit(); renderSources(); renderLive(); }
 async function boot() {
   const th = $('#theme');
   th.onclick = () => { const cur = document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); const n = cur === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = n; try { localStorage.setItem('theme', n); } catch {} };
   S.paths = await (await fetch('assets/map-paths.json')).json();
-  drawMap(); wireMap(); wireTable(); wireChanges(); wireBallot(); wireResults(); wireControl(); wirePolls(); wireFeed();
+  drawMap(); wireMap(); wireTable(); wireChanges(); wireBallot(); wireResults(); wireControl(); wirePolls(); wireFeed(); wireBanner();
   await Promise.all([loadAll(), loadHistory()]);
   S.feedMark = Date.now();
   renderAll();
@@ -583,6 +610,7 @@ async function boot() {
   setInterval(tick, 90000);
   window.addEventListener('hashchange', route);
   route();
+  if (/[?&]demoCall/.test(location.search)) { S.callQ.push({ id: 'S-GA', winner: { n: 'Demo', p: 'D' }, text: 'TEST: NBC News projects Jon Ossoff (D) wins Georgia Senate (banner preview, not a real call)' }); showNextCall(); }
   document.addEventListener('visibilitychange', () => !document.hidden && tick());
 }
 boot().catch((e) => { console.error(e); $('#liveText').textContent = 'Failed to load'; });

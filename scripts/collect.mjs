@@ -4,7 +4,7 @@ import { mkdir, writeFile, readFile, stat } from 'node:fs/promises';
 import { GAMMA, BALLOT_SLUGS, parseEvents } from '../assets/markets.js';
 import { NAME_TO_ST } from '../assets/states.js';
 import { FEEDS } from './feeds.mjs';
-import { diffSnapshots, diffManual } from './diff.mjs';
+import { diffSnapshots, diffManual, diffCalls } from './diff.mjs';
 
 const OUT = process.argv[2] || 'out';
 const UA = 'midterms-2026-dashboard/1.0 (+https://github.com/ShatteredEagle/midterms-2026)';
@@ -154,27 +154,52 @@ async function history() {
   return { ...h, updated: now() };
 }
 
+// ---- Race calls: NBC News "latest results" module (projected winners from the NBC News Decision Desk) ----
+// The page embeds Next.js JSON with the most recent called races across all offices. We keep every call we have seen.
+async function calls() {
+  const html = await get('https://www.nbcnews.com/politics/2026-elections/senate-results', false);
+  const m = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
+  if (!m) throw new Error('nbc page layout changed');
+  const found = [];
+  (function walk(o) { if (Array.isArray(o)) o.forEach(walk); else if (o && typeof o === 'object') { if (o.raceId && o.candidates) found.push(o); Object.values(o).forEach(walk); } })(JSON.parse(m[1]));
+  const prev = (await readJ('calls')) || { calls: {} };
+  const out = { ...prev.calls };
+  for (const r of found) {
+    const w = r.candidates.find((c) => c.isWinner);
+    if (!w || !/^[PW]$/.test(r.callStatusCode || '')) continue;
+    const mm = r.raceId.match(/~([A-Z]{2})(\d{0,3})[A-Z0-9]*~([HSG])/);
+    if (!mm) continue;
+    const id = mm[3] === 'H' ? `H-${mm[1]}-${String(Number(mm[2] || 1)).padStart(2, '0')}` : `${mm[3]}-${mm[1]}`;
+    const party = { Dem: 'D', Rep: 'R' }[w.party] || 'O';
+    const lose = r.candidates.filter((c) => !c.isWinner).sort((a, b) => b.percentVote - a.percentVote)[0];
+    out[id] = out[id] || { id, firstSeen: now() };
+    Object.assign(out[id], { raceId: r.raceId, status: r.callStatusCode, winner: { n: w.lastName, p: party, pct: w.percentVote }, runnerUp: lose ? { n: lose.lastName, p: { Dem: 'D', Rep: 'R' }[lose.party] || 'O', pct: lose.percentVote } : null, pctIn: r.percentInFormatted || null, url: r.href ? `https://www.nbcnews.com${r.href}` : null });
+  }
+  return { updated: now(), source: 'NBC News Decision Desk (projections)', url: 'https://www.nbcnews.com/politics/2026-elections/senate-results', calls: out };
+}
+
 await mkdir(OUT, { recursive: true });
 const before = { markets: await readJ('markets'), polls: await readJ('polls'), results: await readJ('results') };
 const log = (await readJ('changes')) || { events: [] };
-await Promise.all([run('markets', markets), run('polls', polls, 270000), run('results', results), run('turnout', turnout)]);
+await Promise.all([run('markets', markets), run('polls', polls, 270000), run('results', results), run('turnout', turnout), run('calls', calls, 40000)]);
 await run('history', history); // after the others: reads this run's markets/results
 let prev = {};
 try { prev = JSON.parse(await readFile(`${OUT}/status.json`, 'utf8')); } catch {}
 await writeFile(`${OUT}/status.json`, JSON.stringify({ updated: now(), sources: { ...prev.sources, ...status } }));
 // One file for the browser: a single request per refresh (kept under the GitHub API's unauthenticated rate limit).
-const [m, po, re, st, tu] = await Promise.all(['markets', 'polls', 'results', 'status', 'turnout'].map(readJ));
+const [m, po, re, st, tu, ca] = await Promise.all(['markets', 'polls', 'results', 'status', 'turnout', 'calls'].map(readJ));
 // Change feed: diff against the previous run, keep the newest 300 events.
 // Hand-entered data files from the repo (data/*.json): diffed against the last seen copy.
 const DATA = new URL('../data/', import.meta.url);
 const readData = async (f) => { try { return JSON.parse(await readFile(new URL(f, DATA), 'utf8')); } catch { return null; } };
 const manualNow = { exit: await readData('exit-polls.json'), ballot: await readData('ballot-questions.json'), averages: await readData('other-averages.json'), early: await readData('early-vote.json') };
 const manualPrev = (await readJ('manual')) || {};
+const callsBefore = await readJ('calls');
 await writeFile(`${OUT}/manual.json`, JSON.stringify(manualNow));
 const anchors = log.anchors || { odds: {}, control: {} };
 const fresh = diffSnapshots(before, { markets: m, polls: po, results: re }, Date.now(), anchors);
-const added = diffManual(manualPrev, manualNow);
+const added = [...diffManual(manualPrev, manualNow), ...diffCalls(callsBefore, ca, re)];
 const changes = { updated: now(), events: [...added, ...fresh.reverse(), ...(log.events || [])].slice(0, 300) };
 await writeFile(`${OUT}/changes.json`, JSON.stringify({ ...changes, anchors })); // anchors stay server-side; the bundle and site get events only
-await writeFile(`${OUT}/bundle.json`, JSON.stringify({ updated: now(), markets: m, polls: po, results: re, status: st, turnout: tu, changes }));
+await writeFile(`${OUT}/bundle.json`, JSON.stringify({ updated: now(), markets: m, polls: po, results: re, status: st, turnout: tu, calls: ca, changes }));
 console.log(JSON.stringify(status));

@@ -87,3 +87,19 @@ export function diffManual(prev = {}, next = {}, nowMs = Date.now()) {
   for (const x of next.early?.states || []) if (!same(pv[x.code], x)) ev('early', x.code, `${x.name} early vote report ${pv[x.code] ? 'updated' : 'added'}: ${n0(x.ballots)} ballots${x.turnoutPct ? ` (${x.turnoutPct}% turnout)` : ''} · ${x.asOf}`);
   return out;
 }
+
+// New race calls (NBC News Decision Desk projections). On the very first run nothing is announced (no replay of old calls).
+export function diffCalls(prev, next, results, nowMs = Date.now()) {
+  if (!next?.calls || !prev?.calls) return [];
+  const t = new Date(nowMs).toISOString(), out = [];
+  const full = (id, w) => {
+    const cands = results?.races?.[id]?.cands || [];
+    const hit = cands.find((c) => c.p === w.p && c.n.toLowerCase().includes(String(w.n).toLowerCase()));
+    return hit ? hit.n.replace(/ \([^)]*\)$/, '') : w.n;
+  };
+  for (const [id, c] of Object.entries(next.calls)) {
+    if (prev.calls[id]) continue;
+    out.push({ t, type: 'call', id, text: `NBC News projects ${full(id, c.winner)} (${c.winner.p}) wins ${label(id)}${c.winner.pct ? ` · ${c.winner.pct}%${c.runnerUp ? `–${c.runnerUp.pct}%` : ''}` : ''}`, source: 'NBC News Decision Desk' });
+  }
+  return out.reverse();
+}
