@@ -759,3 +759,13 @@
 {"t":"2026-11-04T09:08:42.433Z","type":"count","id":"G-KS","text":"Kansas Governor: Cindy Holscher (D) leads Ty Masterson (R) 50.3%–49.7% · 95% of expected vote counted (95%)","source":"NBC News"}
 {"t":"2026-11-04T09:14:12.801Z","type":"source","id":"FL","text":"FL official feed is failing; showing last good data"}
 {"t":"2026-11-04T09:14:42.275Z","type":"source","id":"FL","text":"FL official feed recovered"}
+{"t":"2026-11-04T09:22:11.599Z","type":"count","id":"G-ID","text":"Idaho Governor: Brad Little (R) leads Terri Pickens (D) 57.4%–31.9% · 90% of expected vote counted (90%)","source":"NBC News"}
+{"t":"2026-11-04T09:24:41.535Z","type":"lead","id":"H-MI-04","text":"MI-04 House: lead changes to Bill Huizenga (R) at 49.7%","source":"NBC News"}
+{"t":"2026-11-04T09:25:41.627Z","type":"count","id":"H-CA-20","text":"CA-20 House: Vince Fong (R) leads Sandra Van Scotter (D) 61%–39% · 209 of 209 precincts (100%)","source":"California Secretary of State"}
+{"t":"2026-11-04T09:25:41.627Z","type":"count","id":"H-CA-21","text":"CA-21 House: Jim Costa (D) leads Kyle Kirkland (R) 57.4%–42.6% · 79 of 79 precincts (100%)","source":"California Secretary of State"}
+{"t":"2026-11-04T09:25:41.627Z","type":"count","id":"H-CA-22","text":"CA-22 House: Randy Villegas (D) leads David G. Valadao (R) 64.7%–35.3% · 100 of 100 precincts (100%)","source":"California Secretary of State"}
+{"t":"2026-11-04T09:30:43.112Z","type":"count","id":"S-AK","text":"Alaska Senate: Dan S. Sullivan (R) leads Mary Peltola (D) 48.5%–47.7% · 72.4% of expected vote counted (72.4%)","source":"NBC News"}
+{"t":"2026-11-04T09:30:43.112Z","type":"count","id":"G-AK","text":"Alaska Governor: Jonathan Kreiss-Tomkins (D) leads Bernadette Wilson (R) 49%–29.5% · 72% of expected vote counted (72%)","source":"NBC News"}
+{"t":"2026-11-04T09:36:12.354Z","type":"count","id":"H-NE-01","text":"NE-01 House: Mike Flood (R) leads Chris Backemeyer (D) 49.9%–46.5% · 414 of 438 precincts (94.5%)","source":"Nebraska Secretary of State"}
+{"t":"2026-11-04T09:36:46.216Z","type":"count","id":"S-NE","text":"Nebraska Senate: Pete Ricketts (R) leads Dan Osborn (O) 50.2%–43.8% · 1,269 of 1,322 precincts (96%)","source":"Nebraska Secretary of State"}
+{"t":"2026-11-04T09:36:46.216Z","type":"count","id":"G-NE","text":"Nebraska Governor: Jim Pillen and Joe Kelly (R) leads Lynne Walz and Ben Steffen (D) 50.6%–42.4% · 1,269 of 1,322 precincts (96%)","source":"Nebraska Secretary of State"}
