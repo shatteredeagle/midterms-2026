@@ -4,6 +4,7 @@ import { mkdir, writeFile, readFile, stat, readdir, rm } from 'node:fs/promises'
 import { GAMMA, BALLOT_SLUGS, parseEvents } from '../assets/markets.js';
 import { NAME_TO_ST } from '../assets/states.js';
 import { FEEDS, nbcState } from './feeds.mjs';
+import { spawn } from 'node:child_process';
 import { STATES as ST_META, closeTime } from '../assets/states.js';
 import { diffSnapshots, diffManual, diffCalls } from './diff.mjs';
 
@@ -113,6 +114,12 @@ async function results() {
       try { Object.assign(races, await nbcState(st, ST_META[st][0], () => true)()); feeds[st].fallback = 'NBC News'; } catch { /* keep last good data */ }
     }
   }));
+  // House districts in states without a native district feed: a detached worker keeps house_nbc.json fresh; merge it here.
+  try {
+    const hn = await readJ('house_nbc');
+    for (const [id, v] of Object.entries(hn || {})) if (!races[id] || races[id].source === 'NBC News') races[id] = v;
+    feeds.NBC_HOUSE = { ok: true, at: now(), districts: Object.keys(hn || {}).length };
+  } catch (e) { feeds.NBC_HOUSE = { ok: false, at: now(), error: e.message }; }
   return { updated: now(), feeds, races };
 }
 
@@ -206,6 +213,16 @@ async function calls() {
 }
 
 await mkdir(OUT, { recursive: true });
+// Start the House worker once (detached) if it is not running.
+try {
+  const pid = Number((await readFile(`${OUT}/house.pid`, 'utf8').catch(() => '0')).trim());
+  let alive = false; if (pid) { try { process.kill(pid, 0); alive = true; } catch { alive = false; } }
+  if (!alive) {
+    const child = spawn(process.execPath, [new URL('./house-loop.mjs', import.meta.url).pathname, OUT], { detached: true, stdio: 'ignore' });
+    child.unref();
+    await writeFile(`${OUT}/house.pid`, String(child.pid));
+  }
+} catch (e) { console.error('house worker', e.message); }
 const before = { markets: await readJ('markets'), polls: await readJ('polls'), results: await readJ('results') };
 const log = (await readJ('changes')) || { events: [] };
 await Promise.all([run('markets', markets), run('polls', polls, 270000), run('results', results), run('turnout', turnout), run('calls', calls, 40000)]);

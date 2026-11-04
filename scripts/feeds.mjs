@@ -226,6 +226,20 @@ export function nbcState(st, name, closed) {
   };
 }
 
+// ---- NBC News per-district House results (states without their own district feed) ----
+// One request per district (~25 KB). Latency swings from 0.2 s to 20 s, so a background worker (scripts/house-loop.mjs) fetches them.
+export const HOUSE_NATIVE = new Set(['CA', 'CO', 'FL', 'GA', 'IA', 'MN', 'NC', 'NE']);
+export async function nbcHouseDistrict(st, n) {
+  const j = await get(`https://www.nbcnews.com/firecracker/api/v2/state-results/2026-elections/${SLUG(STATES[st][0])}-us-house-district-${n}-results`, true);
+  let hit = null;
+  (function walk(o) { if (Array.isArray(o)) o.forEach(walk); else if (o && typeof o === 'object') { if (o.raceId && o.candidates && new RegExp(`~${st}0*${n}~H$`).test(o.raceId) && Number(o.district || n) === n) hit = o; Object.values(o).forEach(walk); } })(j);
+  if (!hit) return null;
+  const cands = hit.candidates.filter((c) => c.lastName).map((c) => ({ n: tidy(`${c.firstName || ''} ${c.lastName}`), p: NBC_PARTY[c.party] || 'O', votes: Number(c.votes) || 0, pct: Number(c.percentVote) || 0, winner: !!c.isWinner })).sort((a, b) => b.pct - a.pct).slice(0, 3);
+  const total = cands.reduce((a, c) => a + c.votes, 0), pctIn = parseFloat(hit.percentInFormatted) || 0;
+  const id = `H-${st}-${String(n).padStart(2, '0')}`;
+  return { id, source: 'NBC News', reporting: `${hit.percentInFormatted || '0%'} of expected vote counted`, pct: pctIn, totalVotes: total, shareOnly: total === 0, cands, ...(cands.some((c) => c.winner) ? { winner: cands.find((c) => c.winner).n } : {}) };
+}
+
 export const FEEDS = { CA: CAall, CO, FL, GA, IA, MN, NC, NE, SD };
 // Every other state with a Senate or governor race reads NBC's state API once its polls have closed (at most 8 requests at a time).
 let nbcActive = 0; const nbcWait = [];
