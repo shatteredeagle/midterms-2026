@@ -426,3 +426,7 @@ svg.lc .callt{fill:#c98a00;font-size:9.5px;font-weight:600}
 .lc-key{display:flex;gap:14px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--muted);margin-top:2px}
 .lc-key i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:5px;vertical-align:middle}
 .lc-key i.k2{background:none;border-top:2px dashed #8b94a3;height:0}
+
+/* two-thirds (290 seat) supermajority markers */
+.waffle i.sup{position:relative;z-index:1;border-radius:3px;outline:2px dotted var(--text);outline-offset:2px;box-shadow:0 0 0 1px var(--surface)}
+.waffle-key .supkey::before{background:none;border:2px dotted var(--text);width:7px;height:7px;outline:0}
