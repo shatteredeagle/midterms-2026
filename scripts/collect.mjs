@@ -4,7 +4,7 @@ import { mkdir, writeFile, readFile, stat, readdir, rm } from 'node:fs/promises'
 import { GAMMA, BALLOT_SLUGS, parseEvents } from '../assets/markets.js';
 import { NAME_TO_ST } from '../assets/states.js';
 import { FEEDS, nbcState } from './feeds.mjs';
-import { STATES as ST_META } from '../assets/states.js';
+import { STATES as ST_META, closeTime } from '../assets/states.js';
 import { diffSnapshots, diffManual, diffCalls } from './diff.mjs';
 
 const OUT = process.argv[2] || 'out';
@@ -100,6 +100,13 @@ async function results() {
       for (const k of Object.keys(races)) if (k.split('-')[1] === st) delete races[k];
       Object.assign(races, got);
       feeds[st] = { ok: true, at: now(), races: Object.keys(got) };
+      // Polls closed but the state's own file still shows zero votes for a Senate/governor race: use NBC's numbers until the state posts.
+      if (Date.now() >= closeTime(st) + 120000 && Object.entries(got).some(([k, v]) => k[0] !== 'H' && v.totalVotes === 0)) {
+        try {
+          const alt = await nbcState(st, ST_META[st][0], () => true)();
+          for (const [k, v] of Object.entries(alt)) if (!(races[k]?.totalVotes > 0) && v.pct > 0) { races[k] = v; feeds[st].fallback = 'NBC News (state file still empty)'; }
+        } catch { /* keep as is */ }
+      }
     } catch (e) {
       feeds[st] = { ...feeds[st], ok: false, at: now(), error: e.message }; console.error(st, e.message);
       // A state's own site is down (election-night overload is common): fall back to NBC's statewide Senate/governor numbers for that state.
