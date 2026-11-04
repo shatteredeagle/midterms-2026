@@ -5,6 +5,9 @@ import { GAMMA, BALLOT_SLUGS, parseEvents } from '../assets/markets.js';
 import { NAME_TO_ST } from '../assets/states.js';
 import { FEEDS, nbcState } from './feeds.mjs';
 import { spawn } from 'node:child_process';
+import { gzipSync } from 'node:zlib';
+import { appendFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import { STATES as ST_META, closeTime } from '../assets/states.js';
 import { diffSnapshots, diffManual, diffCalls } from './diff.mjs';
 
@@ -285,4 +288,34 @@ await writeFile(`${OUT}/bundle.json`, bundleJson);
 const bucket = Math.floor(Date.now() / 30000);
 for (const bb of [bucket, bucket + 1]) await writeFile(`${OUT}/s${bb}.json`, bundleJson);
 for (const f of await readdir(OUT)) { const k = /^[ms](\d+)\.json$/.exec(f); if (k && (f[0] === 'm' || Number(k[1]) < bucket - 1)) await rm(`${OUT}/${f}`); }
+// ---- permanent archive (Tower only: OUT is /app/out, the archive lives beside it and is never force-pushed away) ----
+// Per-minute gzipped bundle snapshots (every race incl. House), every change event ever (the live log is capped at 300),
+// and 10-minute copies of history.json. A separate `archive` branch is pushed (not forced) every 20 minutes.
+const ARCHIVE = process.env.ARCHIVE_DIR || (OUT === '/app/out' ? '/app/archive' : null);
+if (ARCHIVE) {
+  try {
+    const d = new Date(), day = d.toISOString().slice(0, 10), hm = d.toISOString().slice(11, 16).replace(':', '');
+    await mkdir(`${ARCHIVE}/snap/${day}`, { recursive: true });
+    const snap = `${ARCHIVE}/snap/${day}/${hm}.json.gz`;
+    if (!(await stat(snap).catch(() => null))) await writeFile(snap, gzipSync(bundleJson));
+    if (Number(hm.slice(2)) % 10 === 0) {
+      const hp = `${ARCHIVE}/history/${day}-${hm}.json.gz`;
+      await mkdir(`${ARCHIVE}/history`, { recursive: true });
+      if (!(await stat(hp).catch(() => null))) await writeFile(hp, gzipSync(await readFile(`${OUT}/history.json`)));
+    }
+    const st0 = (() => { try { return JSON.parse(readFileSync(`${ARCHIVE}/.state.json`, 'utf8')); } catch { return { t: '', keys: [] }; } })();
+    const fresh2 = changes.events.filter((e) => e.t > st0.t || (e.t === st0.t && !st0.keys.includes(e.text))).reverse();
+    if (fresh2.length) {
+      await appendFile(`${ARCHIVE}/changes.ndjson`, fresh2.map((e) => JSON.stringify(e)).join('\n') + '\n');
+      const top = fresh2[fresh2.length - 1].t;
+      await writeFile(`${ARCHIVE}/.state.json`, JSON.stringify({ t: top, keys: changes.events.filter((e) => e.t === top).map((e) => e.text) }));
+    }
+    const last = await stat(`${ARCHIVE}/.pushed`).then((s) => Date.now() - s.mtimeMs, () => Infinity);
+    if (last > 20 * 60000) {
+      await writeFile(`${ARCHIVE}/.pushed`, now());
+      const sh = `cd ${ARCHIVE} && ( [ -d .git ] || git init -q -b archive ) && git config user.name midterms-bot && git config user.email tower@users.noreply.github.com && git remote get-url origin >/dev/null 2>&1 || git remote add origin git@github.com:ShatteredEagle/midterms-2026.git; cd ${ARCHIVE} && printf '.pushed\\n.state.json\\n' > .gitignore && git add -A && git commit -qm "archive $(date -u +%FT%TZ)" ; git push -q origin archive`;
+      spawn('sh', ['-c', sh], { detached: true, stdio: 'ignore' }).unref();
+    }
+  } catch (e) { console.error('archive failed', e.message); }
+}
 console.log(JSON.stringify(status));
