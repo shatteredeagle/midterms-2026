@@ -3,7 +3,8 @@
 import { mkdir, writeFile, readFile, stat, readdir, rm } from 'node:fs/promises';
 import { GAMMA, BALLOT_SLUGS, parseEvents } from '../assets/markets.js';
 import { NAME_TO_ST } from '../assets/states.js';
-import { FEEDS } from './feeds.mjs';
+import { FEEDS, nbcState } from './feeds.mjs';
+import { STATES as ST_META } from '../assets/states.js';
 import { diffSnapshots, diffManual, diffCalls } from './diff.mjs';
 
 const OUT = process.argv[2] || 'out';
@@ -99,7 +100,11 @@ async function results() {
       for (const k of Object.keys(races)) if (k.split('-')[1] === st) delete races[k];
       Object.assign(races, got);
       feeds[st] = { ok: true, at: now(), races: Object.keys(got) };
-    } catch (e) { feeds[st] = { ...feeds[st], ok: false, at: now(), error: e.message }; console.error(st, e.message); }
+    } catch (e) {
+      feeds[st] = { ...feeds[st], ok: false, at: now(), error: e.message }; console.error(st, e.message);
+      // A state's own site is down (election-night overload is common): fall back to NBC's statewide Senate/governor numbers for that state.
+      try { Object.assign(races, await nbcState(st, ST_META[st][0], () => true)()); feeds[st].fallback = 'NBC News'; } catch { /* keep last good data */ }
+    }
   }));
   return { updated: now(), feeds, races };
 }
