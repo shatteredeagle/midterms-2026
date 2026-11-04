@@ -1,7 +1,9 @@
 // Timelapse: renders the dashboard as it looked at each commit, and (once the archive exists) replays the recorded results snapshots
 // through the page code that was live at that moment. Usage: node scripts/timelapse.mjs <workdir> [--test] [--step=5]
 // Needs: git, google-chrome-stable (headless), ffmpeg, and a clone of the `archive` branch at <workdir>/archive (see below).
-import { execFileSync } from 'node:child_process';
+import { execFileSync, execFile } from 'node:child_process';
+import { promisify } from 'node:util';
+const execFileP = promisify(execFile);
 import { mkdirSync, writeFileSync, readFileSync, readdirSync, existsSync, rmSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
 import http from 'node:http';
@@ -57,7 +59,7 @@ for (const fr of todo) {
   const idx = `${SITE}/index.html`;
   writeFileSync(idx, readFileSync(idx, 'utf8').replace('<head>', `<head>${inject}`));
   try {
-    execFileSync('google-chrome-stable', ['--headless=new', '--disable-gpu', '--no-sandbox', '--hide-scrollbars', '--window-size=1400,1000', '--virtual-time-budget=12000', `--screenshot=${out}`, `http://localhost:${port}/index.html#overview`], { stdio: 'ignore', timeout: 90000 });
+    await execFileP('google-chrome-stable', ['--headless=new', '--disable-gpu', '--no-sandbox', '--hide-scrollbars', '--window-size=1400,1000', '--virtual-time-budget=12000', `--screenshot=${out}`, `http://localhost:${port}/index.html#overview`], { timeout: 90000 }); // async: the page is fetched from this process's own server, which a sync call would block
   } catch { console.error('frame failed', n, fr.commit.sha.slice(0, 7)); }
   if (n % 10 === 0) console.log(`${n}/${todo.length}`);
 }
