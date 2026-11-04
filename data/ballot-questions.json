@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-04T05:00:05Z",
+  "updated": "2026-11-04T05:58:24Z",
   "note": "Summaries come from Boston.com (Jul 21), BU Today (Oct 27) and Ballotpedia News (Jun 16); the official voter guides were not machine-readable. Check the official links for exact ballot wording. Results appear here only when entered from an official source.",
   "states": {
     "MA": {
@@ -24,7 +24,7 @@
           "result": {
             "yes": 86.1,
             "no": 13.9,
-            "reporting": "38.1% of precincts · as of 11:59 PM EST · AP has called it, passes",
+            "reporting": "45.0% of precincts · as of 12:58:04 AM EST · AP has called it, passes",
             "source": "AP via WBUR"
           }
         },
@@ -34,9 +34,9 @@
           "title": "Collective bargaining for public defenders",
           "yes": "Lets employees of the Committee for Public Counsel Services (state public defenders) form a union and bargain collectively.",
           "result": {
-            "yes": 65.2,
-            "no": 34.8,
-            "reporting": "38.1% of precincts · as of 11:59 PM EST",
+            "yes": 64.8,
+            "no": 35.2,
+            "reporting": "45.0% of precincts · as of 12:58:04 AM EST",
             "source": "AP via WBUR"
           }
         },
@@ -52,9 +52,9 @@
           "title": "Election Day registration",
           "yes": "Lets residents register or update their registration on Election Day with proof of residency and an oath.",
           "result": {
-            "yes": 58.0,
-            "no": 42.0,
-            "reporting": "38.1% of precincts · as of 11:59 PM EST",
+            "yes": 57.6,
+            "no": 42.4,
+            "reporting": "45.0% of precincts · as of 12:58:04 AM EST",
             "source": "AP via WBUR"
           }
         },
@@ -66,7 +66,7 @@
           "result": {
             "yes": 47.0,
             "no": 53.0,
-            "reporting": "38.1% of precincts · as of 11:59 PM EST",
+            "reporting": "45.0% of precincts · as of 12:58:04 AM EST",
             "source": "AP via WBUR"
           }
         },
@@ -76,9 +76,9 @@
           "title": "Natural resource conservation fund",
           "yes": "Creates a \"Nature for All\" fund for land conservation and recreation, paid from a small share of sales tax.",
           "result": {
-            "yes": 61.5,
-            "no": 38.5,
-            "reporting": "38.1% of precincts · as of 11:59 PM EST",
+            "yes": 61.3,
+            "no": 38.7,
+            "reporting": "45.0% of precincts · as of 12:58:04 AM EST",
             "source": "AP via WBUR"
           }
         },
@@ -88,9 +88,9 @@
           "title": "Single-family homes on smaller lots",
           "yes": "Lets towns allow single-family homes on residential lots of at least 5,000 sq ft with 50 ft of frontage and public water and sewer.",
           "result": {
-            "yes": 51.5,
-            "no": 48.5,
-            "reporting": "38.1% of precincts · as of 11:59 PM EST",
+            "yes": 50.5,
+            "no": 49.5,
+            "reporting": "45.0% of precincts · as of 12:58:04 AM EST",
             "source": "AP via WBUR"
           }
         },
@@ -107,9 +107,9 @@
           "yes": "A referendum on the 2024 gun law. BU Today reports a Yes vote keeps the law in place; Boston.com words it as a repeal question. Check the official guide before relying on this one.",
           "flag": "Sources word this differently",
           "result": {
-            "yes": 68.9,
-            "no": 31.1,
-            "reporting": "38.1% of precincts · as of 11:59 PM EST",
+            "yes": 68.8,
+            "no": 31.2,
+            "reporting": "45.0% of precincts · as of 12:58:04 AM EST",
             "source": "AP via WBUR"
           }
         }
