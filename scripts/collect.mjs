@@ -217,9 +217,9 @@ const changes = { updated: now(), events: [...added, ...fresh.reverse(), ...(log
 await writeFile(`${OUT}/changes.json`, JSON.stringify({ ...changes, anchors })); // anchors stay server-side; the bundle and site get events only
 const bundleJson = JSON.stringify({ updated: now(), markets: m, polls: po, results: re, status: st, turnout: tu, calls: ca, changes });
 await writeFile(`${OUT}/bundle.json`, bundleJson);
-// Minute-stamped copies (this minute and next). raw.githubusercontent caches each URL for 5 minutes and ignores query strings,
-// so the browser asks for m<minute>.json: a URL nobody has requested yet is always fresh, and data is at most about a minute old.
-const minute = Math.floor(Date.now() / 60000);
-for (const mm of [minute, minute + 1]) await writeFile(`${OUT}/m${mm}.json`, bundleJson);
-for (const f of await readdir(OUT)) { const k = /^m(\d+)\.json$/.exec(f); if (k && Number(k[1]) < minute - 1) await rm(`${OUT}/${f}`); }
+// 30-second stamped copies (this bucket and the next). raw.githubusercontent caches each URL for 5 minutes and ignores query strings,
+// so the browser asks for s<bucket>.json: a URL nobody has requested yet is always fresh, keeping data about a minute old at most.
+const bucket = Math.floor(Date.now() / 30000);
+for (const bb of [bucket, bucket + 1]) await writeFile(`${OUT}/s${bb}.json`, bundleJson);
+for (const f of await readdir(OUT)) { const k = /^[ms](\d+)\.json$/.exec(f); if (k && (f[0] === 'm' || Number(k[1]) < bucket - 1)) await rm(`${OUT}/${f}`); }
 console.log(JSON.stringify(status));
