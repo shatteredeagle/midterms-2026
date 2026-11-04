@@ -686,3 +686,17 @@
 {"t":"2026-11-04T07:30:42.445Z","type":"count","id":"S-AK","text":"Alaska Senate: Dan S. Sullivan (R) leads Mary Peltola (D) 48.7%–47.5% · 66.1% of expected vote counted (66.1%)","source":"NBC News"}
 {"t":"2026-11-04T07:31:11.587Z","type":"count","id":"S-SD","text":"South Dakota Senate: Mike Rounds (R) leads Brian L Bengs (O) 61.1%–38.9% · 610 of 671 precincts (90.9%)","source":"South Dakota Secretary of State"}
 {"t":"2026-11-04T07:31:11.587Z","type":"count","id":"G-SD","text":"South Dakota Governor: Larry Rhoden and Tony Venhuizen (R) leads Dan Ahlers and Steven McCleerey (D) 64.1%–35.9% · 610 of 671 precincts (90.9%)","source":"South Dakota Secretary of State"}
+{"t":"2026-11-04T07:36:11.973Z","type":"call","id":"H-MN-08","text":"NBC News projects Pete Stauber (R) wins MN-08 House · 53.1%–46.8% over Swanson (D)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T07:36:11.973Z","type":"call","id":"H-TX-06","text":"NBC News projects Jake Ellzey (R) wins TX-06 House · 52.3%–47.7% over Minton (D)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T07:38:11.865Z","type":"count","id":"S-ID","text":"Idaho Senate: first votes reported (84.3% of precincts)","source":"NBC News"}
+{"t":"2026-11-04T07:39:42.210Z","type":"count","id":"H-MN-07","text":"MN-07 House: Michelle Fischbach (R) leads Erik Osberg (D) 64.9%–35.1% · 1,327 of 1,327 precincts (100%)","source":"Minnesota Secretary of State"}
+{"t":"2026-11-04T07:41:12.602Z","type":"call","id":"S-NE","text":"NBC News projects Petersen (R) wins Nebraska Senate · 53.1%–41.3% over Slattery (D)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T07:42:12.079Z","type":"call","id":"H-OH-09","text":"NBC News projects Marcy Kaptur (D) wins OH-09 House · 52.7%–47.3% over Merrin (R)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T07:45:14.158Z","type":"count","id":"G-CT","text":"Connecticut Governor: Ned Lamont (D) leads Ryan Fazio (R) 58.4%–41.6% · 90.4% of expected vote counted (90.4%)","source":"NBC News"}
+{"t":"2026-11-04T07:47:42.185Z","type":"source","id":"FL","text":"FL official feed is failing; showing last good data"}
+{"t":"2026-11-04T07:48:12.671Z","type":"source","id":"FL","text":"FL official feed recovered"}
+{"t":"2026-11-04T07:49:42.484Z","type":"count","id":"H-CA-04","text":"CA-04 House: Eric Jones (D) leads Mike Thompson (D) 66.9%–33.1% · 23 of 23 precincts (100%)","source":"California Secretary of State"}
+{"t":"2026-11-04T07:49:42.484Z","type":"count","id":"H-CA-11","text":"CA-11 House: Scott Wiener (D) leads Connie Chan (D) 55.4%–44.6% · 453 of 453 precincts (100%)","source":"California Secretary of State"}
+{"t":"2026-11-04T07:54:12.005Z","type":"count","id":"S-TX","text":"Texas Senate: James Talarico (D) leads Ken Paxton (R) 55%–43.1% · 90.2% of expected vote counted (90.2%)","source":"NBC News"}
+{"t":"2026-11-04T07:54:12.006Z","type":"call","id":"G-NE","text":"NBC News projects Jim Pillen and Joe Kelly (R) wins Nebraska Governor · 50.1%–42.8% over Walz (D)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T07:55:41.620Z","type":"count","id":"H-CA-25","text":"CA-25 House: Raul Ruiz (D) leads Joe Males (R) 58.4%–41.6% · 21 of 40 precincts (52.5%)","source":"California Secretary of State"}
