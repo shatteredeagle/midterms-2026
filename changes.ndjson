@@ -798,3 +798,16 @@
 {"t":"2026-11-04T10:49:55.126Z","type":"count","id":"H-CA-31","text":"CA-31 House: Gil Cisneros (D) leads Eric Ching (R) 60.3%–39.7% · 58 of 58 precincts (100%)","source":"California Secretary of State"}
 {"t":"2026-11-04T10:49:55.126Z","type":"count","id":"H-CA-33","text":"CA-33 House: Pete Aguilar (D) leads Stephanie M. Vargas (R) 67.7%–32.3% · 472 of 472 precincts (100%)","source":"California Secretary of State"}
 {"t":"2026-11-04T10:49:55.126Z","type":"count","id":"H-CA-35","text":"CA-35 House: Norma J. Torres (D) leads Mike Cargile (R) 65.6%–34.4% · 196 of 196 precincts (100%)","source":"California Secretary of State"}
+{"t":"2026-11-04T11:03:05.989Z","type":"lead","id":"H-CO-03","text":"CO-03 House: lead changes to Jeff Hurd (R) at 48.6%","source":"Colorado Secretary of State"}
+{"t":"2026-11-04T11:04:05.884Z","type":"count","id":"S-ID","text":"Idaho Senate: Jim Risch (R) leads Todd Achilles (O) 56.5%–33.7% · 95.2% of expected vote counted (95.2%)","source":"NBC News"}
+{"t":"2026-11-04T11:05:22.041Z","type":"count","id":"G-CA","text":"California Governor: Xavier Becerra (D) leads Steve Hilton (R) 64%–36% · 23,181 of 23,860 precincts (97.2%)","source":"California Secretary of State"}
+{"t":"2026-11-04T11:05:22.041Z","type":"count","id":"H-CA-48","text":"CA-48 House: Marni von Wilpert (D) leads Jim Desmond (R) 59.1%–40.9% · 443 of 443 precincts (100%)","source":"California Secretary of State"}
+{"t":"2026-11-04T11:05:22.041Z","type":"count","id":"H-CA-49","text":"CA-49 House: Mike Levin (D) leads Armen Kurdian (R) 59.9%–40.1% · 595 of 595 precincts (100%)","source":"California Secretary of State"}
+{"t":"2026-11-04T11:05:22.041Z","type":"count","id":"H-CA-50","text":"CA-50 House: Scott Peters (D) leads Steve Cohen (R) 61%–39% · 713 of 713 precincts (100%)","source":"California Secretary of State"}
+{"t":"2026-11-04T11:05:22.041Z","type":"count","id":"H-CA-51","text":"CA-51 House: Sara Jacobs (D) leads Ricardo Cabrera (R) 63.1%–36.9% · 663 of 663 precincts (100%)","source":"California Secretary of State"}
+{"t":"2026-11-04T11:05:22.041Z","type":"count","id":"H-CA-52","text":"CA-52 House: Juan Vargas (D) leads Jeff Belle (R) 68.9%–31.1% · 580 of 580 precincts (100%)","source":"California Secretary of State"}
+{"t":"2026-11-04T11:07:00.435Z","type":"lead","id":"H-MI-04","text":"MI-04 House: lead changes to Sean McCann (D) at 49.3%","source":"NBC News"}
+{"t":"2026-11-04T11:07:28.515Z","type":"count","id":"S-SD","text":"South Dakota Senate: Mike Rounds (R) leads Brian L Bengs (O) 60.5%–39.5% · 671 of 671 precincts (100%)","source":"South Dakota Secretary of State"}
+{"t":"2026-11-04T11:07:28.515Z","type":"count","id":"G-SD","text":"South Dakota Governor: Larry Rhoden and Tony Venhuizen (R) leads Dan Ahlers and Steven McCleerey (D) 63.5%–36.5% · 671 of 671 precincts (100%)","source":"South Dakota Secretary of State"}
+{"t":"2026-11-04T11:14:23.895Z","type":"count","id":"G-AZ","text":"Arizona Governor: Katie Hobbs (D) leads Andy Biggs (R) 55.7%–42.6% · 82.7% of expected vote counted (82.7%)","source":"NBC News"}
+{"t":"2026-11-04T11:14:57.550Z","type":"lead","id":"H-AZ-05","text":"AZ-05 House: lead changes to Mark Lamb (R) at 51.1%","source":"NBC News"}
