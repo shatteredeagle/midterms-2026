@@ -1,13 +1,13 @@
 {
-  "updated": "2026-11-04T01:35:00Z",
+  "updated": "2026-11-04T02:30:00Z",
   "status": "partial",
-  "note": "Early results, re-weighted to the final count later. NBC, ABC, AP, CBS, CNN, Fox News and MS NOW share this one SSRS poll (over 75,000 voters nationally; in person, online and by phone, plus a pre-election survey for early and mail voters), so other networks will repeat these numbers, not add a second opinion. In the vote-by-group tables the columns are NBC's Democrat and Republican columns; they match the U.S. House vote (for example 2% Democratic among those voting to support Trump), but NBC's text does not label them, and no overall House total has been published. Numbers come from NBC's national table; its live blog quotes a few subgroup figures that differ, and those are not used. Updated 8:26 PM ET: shares moved by about a point in many rows as more respondents were added. Only rows I could match to NBC's new table were refreshed, so a few groups may lag by a point.",
+  "note": "Early results, re-weighted to the final count later. NBC, ABC, AP, CBS, CNN, Fox News and MS NOW share this one SSRS poll (over 75,000 voters nationally; in person, online and by phone, plus a pre-election survey for early and mail voters), so other networks will repeat these numbers, not add a second opinion. In the vote-by-group tables the columns are NBC's Democrat and Republican columns; they match the U.S. House vote (for example 2% Democratic among those voting to support Trump), but NBC's text does not label them, and no overall House total has been published. Numbers come from NBC's national table; its live blog quotes a few subgroup figures that differ, and those are not used. Tables refreshed at 9:15 PM ET: shares move by about a point as more respondents are added; groups I could not match to NBC's current table keep their earlier numbers.",
   "sources": [
     {
       "id": "nbc",
       "name": "NBC News Exit Poll (SSRS)",
       "url": "https://www.nbcnews.com/politics/2026-election/exit-poll-trump-midterms-voters-economy-disapproval-rcna607045",
-      "published": "Nov 3: article 5:06 PM EST (updated 6:14 PM), national tables updated 8:26 PM ET",
+      "published": "Nov 3: article 5:06 PM EST (updated 6:14 PM), national tables updated 9:15 PM ET",
       "kind": "Early results: Election Day interviews plus phone, mail and online for early and mail voters"
     }
   ],
@@ -134,11 +134,11 @@
           }
         },
         {
-          "label": "Some college, no degree (19%)",
+          "label": "Some college, no degree (92%)",
           "values": {
             "nbc": {
-              "dem": 48,
-              "rep": 48
+              "dem": 50,
+              "rep": 47
             }
           }
         },
@@ -161,10 +161,10 @@
           }
         },
         {
-          "label": "College graduates (47%)",
+          "label": "College graduates (18%)",
           "values": {
             "nbc": {
-              "dem": 61,
+              "dem": 62,
               "rep": 36
             }
           }
@@ -203,20 +203,20 @@
           }
         },
         {
-          "label": "Voters of color, college degree (12%)",
+          "label": "Voters of color, college degree (27%)",
           "values": {
             "nbc": {
-              "dem": 72,
-              "rep": 25
+              "dem": 69,
+              "rep": 27
             }
           }
         },
         {
-          "label": "Voters of color, no degree (16%)",
+          "label": "Voters of color, no degree (27%)",
           "values": {
             "nbc": {
-              "dem": 67,
-              "rep": 28
+              "dem": 69,
+              "rep": 27
             }
           }
         }
@@ -227,7 +227,7 @@
       "kind": "vote",
       "groups": [
         {
-          "label": "Democrats (33%)",
+          "label": "Democrats (34%)",
           "values": {
             "nbc": {
               "dem": 97,
@@ -437,7 +437,7 @@
           "label": "Jewish (3%)",
           "values": {
             "nbc": {
-              "dem": 67,
+              "dem": 66,
               "rep": 32
             }
           }
@@ -503,7 +503,7 @@
           }
         },
         {
-          "label": "Strongly approve (20%)",
+          "label": "Strongly approve (21%)",
           "values": {
             "nbc": {
               "dem": 2,
@@ -539,10 +539,10 @@
           }
         },
         {
-          "label": "Trump not a factor (41%)",
+          "label": "Trump not a factor (13%)",
           "values": {
             "nbc": {
-              "dem": 28,
+              "dem": 30,
               "rep": 67
             }
           }
@@ -554,7 +554,7 @@
       "kind": "vote",
       "groups": [
         {
-          "label": "Economy (39%)",
+          "label": "Economy (92%)",
           "values": {
             "nbc": {
               "dem": 50,
@@ -635,7 +635,7 @@
           "label": "About right (23%)",
           "values": {
             "nbc": {
-              "dem": 6,
+              "dem": 7,
               "rep": 91
             }
           }
@@ -665,7 +665,7 @@
       "kind": "vote",
       "groups": [
         {
-          "label": "Economy excellent or good (25%)",
+          "label": "Economy excellent or good (23%)",
           "values": {
             "nbc": {
               "dem": 10,
