@@ -1,4 +1,4 @@
-import { STATES, RACES, closeTime } from './states.js?v=f7331e27';
+import { STATES, RACES, closeTime } from './states.js?v=c3ad9fc1';
 
 const REPO = 'ShatteredEagle/midterms-2026';
 const RAW = `https://raw.githubusercontent.com/${REPO}/data/`;
@@ -67,7 +67,7 @@ function statusTag(r) {
 function leadHtml(o, call) {
   if (!counted(o) && call) {
     const w = call.winner, y = call.runnerUp;
-    return `<b class="lead ${esc(w.p)}">${esc(w.n)} (${esc(w.p)})</b> <span class="small">called by NBC${y ? ` · ${w.pct}%–${y.pct}% over ${esc(y.n)} (${esc(y.p)})` : ''}</span>`;
+    return `<b class="lead ${esc(w.p)}">${esc(w.n)} (${esc(w.p)})</b> <span class="small">called by NBC${y ? ` · ${w.pct > 0 ? `${w.pct}%–${y.pct}% ` : ''}over ${esc(y.n)} (${esc(y.p)})` : ''}</span>`;
   }
   if (!counted(o)) return '<span class="small">—</span>';
   const x = o.cands[0], y = o.cands[1], m = x.pct - (y ? y.pct : 0);
@@ -75,7 +75,9 @@ function leadHtml(o, call) {
 }
 function voteBar(o, call) {
   if (!counted(o) && call) {
-    const w = call.winner, y = call.runnerUp, d = w.p === 'D' ? w.pct : y?.p === 'D' ? y.pct : 0, r = w.p === 'R' ? w.pct : y?.p === 'R' ? y.pct : 0, rest = Math.max(0, 100 - d - r);
+    const w = call.winner, y = call.runnerUp;
+    if (!(w.pct > 0)) return '';
+    const d = w.p === 'D' ? w.pct : y?.p === 'D' ? y.pct : 0, r = w.p === 'R' ? w.pct : y?.p === 'R' ? y.pct : 0, rest = Math.max(0, 100 - d - r);
     return `<div class="split" role="img" aria-label="Vote share when called: Democrat ${d}%, Republican ${r}%"><i class="d" style="width:${d}%"></i><i style="width:${rest}%;background:var(--muted)"></i><i class="r" style="width:${r}%"></i></div>`;
   }
   if (!counted(o)) return '';
@@ -227,8 +229,8 @@ function stateInfo(st) {
   }
   const call = callOf(`${S.kind}-${st}`);
   if (call) {
-    const w = call.winner, m = w.pct - (call.runnerUp ? call.runnerUp.pct : 0), mag = m >= 20 ? 3 : m >= 10 ? 2 : 1;
-    return { bin: m < 1 ? 'T' : w.p === 'D' ? `D${mag}` : w.p === 'R' ? `R${mag}` : 'O', called: true, text: `NBC News projects ${w.n} (${w.p}) wins${call.runnerUp ? ` · ${w.pct}%–${call.runnerUp.pct}% over ${call.runnerUp.n} (${call.runnerUp.p})` : ''}${call.pctIn ? ` · ${call.pctIn} in` : ''}` };
+    const w = call.winner, m = w.pct > 0 ? w.pct - (call.runnerUp ? call.runnerUp.pct : 0) : 50, mag = m >= 20 ? 3 : m >= 10 ? 2 : 1;
+    return { bin: m < 1 ? 'T' : w.p === 'D' ? `D${mag}` : w.p === 'R' ? `R${mag}` : 'O', called: true, text: `NBC News projects ${w.n} (${w.p}) wins${call.runnerUp ? ` · ${w.pct > 0 ? `${w.pct}%–${call.runnerUp.pct}% ` : ''}over ${call.runnerUp.n} (${call.runnerUp.p})` : ''}${call.pctIn ? ` · ${call.pctIn} in` : ''}` };
   }
   return r.closed ? { bin: 'closed', text: o ? 'Polls closed · no votes counted yet' : 'Polls closed · no results feed on this page for this state' } : { bin: 'pend', text: `Polls close ${new Date(closeTime(st)).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}` };
 }
