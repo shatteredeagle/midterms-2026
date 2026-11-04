@@ -1,4 +1,4 @@
-import { STATES, RACES, HOUSE_SEATS, closeTime } from './states.js?v=7351eeb1';
+import { STATES, RACES, HOUSE_SEATS, closeTime } from './states.js?v=995a3038';
 
 const REPO = 'ShatteredEagle/midterms-2026';
 const RAW = `https://raw.githubusercontent.com/${REPO}/data/`;
@@ -142,7 +142,8 @@ function renderSenate() {
     return { cls: p === 'D' ? 'D1' : p === 'R' ? 'R1' : 'O', flip, holder, p, title: `${STATES[r.st][0]}: ${w || p} (${p}) ${callOf(r.id) ? 'wins' : 'leads'}${flip ? ` · FLIP from ${holder} to ${p}` : holder ? ` · ${holder} hold` : ''}` };
   };
   const dC = lead.filter((x) => x.p === 'D').map(cellFor).sort((a, b) => a.flip - b.flip), rC = lead.filter((x) => x.p === 'R').map(cellFor).sort((a, b) => b.flip - a.flip), oC = lead.filter((x) => x.p !== 'D' && x.p !== 'R').map(cellFor);
-  const undecided = rs.filter((r) => !leaderParty(r)).map((r) => { const h = holderOf(r.st); return { cls: 'N', hold: h === 'D' || h === 'R' ? h : null, title: `${STATES[r.st][0]}: not decided yet${h ? ` · currently held by ${h}` : ''}` }; });
+  const holdRank = (c) => (c.hold === 'D' ? 0 : c.hold === 'R' ? 1 : 2); // undecided seats group by current holder: blue dots, then red, then unknown
+  const undecided = rs.filter((r) => !leaderParty(r)).map((r) => { const h = holderOf(r.st); return { cls: 'N', hold: h === 'D' || h === 'R' ? h : null, title: `${STATES[r.st][0]}: not decided yet${h ? ` · currently held by ${h}` : ''}` }; }).sort((a, b) => holdRank(a) - holdRank(b));
   const cells = [...Array(34).fill({ cls: 'D0', title: 'Democratic seat, not up this year' }), ...dC, ...undecided, ...oC, ...rC, ...Array(31).fill({ cls: 'R0', title: 'Republican seat, not up this year' })];
   const d = 34 + t.d, r = 31 + t.r;
   const flipsD = dC.filter((c) => c.flip).length, flipsR = rC.filter((c) => c.flip).length, flipsO = oC.filter((c) => c.flip).length;
@@ -180,7 +181,7 @@ function renderHouse() {
   const dC = all.filter((e) => e.c.cls === 'D1').map((e) => e.c).sort((a, b) => a.flip - b.flip);
   const rC = all.filter((e) => e.c.cls === 'R1').map((e) => e.c).sort((a, b) => b.flip - a.flip);
   const oC = all.filter((e) => e.c.cls === 'O').map((e) => e.c);
-  const nC = all.filter((e) => e.c.cls === 'N').map((e) => e.c);
+  const nC = all.filter((e) => e.c.cls === 'N').map((e) => e.c).sort((a, b) => (a.hold === 'D' ? 0 : a.hold === 'R' ? 1 : 2) - (b.hold === 'D' ? 0 : b.hold === 'R' ? 1 : 2)); // blue-dot seats together, then red
   const cells = [...dC, ...nC, ...oC, ...rC];
   const flipsD = dC.filter((c) => c.flip).length, flipsR = rC.filter((c) => c.flip).length;
   const known = [...dC, ...rC].filter((c) => /hold|FLIP/.test(c.title)).length;
