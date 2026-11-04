@@ -1,4 +1,4 @@
-import { STATES, RACES, HOUSE_SEATS, closeTime } from './states.js?v=1625299f';
+import { STATES, RACES, HOUSE_SEATS, closeTime } from './states.js?v=7351eeb1';
 
 const REPO = 'ShatteredEagle/midterms-2026';
 const RAW = `https://raw.githubusercontent.com/${REPO}/data/`;
@@ -9,7 +9,7 @@ const pct = (x, d = 0) => (x * 100).toFixed(d) + '%';
 const FIPS = {};
 for (const [st, v] of Object.entries(STATES)) FIPS[v[1]] = st;
 
-const S = { calls: null, callsSeen: null, key: null, feedF: 'key', feedMark: 0, pollTab: 'H', senAll: false, history: null, early: null, turnout: null, otherAvgs: null, ballot: null, bqState: 'MA', changes: null, chgF: 'all', chgAll: false, chgSeen: 0, markets: null, polls: null, results: null, status: null, exit: null, control: null, paths: null, kind: 'S', sel: null, rkind: 'S', sort: 'close', q: '', showAll: false, fetchedAt: {} };
+const S = { holders: null, calls: null, callsSeen: null, key: null, feedF: 'key', feedMark: 0, pollTab: 'H', senAll: false, history: null, early: null, turnout: null, otherAvgs: null, ballot: null, bqState: 'MA', changes: null, chgF: 'all', chgAll: false, chgSeen: 0, markets: null, polls: null, results: null, status: null, exit: null, control: null, paths: null, kind: 'S', sel: null, rkind: 'S', sort: 'close', q: '', showAll: false, fetchedAt: {} };
 
 // ---------- data ----------
 // raw.githubusercontent.com caches 5 min regardless of query string, so the browser reads the bundle through the
@@ -38,6 +38,7 @@ async function loadAll() {
   const [b, exit] = await Promise.all([getBundle(), fetch('data/exit-polls.json', { cache: 'no-store' }).then((r) => r.json()).catch(() => null)]);
   if (b) Object.assign(S, { calls: b.calls || S.calls, turnout: b.turnout || S.turnout, changes: b.changes || S.changes, markets: b.markets || S.markets, polls: b.polls || S.polls, results: b.results || S.results, status: b.status || S.status });
   if (exit) S.exit = exit;
+  if (!S.holders) S.holders = await fetch('data/holders.json').then((r) => r.json()).catch(() => null);
   if (!S.key) S.key = await fetch('data/key-races.json', { cache: 'no-store' }).then((r) => r.json()).catch(() => null);
   if (!S.early) S.early = await fetch('data/early-vote.json', { cache: 'no-store' }).then((r) => r.json()).catch(() => null);
   if (!S.otherAvgs) S.otherAvgs = await fetch('data/other-averages.json', { cache: 'no-store' }).then((r) => r.json()).catch(() => null);
@@ -131,7 +132,7 @@ function renderClock() {
 const countdown = (ms) => { const s = Math.max(0, Math.floor(ms / 1000)); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60); return h ? `${h}h ${String(m).padStart(2, '0')}m` : `${m}m ${String(s % 60).padStart(2, '0')}s`; };
 
 // Who held each Senate seat before this election (PollCheck's last-result winner, else the fixed key-race list). Used only to mark flips.
-const holderOf = (st) => S.polls?.races?.[`S-${st}`]?.holder || S.key?.senate?.races?.find((k) => k.st === st)?.holder || null;
+const holderOf = (st) => S.holders?.senate?.[st] || S.polls?.races?.[`S-${st}`]?.holder || S.key?.senate?.races?.find((k) => k.st === st)?.holder || null;
 function renderSenate() {
   const rs = allRaces('S'), t = tally(rs), unc = rs.length - t.n;
   const lead = rs.map((r) => ({ r, p: leaderParty(r) })).filter((x) => x.p);
@@ -141,15 +142,15 @@ function renderSenate() {
     return { cls: p === 'D' ? 'D1' : p === 'R' ? 'R1' : 'O', flip, holder, p, title: `${STATES[r.st][0]}: ${w || p} (${p}) ${callOf(r.id) ? 'wins' : 'leads'}${flip ? ` · FLIP from ${holder} to ${p}` : holder ? ` · ${holder} hold` : ''}` };
   };
   const dC = lead.filter((x) => x.p === 'D').map(cellFor).sort((a, b) => a.flip - b.flip), rC = lead.filter((x) => x.p === 'R').map(cellFor).sort((a, b) => b.flip - a.flip), oC = lead.filter((x) => x.p !== 'D' && x.p !== 'R').map(cellFor);
-  const undecided = rs.filter((r) => !leaderParty(r)).map((r) => ({ cls: 'N', title: `${STATES[r.st][0]}: not decided yet` }));
+  const undecided = rs.filter((r) => !leaderParty(r)).map((r) => { const h = holderOf(r.st); return { cls: 'N', hold: h === 'D' || h === 'R' ? h : null, title: `${STATES[r.st][0]}: not decided yet${h ? ` · currently held by ${h}` : ''}` }; });
   const cells = [...Array(34).fill({ cls: 'D0', title: 'Democratic seat, not up this year' }), ...dC, ...undecided, ...oC, ...rC, ...Array(31).fill({ cls: 'R0', title: 'Republican seat, not up this year' })];
   const d = 34 + t.d, r = 31 + t.r;
   const flipsD = dC.filter((c) => c.flip).length, flipsR = rC.filter((c) => c.flip).length, flipsO = oC.filter((c) => c.flip).length;
   const majWho = { D0: 'a Democratic seat', D1: 'a Democratic seat', N: 'in a race not yet counted', O: 'held by an independent', R1: 'a Republican seat', R0: 'a Republican seat' }[cells[50].cls];
   $('#cardSenate').innerHTML = `<h3>Senate · 51 for majority</h3>
     <div class="big"><b class="d">${d}</b><small>D holding or leading</small><b class="r">${r}</b><small>R holding or leading</small></div>
-    <div class="waffle" role="img" aria-label="Senate seats: ${d} Democratic holding or leading, ${r} Republican, ${unc} races not yet counted. Flipped seats so far: Democrats ${flipsD}, Republicans ${flipsR}. The outlined 51st square decides control: it is currently ${majWho}.">${cells.map((c, i) => `<i class="${c.cls}${c.flip ? ' flip' : ''}${i === 50 ? ' maj' : ''}" title="${esc(i === 50 ? `The 51st seat decides control: currently ${majWho}${c.title ? ` (${c.title})` : ''}` : c.title)}"></i>`).join('')}</div>
-    <div class="waffle-key"><span style="--c:var(--d)">D not up</span><span style="--c:var(--d-2)">D leading</span><span style="--c:var(--none)">Not decided ${unc}</span><span style="--c:var(--r-2)">R leading</span><span style="--c:var(--r)">R not up</span><span class="majkey">Outlined = the 51st seat</span><span class="flipkey">Gold corner = flipped seat</span></div>
+    <div class="waffle" role="img" aria-label="Senate seats: ${d} Democratic holding or leading, ${r} Republican, ${unc} races not yet counted. Flipped seats so far: Democrats ${flipsD}, Republicans ${flipsR}. The outlined 51st square decides control: it is currently ${majWho}.">${cells.map((c, i) => `<i class="${c.cls}${c.flip ? ' flip' : ''}${i === 50 ? ' maj' : ''}"${c.hold ? ` data-h="${c.hold}"` : ''} title="${esc(i === 50 ? `The 51st seat decides control: currently ${majWho}${c.title ? ` (${c.title})` : ''}` : c.title)}"></i>`).join('')}</div>
+    <div class="waffle-key"><span style="--c:var(--d)">D not up</span><span style="--c:var(--d-2)">D leading</span><span style="--c:var(--none)">Not decided ${unc}</span><span style="--c:var(--r-2)">R leading</span><span style="--c:var(--r)">R not up</span><span class="majkey">Outlined = the 51st seat</span><span class="flipkey">Gold corner = flipped seat</span><span class="dotkey">Dot = party holding an undecided seat now</span></div>
     <p class="meta"><b>Flipped so far:</b> Democrats +${flipsD}, Republicans +${flipsR}${flipsO ? `, independents +${flipsO}` : ''} (net ${flipsD - flipsR === 0 ? 'even' : flipsD > flipsR ? `D +${flipsD - flipsR}` : `R +${flipsR - flipsD}`}). A flip is a seat won or led by a different party than the one that held it. Hover a square for the state.</p>
     <p class="meta"><b>The outlined square is where control lands:</b> Democrats need it for 51 seats; if Republicans hold it they keep 50 or more, and the Vice President breaks a 50–50 tie for them. It is currently <b>${majWho}</b>.</p>
     <p class="meta">Votes counted or races called in ${t.n} of ${rs.length}. D leads ${t.d}, R leads ${t.r}. Seats not up: D 34, R 31. Calls are NBC News projections; the rest is counted votes. <a href="#control">What Democrats need ↗</a></p>`;
@@ -159,7 +160,9 @@ function houseHolder(id) {
   const call = callOf(id)?.incumbentParty;
   if (call) return call;
   const inc = S.results?.races?.[id]?.cands?.find((c) => c.inc);
-  return inc ? inc.p : null;
+  if (inc) return inc.p;
+  const h = S.holders?.house?.[id.slice(2)];
+  return h === 'D' || h === 'R' ? h : null;
 }
 function renderHouse() {
   const ids = [];
@@ -168,7 +171,7 @@ function renderHouse() {
   const t = tally(items);
   const cell = (x) => {
     const p = leaderParty(x);
-    if (!p) return { cls: 'N', title: `${x.id.slice(2)}: not decided yet` };
+    if (!p) { const h = houseHolder(x.id); return { cls: 'N', hold: h, title: `${x.id.slice(2)}: not decided yet${h ? ` · currently held by ${h}` : ''}` }; }
     const holder = houseHolder(x.id), flip = !!holder && p !== holder, call = callOf(x.id);
     const w = counted(x.o) && !tooEarly(x.o) ? x.o.cands[0].n : call?.winner.n;
     return { cls: p === 'D' ? 'D1' : p === 'R' ? 'R1' : 'O', flip, title: `${x.id.slice(2)}: ${w || p} (${p}) ${call ? 'wins' : 'leads'}${flip ? ` · FLIP from ${holder} to ${p}` : holder ? ` · ${holder} hold` : ''}` };
@@ -184,9 +187,9 @@ function renderHouse() {
   const majWho = { D1: 'a Democratic seat', N: 'in a district not yet decided', O: 'held by another party', R1: 'a Republican seat' }[cells[217].cls];
   $('#cardHouse').innerHTML = `<h3>House · 218 for majority</h3>
     <div class="big"><b class="d">${t.d}</b><small>districts D leads</small><b class="r">${t.r}</b><small>districts R leads</small></div>
-    <div class="waffle house" role="img" aria-label="435 House districts: ${t.d} Democratic leading or called, ${t.r} Republican, ${nC.length} not decided. Flips so far: Democrats ${flipsD}, Republicans ${flipsR}. The outlined 218th square decides control: it is currently ${majWho}.">${cells.map((c, i) => `<i class="${c.cls}${c.flip ? ' flip' : ''}${i === 217 ? ' maj' : ''}" title="${esc(i === 217 ? `The 218th seat decides control: currently ${majWho}${c.title ? ` (${c.title})` : ''}` : c.title)}"></i>`).join('')}</div>
-    <div class="waffle-key"><span style="--c:var(--d-2)">D leading or called</span><span style="--c:var(--none)">Not decided ${nC.length}</span><span style="--c:var(--r-2)">R leading or called</span><span class="majkey">Outlined = the 218th seat</span><span class="flipkey">Gold corner = flipped seat</span></div>
-    <p class="meta"><b>Flipped so far:</b> Democrats +${flipsD}, Republicans +${flipsR} (net ${flipsD === flipsR ? 'even' : flipsD > flipsR ? `D +${flipsD - flipsR}` : `R +${flipsR - flipsD}`}). A flip needs a known incumbent, so open seats are never marked, and only ${known} of the ${t.n} decided seats have a known holder.</p>
+    <div class="waffle house" role="img" aria-label="435 House districts: ${t.d} Democratic leading or called, ${t.r} Republican, ${nC.length} not decided. Flips so far: Democrats ${flipsD}, Republicans ${flipsR}. The outlined 218th square decides control: it is currently ${majWho}.">${cells.map((c, i) => `<i class="${c.cls}${c.flip ? ' flip' : ''}${i === 217 ? ' maj' : ''}"${c.hold ? ` data-h="${c.hold}"` : ''} title="${esc(i === 217 ? `The 218th seat decides control: currently ${majWho}${c.title ? ` (${c.title})` : ''}` : c.title)}"></i>`).join('')}</div>
+    <div class="waffle-key"><span style="--c:var(--d-2)">D leading or called</span><span style="--c:var(--none)">Not decided ${nC.length}</span><span style="--c:var(--r-2)">R leading or called</span><span class="majkey">Outlined = the 218th seat</span><span class="flipkey">Gold corner = flipped seat</span><span class="dotkey">Dot = party holding an undecided seat now</span></div>
+    <p class="meta"><b>Flipped so far:</b> Democrats +${flipsD}, Republicans +${flipsR} (net ${flipsD === flipsR ? 'even' : flipsD > flipsR ? `D +${flipsD - flipsR}` : `R +${flipsR - flipsD}`}). The holder is the party of the member now holding that district number (congress-legislators data); in states that redrew maps, a few flips may be redistricting rather than a change in who represents the same voters. Two vacant seats show no dot.</p>
     <p class="meta"><b>The outlined square is where control lands:</b> a party needs 218 of 435 seats, so the 218th seat from the Democratic side decides it. It is currently <b>${majWho}</b>. Squares fill in from vote feeds (CA, CO, FL, GA, IA, MN, NC, NE) and NBC News calls; other districts stay undecided here. Follow <a href="https://apnews.com/" target="_blank" rel="noopener">AP</a> or <a href="https://www.nbcnews.com/politics/2026-elections/midterms" target="_blank" rel="noopener">NBC</a> for the full count. <a href="#control">Key districts ↗</a></p>`;
 }
 
