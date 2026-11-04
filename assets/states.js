@@ -21,3 +21,9 @@ export function closeTime(st) {
   const nextDay = STATES[st][2].includes('+1');
   return Date.UTC(2026, 10, 3 + (nextDay ? 1 : 0), h + 5, m);
 }
+
+// States with a 2026 Senate (35 contests incl. the FL and OH specials) or governor (36) race.
+export const RACES = {
+  S: 'AL AK AR CO DE FL GA ID IL IA KS KY LA ME MA MI MN MS MT NE NH NJ NM NC OH OK OR RI SC SD TN TX VA WV WY'.split(' '),
+  G: 'AL AK AZ AR CA CO CT FL GA HI ID IL IA KS ME MD MA MI MN NE NV NH NM NY OH OK OR PA RI SC SD TN TX VT WI WY'.split(' '),
+};

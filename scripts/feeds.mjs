@@ -11,6 +11,7 @@ const num = (x) => Number(String(x).replace(/[^\d.-]/g, '')) || 0;
 const tidy = (s) => String(s).replace(/\s+/g, ' ').trim();
 const kindOf = (name) => (/^(for )?(the )?(united states|u\.?s\.?) senator|^us senate/i.test(name.trim()) ? 'S' : /^(for )?governor/i.test(name.trim()) ? 'G' : null);
 
+const dd = (n) => String(n).padStart(2, '0');
 function build(id, source, prRep, prTot, cands, unit = 'precincts') {
   const total = cands.reduce((a, c) => a + c.votes, 0);
   return {
@@ -33,10 +34,13 @@ export async function CA() {
 // ---- North Carolina: State Board of Elections ENR (statewide rows have cid "0") ----
 export async function NC() {
   const rows = await get('https://er.ncsbe.gov/enr/20261103/data/results_0.txt', true);
-  const sen = rows.filter((r) => r.cid === '0' && /^US SENATE/i.test(r.cnm));
-  if (!sen.length) return {};
-  const prRep = Math.max(...sen.map((r) => num(r.prt))), prTot = Math.max(...sen.map((r) => num(r.ptl)));
-  return { 'S-NC': build('S-NC', 'NC State Board of Elections', prRep, prTot, sen.map((r) => ({ n: tidy(r.bnm), p: party(r.pty), votes: num(r.vct) }))) };
+  const out = {};
+  const add = (key, rs) => { if (rs.length) out[key] = build(key, 'NC State Board of Elections', Math.max(...rs.map((r) => num(r.prt))), Math.max(...rs.map((r) => num(r.ptl))), rs.map((r) => ({ n: tidy(r.bnm), p: party(r.pty), votes: num(r.vct) }))); };
+  add('S-NC', rows.filter((r) => r.cid === '0' && /^US SENATE/i.test(r.cnm)));
+  const byHouse = {};
+  for (const r of rows) { const m = r.cid === '0' && r.cnm.match(/^US HOUSE OF REPRESENTATIVES DISTRICT (\d+)/i); if (m) (byHouse[dd(+m[1])] ||= []).push(r); }
+  for (const [n, rs] of Object.entries(byHouse)) add(`H-NC-${n}`, rs);
+  return out;
 }
 
 // ---- Minnesota: semicolon media files ----
@@ -47,7 +51,15 @@ async function mnFile(file, kind) {
   const pr = rows.map((f) => num(f[11])), tot = rows.map((f) => num(f[12]));
   return { [`${kind}-MN`]: build(`${kind}-MN`, 'Minnesota Secretary of State', Math.max(...pr), Math.max(...tot), rows.map((f) => ({ n: tidy(f[7]), p: party(f[10]), votes: num(f[13]) }))) };
 }
-export const MN = async () => ({ ...(await mnFile('ussenate.txt', 'S')), ...(await mnFile('governor.txt', 'G')) });
+async function mnHouse() {
+  const lines = (await get('https://electionresultsfiles.sos.mn.gov/20261103/ushouse.txt')).split(/\r?\n/).filter(Boolean).map((l) => l.split(';'));
+  const by = {};
+  for (const f of lines) if (f.length >= 15 && !/write-?in/i.test(f[7]) && f[10] !== 'WI' && /District (\d+)/.test(f[4])) (by[dd(+f[4].match(/District (\d+)/)[1])] ||= []).push(f);
+  const out = {};
+  for (const [n, rows] of Object.entries(by)) out[`H-MN-${n}`] = build(`H-MN-${n}`, 'Minnesota Secretary of State', Math.max(...rows.map((f) => num(f[11]))), Math.max(...rows.map((f) => num(f[12]))), rows.map((f) => ({ n: tidy(f[7]), p: party(f[10]), votes: num(f[13]) })));
+  return out;
+}
+export const MN = async () => ({ ...(await mnFile('ussenate.txt', 'S')), ...(await mnFile('governor.txt', 'G')), ...(await mnHouse()) });
 
 // ---- Nebraska / South Dakota: results CSV ----
 function csv(text) {
@@ -80,7 +92,19 @@ async function csvFeed(url, source, stateCode) {
   }
   return out;
 }
-export const NE = () => csvFeed('https://electionresults.nebraska.gov/resultsCSV.aspx?text=All&type=SW&map=CTY', 'Nebraska Secretary of State', 'NE');
+async function neHouse() {
+  const [head, ...rows] = csv(await get('https://electionresults.nebraska.gov/resultsCSV.aspx?text=All&type=CG&map=DIST'));
+  const ix = Object.fromEntries(head.map((h, i) => [h.trim(), i]));
+  const by = {};
+  for (const r of rows) { const m = /District (\d+)/.exec(r[ix.AreaNum] || ''); if (m && /Representative/i.test(r[ix.RaceName])) (by[dd(+m[1])] ||= []).push(r); }
+  const out = {};
+  for (const [n, rs] of Object.entries(by)) {
+    const pr = rs[0][ix.PrecinctsReporting].replace(/[^\d/]/g, '').split('/');
+    out[`H-NE-${n}`] = build(`H-NE-${n}`, 'Nebraska Secretary of State', num(pr[0]), num(pr[1]), rs.map((r) => ({ n: tidy(r[ix.CandidateName]), p: party(r[ix.PartyCode]), votes: num(r[ix.CandidateVotes]) })));
+  }
+  return out;
+}
+export const NE = async () => ({ ...(await csvFeed('https://electionresults.nebraska.gov/resultsCSV.aspx?text=All&type=SW&map=CTY', 'Nebraska Secretary of State', 'NE')), ...(await neHouse()) });
 export const SD = () => csvFeed('https://electionresults.sd.gov/resultsCSV.aspx?text=All&type=SWR&map=CTY', 'South Dakota Secretary of State', 'SD');
 
 // ---- Clarity (Colorado, Iowa) ----
@@ -92,8 +116,9 @@ async function clarity(base, st, source) {
   const sum = await get(`${base}/${el.EID}/${ver}/json/en/summary.json`, true);
   const out = {};
   for (const c of sum) {
-    const kind = kindOf(c.C || '');
-    const key = kind && `${kind}-${st}`;
+    const hm = /(?:Representative.*Congress - District|United States Representative District) (\d+)/i.exec(c.C || '');
+    const kind = hm ? 'H' : kindOf(c.C || '');
+    const key = hm ? `H-${st}-${dd(+hm[1])}` : kind && `${kind}-${st}`;
     if (!key || out[key]) continue;
     out[key] = build(key, source, num(c.PR), num(c.TP), c.CH.map((n, i) => ({ n: tidy(n), p: party(c.P[i]), votes: num(c.V[i]) })));
   }
@@ -112,7 +137,8 @@ export async function GA() {
   const out = {};
   for (const it of items) {
     const nm = it.name?.[0]?.text?.trim();
-    const key = nm === 'US Senate' ? 'S-GA' : nm === 'Governor' ? 'G-GA' : null;
+    const gm = /^US House of Representatives - District (\d+)/i.exec(nm || '');
+    const key = nm === 'US Senate' ? 'S-GA' : nm === 'Governor' ? 'G-GA' : gm ? `H-GA-${dd(+gm[1])}` : null;
     if (!key || !it.summaryResults?.ballotOptions) continue;
     const rs = it.reportingStatus || {};
     out[key] = build(key, 'Georgia Secretary of State', num(rs.reportingUnits), num(rs.totalUnits), it.summaryResults.ballotOptions.filter((o) => !o.isWriteIn).map((o) => ({
@@ -131,8 +157,9 @@ export async function FL(ctx = {}) {
   const [info, votes] = await Promise.all([get(`${base}Info.txt`).then(recs), get(`${base}Votes.txt`).then(recs)]);
   const races = {};
   for (const r of info.filter((x) => x[0] === 'r' && /general/i.test(x[4]))) {
-    const kind = kindOf(r[3]);
-    if (kind) races[r[5]] = { key: `${kind}-FL`, cands: {}, tot: 0, units: {}, votes: {} };
+    const kind = kindOf(r[3]), hm = /^Representative in Congress, District (\d+)/i.exec(r[3]);
+    if (hm) races[r[5]] = { key: `H-FL-${dd(+hm[1])}`, cands: {}, tot: 0, units: {}, votes: {} };
+    else if (kind) races[r[5]] = { key: `${kind}-FL`, cands: {}, tot: 0, units: {}, votes: {} };
   }
   for (const x of info) {
     if (x[0] === 'c' && races[x[3]]) races[x[3]].cands[x[6]] = { last: x[4], first: x[5] };
@@ -158,4 +185,17 @@ export async function FL(ctx = {}) {
   return out;
 }
 
-export const FEEDS = { CA, CO, FL, GA, IA, MN, NC, NE, SD };
+async function caHouse() {
+  const rows = await get('https://media.sos.ca.gov/media/us-rep.json', true);
+  const out = {};
+  for (const r of rows) {
+    const m = /District (\d+)/i.exec(r.raceTitle || '');
+    if (!m) continue;
+    const pm = (r.Reporting || '').match(/\(([\d,]+) of ([\d,]+)/);
+    const key = `H-CA-${dd(+m[1])}`;
+    out[key] = build(key, 'California Secretary of State', num(pm?.[1]), num(pm?.[2]), r.candidates.map((c) => ({ n: tidy(c.Name), p: party(c.Party), votes: num(c.Votes) })));
+  }
+  return out;
+}
+const CAall = async () => ({ ...(await CA()), ...(await caHouse()) });
+export const FEEDS = { CA: CAall, CO, FL, GA, IA, MN, NC, NE, SD };

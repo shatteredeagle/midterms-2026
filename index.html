@@ -12,7 +12,7 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://shatteredeagle.github.io/midterms-2026/">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='16' height='32' fill='%232563c9'/%3E%3Crect x='16' width='16' height='32' fill='%23cc3a3a'/%3E%3Cpath d='M6 17l6 6 14-14' stroke='white' stroke-width='4' fill='none'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="assets/styles.css?v=78b41692">
+<link rel="stylesheet" href="assets/styles.css?v=a6dc40d5">
 <script>try{const t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t}catch{}</script>
 </head>
 <body>
@@ -21,7 +21,7 @@
   <div class="wide topbar">
     <div class="brand"><span class="logo" aria-hidden="true"></span><h1>2026 Midterms</h1></div>
     <nav aria-label="Sections" id="nav">
-      <a href="#overview" data-v="overview">Overview</a><a href="#races" data-v="races">Races</a><a href="#polls" data-v="polls">Polls</a><a href="#reports" data-v="reports">Reports</a><a href="#changes" data-v="changes">Changes</a><a href="#sources" data-v="sources">Sources</a>
+      <a href="#overview" data-v="overview">Overview</a><a href="#control" data-v="control">Control</a><a href="#races" data-v="races">Races</a><a href="#polls" data-v="polls">Polls</a><a href="#reports" data-v="reports">Reports</a><a href="#changes" data-v="changes">Changes</a><a href="#sources" data-v="sources">Sources</a>
     </nav>
     <div class="bar-right">
       <button id="railBtn" class="pillbtn" type="button" aria-controls="rail" aria-expanded="false">Live feed <span id="railBadge" class="badge" hidden>0</span></button>
@@ -58,27 +58,31 @@
       <aside id="detail" class="detail" aria-live="polite"></aside>
     </div>
   </section>
-<section class="pair" aria-label="Market odds versus polling">
-    <article class="card sbc market" id="cardMarket"></article>
-    <article class="card sbc poll" id="cardPolls"></article>
+  <section id="results" class="panel" aria-labelledby="resH">
+    <div class="panel-head"><div><h2 id="resH">Results so far</h2><p class="sub">Senate and governor races with votes counted, most complete first.</p></div></div>
+    <div id="results-body"></div>
   </section>
-<section id="flips" class="panel" aria-labelledby="flipsH">
-    <div class="panel-head">
-      <div><h2 id="flipsH">Seats that could flip</h2><p class="sub">Races where the party that holds the seat today is not the favorite, plus close calls. Chance is the market's probability that the seat changes party.</p></div>
-    </div>
-    <div id="flips-body"></div>
-  </section>
+  </div>
+
+  <div class="view" data-view="control" id="view-control">
+    <section id="ctl-senate" class="panel" aria-labelledby="ctlSH">
+      <div class="panel-head"><div><h2 id="ctlSH">Senate: what Democrats need</h2><p class="sub" id="ctlSenateSub"></p></div></div>
+      <div id="ctl-senate-body"></div>
+    </section>
+    <section id="ctl-house" class="panel" aria-labelledby="ctlHH">
+      <div class="panel-head"><div><h2 id="ctlHH">House: key districts</h2><p class="sub" id="ctlHouseSub"></p></div></div>
+      <div id="ctl-house-body"></div>
+    </section>
   </div>
 
   <div class="view" data-view="races" id="view-races">
 <section id="races" class="panel" aria-labelledby="racesH">
     <div class="panel-head">
-      <div><h2 id="racesH">Races</h2><p class="sub">Polling average vs. market odds. Sorted by how close the market thinks it is.</p></div>
+      <div><h2 id="racesH">Races</h2><p class="sub">Current vote counts and the pre-election polling average. Races with votes counted come first.</p></div>
       <div class="controls">
         <div class="seg" role="tablist" aria-label="Race type" id="raceTabs">
           <button role="tab" data-k="S" aria-selected="true">Senate</button>
           <button role="tab" data-k="G" aria-selected="false">Governor</button>
-          <button role="tab" data-k="H" aria-selected="false">House</button>
         </div>
         <label class="search"><span class="sr">Filter races</span><input id="q" type="search" placeholder="Filter by state or candidate" autocomplete="off"></label>
       </div>
@@ -128,7 +132,6 @@
       <div class="seg" role="tablist" aria-label="Change type" id="chgTabs">
         <button role="tab" data-f="all" aria-selected="true">All</button>
         <button role="tab" data-f="count" aria-selected="false">Counts</button>
-        <button role="tab" data-f="odds" aria-selected="false">Odds</button>
         <button role="tab" data-f="polls" aria-selected="false">Polls</button>
         <button role="tab" data-f="reports" aria-selected="false">Reports</button>
       </div>
@@ -159,11 +162,11 @@
 </div>
 
 <footer class="wide foot">
-  <p><strong>Not official results.</strong> Market-implied projections are probabilities from trading prices, not race calls. Official counts appear only for the states listed under Sources; for everything else follow your state election office and AP. Data may be delayed or briefly wrong.</p>
+  <p><strong>Not official results.</strong> Vote counts are unofficial totals from state election offices and can change. This page makes no projections or race calls; it shows counts only for the states listed under Sources. For everything else follow your state election office and AP. Data may be delayed or briefly wrong.</p>
   <p>Open source (MIT) · <a href="https://github.com/ShatteredEagle/midterms-2026">github.com/ShatteredEagle/midterms-2026</a></p>
 </footer>
 <div id="railBackdrop" class="backdrop" hidden></div>
-<script type="module" src="assets/app.js?v=78b41692"></script>
+<script type="module" src="assets/app.js?v=a6dc40d5"></script>
 <noscript><p class="wrap">This dashboard needs JavaScript to draw the map and load live data.</p></noscript>
 </body>
 </html>

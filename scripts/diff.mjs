@@ -14,25 +14,7 @@ export function diffSnapshots(prev, next, nowMs = Date.now(), anchors = { odds: 
   const out = [];
   const ev = (type, id, text, extra = {}) => out.push({ t, type, id, text, ...extra });
 
-  // Market odds
-  if (prev.markets && next.markets) {
-    for (const [id, r] of Object.entries(next.markets.races)) {
-      const p = prev.markets.races[id];
-      if (!p) continue;
-      if (p.d + p.r === 0 || r.d + r.r === 0) { delete anchors.odds[id]; continue; } // party labels were missing: no real odds to compare
-      const b = pD(r), thr = id[0] === 'H' ? 0.05 : 0.03;
-      const a = anchors.odds[id] ?? pD(p);
-      if (Math.abs(b - a) >= thr) { ev('odds', id, `${label(id)}: ${side(a)} → ${side(b)}`, { from: a, to: b }); anchors.odds[id] = b; } else anchors.odds[id] = a;
-      const st = id.split('-')[1], pa = pD(p);
-      if (STATES[st] && nowMs >= closeTime(st) && (b >= 0.99 || b <= 0.01) && !(pa >= 0.99 || pa <= 0.01)) ev('projected', id, `${label(id)}: market now projects ${b >= 0.5 ? 'D' : 'R'} (${side(b)})`, { to: b });
-    }
-    for (const ch of ['senate', 'house']) {
-      const p = prev.markets.control?.[ch], n = next.markets.control?.[ch];
-      if (!p || !n) continue;
-      const b = n.d / (n.d + n.r), a = anchors.control[ch] ?? p.d / (p.d + p.r);
-      if (Math.abs(b - a) >= 0.01) { ev('control', ch, `${ch === 'senate' ? 'Senate' : 'House'} control: ${side(a)} → ${side(b)}`, { from: a, to: b }); anchors.control[ch] = b; } else anchors.control[ch] = a;
-    }
-  }
+  // (Market-odds, control and projection events are no longer produced: the page shows counted votes only.)
 
   // Polls closing: one event per close time, listing the states (prev snapshot time < close <= now)
   const prevT = Date.parse(prev.markets?.updated || prev.results?.updated || '') || 0;
@@ -70,10 +52,6 @@ export function diffSnapshots(prev, next, nowMs = Date.now(), anchors = { odds: 
     if (a && b && Math.abs(b.margin - a.margin) >= 0.1) ev('polls', 'generic', `Generic ballot average: ${a.margin >= 0 ? 'D' : 'R'}+${Math.abs(a.margin).toFixed(1)} → ${b.margin >= 0 ? 'D' : 'R'}+${Math.abs(b.margin).toFixed(1)}`, { from: a.margin, to: b.margin });
     const seen = new Set((a?.polls || []).map((x) => `${x.pollster}|${x.date}|${x.n}`));
     for (const x of (b?.polls || []).filter((y) => !y.dup && !seen.has(`${y.pollster}|${y.date}|${y.n}`)).slice(0, 5)) ev('polls', 'generic', `New generic-ballot poll: ${x.pollster} ${x.margin >= 0 ? 'D' : 'R'}+${Math.abs(x.margin)} (${x.date})`);
-    for (const [id, r] of Object.entries(next.polls.races)) {
-      const p = prev.polls.races[id];
-      if (p && p.rating !== r.rating) ev('rating', id, `${label(id)} rating: ${p.rating} → ${r.rating}`);
-    }
   }
   return out;
 }

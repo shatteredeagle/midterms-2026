@@ -96,7 +96,7 @@ async function results() {
   await Promise.all(Object.entries(FEEDS).map(async ([st, fn]) => {
     try {
       const got = await fn(ctx);
-      for (const k of Object.keys(races)) if (k.endsWith(`-${st}`)) delete races[k];
+      for (const k of Object.keys(races)) if (k.split('-')[1] === st) delete races[k];
       Object.assign(races, got);
       feeds[st] = { ok: true, at: now(), races: Object.keys(got) };
     } catch (e) { feeds[st] = { ...feeds[st], ok: false, at: now(), error: e.message }; console.error(st, e.message); }

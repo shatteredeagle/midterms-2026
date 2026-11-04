@@ -1,0 +1,145 @@
+{
+ "senate": {
+  "need": 51,
+  "notUp": {
+   "D": 34,
+   "R": 31
+  },
+  "dHeldUp": 13,
+  "races": [
+   {
+    "st": "NC",
+    "holder": "R"
+   },
+   {
+    "st": "OH",
+    "holder": "R"
+   },
+   {
+    "st": "ME",
+    "holder": "R"
+   },
+   {
+    "st": "IA",
+    "holder": "R"
+   },
+   {
+    "st": "TX",
+    "holder": "R"
+   },
+   {
+    "st": "AK",
+    "holder": "R"
+   },
+   {
+    "st": "KS",
+    "holder": "R"
+   },
+   {
+    "st": "LA",
+    "holder": "R"
+   },
+   {
+    "st": "SC",
+    "holder": "R"
+   },
+   {
+    "st": "NE",
+    "holder": "R"
+   },
+   {
+    "st": "MT",
+    "holder": "R"
+   },
+   {
+    "st": "AR",
+    "holder": "R"
+   },
+   {
+    "st": "ID",
+    "holder": "R"
+   },
+   {
+    "st": "GA",
+    "holder": "D"
+   },
+   {
+    "st": "MI",
+    "holder": "D"
+   },
+   {
+    "st": "MN",
+    "holder": "D"
+   },
+   {
+    "st": "NH",
+    "holder": "D"
+   }
+  ]
+ },
+ "house": {
+  "need": 218,
+  "districts": [
+   "NV-02",
+   "CO-03",
+   "NJ-02",
+   "CO-04",
+   "CO-05",
+   "SC-01",
+   "ME-02",
+   "WI-01",
+   "OH-15",
+   "FL-07",
+   "MI-04",
+   "AL-02",
+   "VA-05",
+   "AZ-02",
+   "NY-17",
+   "FL-09",
+   "TX-23",
+   "FL-13",
+   "MO-02",
+   "MN-01",
+   "FL-04",
+   "IN-05",
+   "NC-03",
+   "NC-13",
+   "OH-10",
+   "NY-01",
+   "NE-01",
+   "KS-02",
+   "NC-09",
+   "VA-01",
+   "AR-02",
+   "FL-27",
+   "TX-09",
+   "IA-02",
+   "TX-35",
+   "FL-16",
+   "NY-02",
+   "MT-01",
+   "FL-22",
+   "WA-05",
+   "NY-21",
+   "NC-07",
+   "MI-10",
+   "TN-09",
+   "FL-26",
+   "FL-12",
+   "FL-02",
+   "NC-14",
+   "AZ-01",
+   "MD-01",
+   "IA-03",
+   "MI-01",
+   "AZ-08",
+   "MN-08",
+   "OK-05",
+   "SC-02",
+   "GA-01",
+   "MI-07",
+   "NC-01"
+  ]
+ },
+ "note": "Senate key races are the ones with a competitive polling rating plus North Carolina, fixed before results came in. House key districts are the 59 that prediction markets priced as competitive on election day, fixed at that point; no odds are shown on this page."
+}
