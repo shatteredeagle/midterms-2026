@@ -738,3 +738,17 @@
 {"t":"2026-11-04T08:32:12.316Z","type":"count","id":"H-NE-02","text":"NE-02 House: Denise Powell (D) leads Brinker Harding (R) 56.4%–41% · 334 of 334 precincts (100%)","source":"Nebraska Secretary of State"}
 {"t":"2026-11-04T08:33:11.591Z","type":"count","id":"H-NE-02","text":"NE-02 House: Denise Powell (D) leads Brinker Harding (R) 56.4%–41% · 334 of 334 precincts (100%)","source":"Nebraska Secretary of State"}
 {"t":"2026-11-04T08:35:42.982Z","type":"count","id":"G-NV","text":"Nevada Governor: Aaron Ford (D) leads Joe Lombardo (R) 51.3%–44.7% · 70.9% of expected vote counted (70.9%)","source":"NBC News"}
+{"t":"2026-11-04T08:45:41.872Z","type":"count","id":"H-TX-30","text":"TX-30 House: Frederick Haynes (D) leads Everett Jackson (R) 82.6%–17.4% · 97.9% of expected vote counted (97.9%)","source":"NBC News"}
+{"t":"2026-11-04T08:46:12.269Z","type":"count","id":"S-MA","text":"Massachusetts Senate: Ed Markey (D) leads John Deaton (R) 63.8%–31.7% · 80.1% of expected vote counted (80.1%)","source":"NBC News"}
+{"t":"2026-11-04T08:46:42.498Z","type":"count","id":"G-MA","text":"Massachusetts Governor: Maura Healey (D) leads Michael Minogue (R) 62.8%–33.8% · 80.1% of expected vote counted (80.1%)","source":"NBC News"}
+{"t":"2026-11-04T08:49:41.528Z","type":"count","id":"H-MN-06","text":"MN-06 House: Tom Emmer (R) leads Doug Chapin (D) 55.8%–44.2% · 276 of 276 precincts (100%)","source":"Minnesota Secretary of State"}
+{"t":"2026-11-04T08:50:11.897Z","type":"lead","id":"H-ME-02","text":"ME-02 House: lead changes to Paul LePage (R) at 50%","source":"NBC News"}
+{"t":"2026-11-04T08:50:11.898Z","type":"call","id":"G-OR","text":"NBC News projects Tina Kotek (D) wins Oregon Governor · 51.9%–45.3% over Drazan (R)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T08:50:42.169Z","type":"count","id":"S-NE","text":"Nebraska Senate: Pete Ricketts (R) leads Dan Osborn (O) 50.1%–43.9% · 1,057 of 1,322 precincts (80%)","source":"Nebraska Secretary of State"}
+{"t":"2026-11-04T08:50:42.169Z","type":"count","id":"G-NE","text":"Nebraska Governor: Jim Pillen and Joe Kelly (R) leads Lynne Walz and Ben Steffen (D) 50.4%–42.6% · 1,057 of 1,322 precincts (80%)","source":"Nebraska Secretary of State"}
+{"t":"2026-11-04T08:52:42.331Z","type":"count","id":"S-NE","text":"Nebraska Senate: Pete Ricketts (R) leads Dan Osborn (O) 50.1%–43.9% · 1,057 of 1,322 precincts (80%)","source":"Nebraska Secretary of State"}
+{"t":"2026-11-04T08:52:42.331Z","type":"count","id":"G-NE","text":"Nebraska Governor: Jim Pillen and Joe Kelly (R) leads Lynne Walz and Ben Steffen (D) 50.4%–42.6% · 1,057 of 1,322 precincts (80%)","source":"Nebraska Secretary of State"}
+{"t":"2026-11-04T08:53:41.968Z","type":"count","id":"G-KS","text":"Kansas Governor: Cindy Holscher (D) leads Ty Masterson (R) 50.3%–49.7% · 95% of expected vote counted (95%)","source":"NBC News"}
+{"t":"2026-11-04T08:54:12.206Z","type":"call","id":"S-NV","text":"NBC News projects Aguilar (D) wins Nevada Senate · 56.8%–39.8% over Marchant (R)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T08:55:13.569Z","type":"count","id":"S-NH","text":"New Hampshire Senate: Chris Pappas (D) leads John Sununu (R) 56.2%–41.9% · 90.1% of expected vote counted (90.1%)","source":"NBC News"}
+{"t":"2026-11-04T08:55:13.569Z","type":"count","id":"G-NH","text":"New Hampshire Governor: Kelly Ayotte (R) leads Cinde Warmington (D) 51.1%–47.2% · 90.2% of expected vote counted (90.2%)","source":"NBC News"}
