@@ -1,4 +1,4 @@
-import { STATES, RACES, closeTime } from './states.js?v=a6dc40d5';
+import { STATES, RACES, closeTime } from './states.js?v=c14a3920';
 
 const REPO = 'ShatteredEagle/midterms-2026';
 const RAW = `https://raw.githubusercontent.com/${REPO}/data/`;
@@ -115,10 +115,12 @@ function renderSenate() {
   const rs = allRaces('S'), t = tally(rs), unc = rs.length - t.n;
   const cells = [...Array(34).fill('D0'), ...Array(t.d).fill('D1'), ...Array(unc).fill('N'), ...Array(t.o).fill('O'), ...Array(t.r).fill('R1'), ...Array(31).fill('R0')];
   const d = 34 + t.d, r = 31 + t.r;
+  const majWho = { D0: 'a Democratic seat', D1: 'a Democratic seat', N: 'in a race not yet counted', O: 'held by an independent', R1: 'a Republican seat', R0: 'a Republican seat' }[cells[50]];
   $('#cardSenate').innerHTML = `<h3>Senate · 51 for majority</h3>
     <div class="big"><b class="d">${d}</b><small>D holding or leading</small><b class="r">${r}</b><small>R holding or leading</small></div>
-    <div class="waffle" role="img" aria-label="Senate seats: ${d} Democratic holding or leading, ${r} Republican, ${unc} races not yet counted">${cells.map((k) => `<i class="${k}"></i>`).join('')}</div>
-    <div class="waffle-key"><span style="--c:var(--d)">D not up</span><span style="--c:var(--d-2)">D leading</span><span style="--c:var(--none)">Not counted ${unc}</span><span style="--c:var(--r-2)">R leading</span><span style="--c:var(--r)">R not up</span></div>
+    <div class="waffle" role="img" aria-label="Senate seats: ${d} Democratic holding or leading, ${r} Republican, ${unc} races not yet counted. The outlined 51st square decides control: it is currently ${majWho}.">${cells.map((k, i) => `<i class="${k}${i === 50 ? ' maj' : ''}"${i === 50 ? ` title="The 51st seat decides control: currently ${majWho}"` : ''}></i>`).join('')}</div>
+    <div class="waffle-key"><span style="--c:var(--d)">D not up</span><span style="--c:var(--d-2)">D leading</span><span style="--c:var(--none)">Not counted ${unc}</span><span style="--c:var(--r-2)">R leading</span><span style="--c:var(--r)">R not up</span><span class="majkey">Outlined = the 51st seat</span></div>
+    <p class="meta"><b>The outlined square is where control lands:</b> Democrats need it for 51 seats; if Republicans hold it they keep 50 or more, and the Vice President breaks a 50–50 tie for them. It is currently <b>${majWho}</b>.</p>
     <p class="meta">Votes counted in ${t.n} of ${rs.length} races. D leads ${t.d}, R leads ${t.r}. Seats not up: D 34, R 31. This counts who leads so far, not a projection. <a href="#control">What Democrats need ↗</a></p>`;
 }
 function renderHouse() {

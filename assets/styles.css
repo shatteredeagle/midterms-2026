@@ -345,3 +345,6 @@ table.ctl tbody tr{cursor:pointer}
 .meter{position:relative;display:flex;height:14px;border-radius:99px;background:var(--none);overflow:hidden;margin:8px 0}
 .meter i{display:block;height:100%}.meter .d{background:var(--d)}.meter .r{background:var(--r)}
 .meter .mark{position:absolute;top:-2px;bottom:-2px;width:3px;background:var(--text)}
+
+.waffle i.maj{position:relative;z-index:1;outline:2.5px solid var(--text);outline-offset:1px;border-radius:3px;box-shadow:0 0 0 4px color-mix(in srgb,var(--text) 18%,transparent)}
+.waffle-key .majkey::before{background:none;border:2px solid var(--text);width:7px;height:7px}
