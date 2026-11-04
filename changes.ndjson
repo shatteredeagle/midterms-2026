@@ -813,3 +813,6 @@
 {"t":"2026-11-04T11:14:57.550Z","type":"lead","id":"H-AZ-05","text":"AZ-05 House: lead changes to Mark Lamb (R) at 51.1%","source":"NBC News"}
 {"t":"2026-11-04T12:30:35.029Z","type":"count","id":"S-TX","text":"Texas Senate: James Talarico (D) leads Ken Paxton (R) 55.2%–42.9% · 96.2% of expected vote counted (96.2%)","source":"NBC News"}
 {"t":"2026-11-04T12:30:35.029Z","type":"count","id":"G-TX","text":"Texas Governor: Gina Hinojosa (D) leads Greg Abbott (R) 52.9%–45.6% · 96.3% of expected vote counted (96.3%)","source":"NBC News"}
+{"t":"2026-11-04T12:43:03.630Z","type":"count","id":"S-IA","text":"Iowa Senate: Josh Turek (D) leads Ashley Hinson (R) 50.4%–46.3% · 95 of 99 precincts (96%)","source":"Iowa Secretary of State"}
+{"t":"2026-11-04T12:43:03.630Z","type":"count","id":"H-IA-03","text":"IA-03 House: Sarah Trone Garriott (D) leads Zach Nunn (R) 53.5%–46.2% · 21 of 21 precincts (100%)","source":"Iowa Secretary of State"}
+{"t":"2026-11-04T12:43:03.630Z","type":"count","id":"G-IA","text":"Iowa Governor: Rob Sand and Dave Muhlbauer (D) leads Zach Lahn and Derek Wulf (R) 55.4%–44.4% · 95 of 99 precincts (96%)","source":"Iowa Secretary of State"}
