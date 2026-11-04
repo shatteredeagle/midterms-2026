@@ -176,11 +176,13 @@ async function history() {
 // ---- Race calls: NBC News "latest results" module (projected winners from the NBC News Decision Desk) ----
 // The page embeds Next.js JSON with the most recent called races across all offices. We keep every call we have seen.
 async function calls() {
-  const html = await get('https://www.nbcnews.com/politics/2026-elections/senate-results', false);
-  const m = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
-  if (!m) throw new Error('nbc page layout changed');
+  // The "latest results" module (most recent calls nationwide) rides along in every state API payload; the HTML pages refuse automated requests.
+  // Several states are read and unioned, since each answer shows a slightly different recent window.
   const found = [];
-  (function walk(o) { if (Array.isArray(o)) o.forEach(walk); else if (o && typeof o === 'object') { if (o.raceId && o.candidates) found.push(o); Object.values(o).forEach(walk); } })(JSON.parse(m[1]));
+  const seenRace = new Set();
+  const payloads = await Promise.allSettled(['ohio', 'texas', 'georgia', 'pennsylvania', 'north-carolina'].map((s) => get(`https://www.nbcnews.com/firecracker/api/v2/state-results/2026-elections/${s}-results`, true)));
+  if (payloads.every((p) => p.status === 'rejected')) throw new Error(`nbc latest results unavailable: ${payloads[0].reason?.message}`);
+  for (const p of payloads) if (p.status === 'fulfilled') (function walk(o) { if (Array.isArray(o)) o.forEach(walk); else if (o && typeof o === 'object') { if (o.raceId && o.candidates && !seenRace.has(o.raceId + (o.percentInFormatted || ''))) { seenRace.add(o.raceId + (o.percentInFormatted || '')); found.push(o); } Object.values(o).forEach(walk); } })(p.value);
   const prev = (await readJ('calls')) || { calls: {} };
   const out = { ...prev.calls };
   for (const r of found) {
@@ -194,6 +196,13 @@ async function calls() {
     out[id] = out[id] || { id, firstSeen: now() };
     const inc = r.candidates.find((x) => x.isIncumbent);
     Object.assign(out[id], { incumbentParty: inc ? ({ Dem: 'D', Rep: 'R' }[inc.party] || 'O') : null, raceId: r.raceId, status: r.callStatusCode, winner: { n: w.lastName, p: party, pct: w.percentVote }, runnerUp: lose ? { n: lose.lastName, p: { Dem: 'D', Rep: 'R' }[lose.party] || 'O', pct: lose.percentVote } : null, pctIn: r.percentInFormatted || null, url: r.href ? `https://www.nbcnews.com${r.href}` : null });
+  }
+  // Any race that NBC's own state or district data marks with a winner counts as a call, even if it has scrolled out of the latest-results window.
+  const flagged = { ...((await readJ('results'))?.races || {}), ...((await readJ('house_nbc')) || {}) };
+  for (const [id, r] of Object.entries(flagged)) {
+    if (!r.winner || r.source !== 'NBC News' || out[id]) continue;
+    const w = r.cands.find((x) => x.winner) || r.cands[0], u = r.cands.find((x) => x !== w);
+    out[id] = { id, firstSeen: now(), status: 'P', incumbentParty: null, winner: { n: w.n.split(' ').pop(), p: w.p, pct: w.pct }, runnerUp: u ? { n: u.n.split(' ').pop(), p: u.p, pct: u.pct } : null, pctIn: r.reporting?.split(' ')[0] || null, url: null };
   }
   // Massachusetts ballot questions that NBC tracks (it lists only some of the nine), keyed MA-<question number>.
   const measures = {};
