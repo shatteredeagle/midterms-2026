@@ -811,3 +811,5 @@
 {"t":"2026-11-04T11:07:28.515Z","type":"count","id":"G-SD","text":"South Dakota Governor: Larry Rhoden and Tony Venhuizen (R) leads Dan Ahlers and Steven McCleerey (D) 63.5%–36.5% · 671 of 671 precincts (100%)","source":"South Dakota Secretary of State"}
 {"t":"2026-11-04T11:14:23.895Z","type":"count","id":"G-AZ","text":"Arizona Governor: Katie Hobbs (D) leads Andy Biggs (R) 55.7%–42.6% · 82.7% of expected vote counted (82.7%)","source":"NBC News"}
 {"t":"2026-11-04T11:14:57.550Z","type":"lead","id":"H-AZ-05","text":"AZ-05 House: lead changes to Mark Lamb (R) at 51.1%","source":"NBC News"}
+{"t":"2026-11-04T12:30:35.029Z","type":"count","id":"S-TX","text":"Texas Senate: James Talarico (D) leads Ken Paxton (R) 55.2%–42.9% · 96.2% of expected vote counted (96.2%)","source":"NBC News"}
+{"t":"2026-11-04T12:30:35.029Z","type":"count","id":"G-TX","text":"Texas Governor: Gina Hinojosa (D) leads Greg Abbott (R) 52.9%–45.6% · 96.3% of expected vote counted (96.3%)","source":"NBC News"}
