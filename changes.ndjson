@@ -700,3 +700,31 @@
 {"t":"2026-11-04T07:54:12.005Z","type":"count","id":"S-TX","text":"Texas Senate: James Talarico (D) leads Ken Paxton (R) 55%–43.1% · 90.2% of expected vote counted (90.2%)","source":"NBC News"}
 {"t":"2026-11-04T07:54:12.006Z","type":"call","id":"G-NE","text":"NBC News projects Jim Pillen and Joe Kelly (R) wins Nebraska Governor · 50.1%–42.8% over Walz (D)","source":"NBC News Decision Desk"}
 {"t":"2026-11-04T07:55:41.620Z","type":"count","id":"H-CA-25","text":"CA-25 House: Raul Ruiz (D) leads Joe Males (R) 58.4%–41.6% · 21 of 40 precincts (52.5%)","source":"California Secretary of State"}
+{"t":"2026-11-04T07:56:11.726Z","type":"count","id":"S-NE","text":"Nebraska Senate: Pete Ricketts (R) leads Dan Osborn (O) 49.8%–44.2% · 929 of 1,322 precincts (70.3%)","source":"Nebraska Secretary of State"}
+{"t":"2026-11-04T07:56:11.726Z","type":"count","id":"G-NE","text":"Nebraska Governor: Jim Pillen and Joe Kelly (R) leads Lynne Walz and Ben Steffen (D) 50.1%–42.9% · 929 of 1,322 precincts (70.3%)","source":"Nebraska Secretary of State"}
+{"t":"2026-11-04T07:59:41.821Z","type":"count","id":"S-MN","text":"Minnesota Senate: Peggy Flanagan (D) leads Michele Tafoya (R) 53.8%–43.6% · 4,103 of 4,105 precincts (100%)","source":"Minnesota Secretary of State"}
+{"t":"2026-11-04T07:59:41.821Z","type":"count","id":"G-MN","text":"Minnesota Governor: Amy Klobuchar and Ben Schierer (D) leads Lisa Demuth and Ryan Wilson (R) 55.5%–42.6% · 4,103 of 4,105 precincts (100%)","source":"Minnesota Secretary of State"}
+{"t":"2026-11-04T07:59:41.821Z","type":"lead","id":"H-MN-01","text":"MN-01 House: lead changes to Jake Johnson (D) at 50%","source":"Minnesota Secretary of State"}
+{"t":"2026-11-04T08:00:11.947Z","type":"count","id":"S-IL","text":"Illinois Senate: Juliana Stratton (D) leads Don Tracy (R) 60.8%–37.6% · 90% of expected vote counted (90%)","source":"NBC News"}
+{"t":"2026-11-04T08:00:42.279Z","type":"count","id":"S-SD","text":"South Dakota Senate: Mike Rounds (R) leads Brian L Bengs (O) 60.8%–39.2% · 641 of 671 precincts (95.5%)","source":"South Dakota Secretary of State"}
+{"t":"2026-11-04T08:00:42.279Z","type":"count","id":"G-SD","text":"South Dakota Governor: Larry Rhoden and Tony Venhuizen (R) leads Dan Ahlers and Steven McCleerey (D) 63.8%–36.2% · 641 of 671 precincts (95.5%)","source":"South Dakota Secretary of State"}
+{"t":"2026-11-04T08:01:41.711Z","type":"count","id":"S-SD","text":"South Dakota Senate: Mike Rounds (R) leads Brian L Bengs (O) 60.8%–39.2% · 641 of 671 precincts (95.5%)","source":"South Dakota Secretary of State"}
+{"t":"2026-11-04T08:01:41.711Z","type":"count","id":"G-SD","text":"South Dakota Governor: Larry Rhoden and Tony Venhuizen (R) leads Dan Ahlers and Steven McCleerey (D) 63.8%–36.2% · 641 of 671 precincts (95.5%)","source":"South Dakota Secretary of State"}
+{"t":"2026-11-04T08:03:42.288Z","type":"count","id":"H-NV-01","text":"NV-01 House: Dina Titus (D) leads Carrie Buck (R) 60.3%–37.2% · 64.6% of expected vote counted (64.6%)","source":"NBC News"}
+{"t":"2026-11-04T08:05:12.431Z","type":"count","id":"H-NV-03","text":"NV-03 House: Susie Lee (D) leads Marty O'Donnell (R) 60.1%–37.8% · 65.3% of expected vote counted (65.3%)","source":"NBC News"}
+{"t":"2026-11-04T08:05:41.602Z","type":"count","id":"G-NV","text":"Nevada Governor: first votes reported (0.2% of precincts)","source":"NBC News"}
+{"t":"2026-11-04T08:06:41.928Z","type":"lead","id":"G-NV","text":"Nevada Governor: lead changes to Aaron Ford (D) at 55.8%","source":"NBC News"}
+{"t":"2026-11-04T08:06:41.928Z","type":"count","id":"G-NV","text":"Nevada Governor: Aaron Ford (D) leads Joe Lombardo (R) 55.8%–40.5% · 45.3% of expected vote counted (45.3%)","source":"NBC News"}
+{"t":"2026-11-04T08:06:41.928Z","type":"count","id":"H-NV-04","text":"NV-04 House: Steven Horsford (D) leads Cody Whipple (R) 63.6%–34.8% · 59.8% of expected vote counted (59.8%)","source":"NBC News"}
+{"t":"2026-11-04T08:07:11.999Z","type":"lead","id":"H-NV-02","text":"NV-02 House: lead changes to Teresa Benitez-Thompson (D) at 50.1%","source":"NBC News"}
+{"t":"2026-11-04T08:07:42.321Z","type":"lead","id":"H-NV-02","text":"NV-02 House: lead changes to David Flippo (R) at 51.7%","source":"NBC News"}
+{"t":"2026-11-04T08:09:11.883Z","type":"call","id":"H-NV-01","text":"NBC News projects Dina Titus (D) wins NV-01 House · 60.3%–37.2% over Buck (R)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T08:09:11.883Z","type":"call","id":"H-NV-04","text":"NBC News projects Steven Horsford (D) wins NV-04 House · 63.6%–34.9% over Whipple (R)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T08:09:42.243Z","type":"count","id":"G-CA","text":"California Governor: Xavier Becerra (D) leads Steve Hilton (R) 64.2%–35.8% · 19,810 of 23,860 precincts (83%)","source":"California Secretary of State"}
+{"t":"2026-11-04T08:09:42.243Z","type":"count","id":"H-CA-10","text":"CA-10 House: Mark DeSaulnier (D) leads Jeff Frese (R) 68.8%–31.2% · 665 of 665 precincts (100%)","source":"California Secretary of State"}
+{"t":"2026-11-04T08:10:12.597Z","type":"call","id":"H-NV-03","text":"NBC News projects Susie Lee (D) wins NV-03 House · 60.1%–37.8% over O'Donnell (R)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T08:11:12.337Z","type":"count","id":"G-NV","text":"Nevada Governor: Aaron Ford (D) leads Joe Lombardo (R) 53.5%–42.6% · 50.5% of expected vote counted (50.5%)","source":"NBC News"}
+{"t":"2026-11-04T08:13:12.003Z","type":"count","id":"G-AZ","text":"Arizona Governor: Katie Hobbs (D) leads Andy Biggs (R) 56.9%–41.5% · 72% of expected vote counted (72%)","source":"NBC News"}
+{"t":"2026-11-04T08:13:12.003Z","type":"count","id":"H-NV-02","text":"NV-02 House: David Flippo (R) leads Teresa Benitez-Thompson (D) 47.6%–46.9% · 99% of expected vote counted (99%)","source":"NBC News"}
+{"t":"2026-11-04T08:13:42.061Z","type":"count","id":"G-NV","text":"Nevada Governor: Aaron Ford (D) leads Joe Lombardo (R) 51.7%–44.4% · 68% of expected vote counted (68%)","source":"NBC News"}
+{"t":"2026-11-04T08:13:42.061Z","type":"lead","id":"H-AZ-08","text":"AZ-08 House: lead changes to Abraham Hamadeh (R) at 50.3%","source":"NBC News"}
