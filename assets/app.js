@@ -1,4 +1,4 @@
-import { STATES, RACES, HOUSE_SEATS, closeTime } from './states.js?v=9cc02783';
+import { STATES, RACES, HOUSE_SEATS, closeTime } from './states.js?v=814c58cb';
 
 const REPO = 'ShatteredEagle/midterms-2026';
 const RAW = `https://raw.githubusercontent.com/${REPO}/data/`;
@@ -141,8 +141,8 @@ function renderSenate() {
     const w = counted(r.o) ? r.o.cands[0].n : callOf(r.id)?.winner.n;
     return { cls: p === 'D' ? 'D1' : p === 'R' ? 'R1' : 'O', flip, called, holder, p, title: `${STATES[r.st][0]}: ${w || p} (${p}) ${called ? 'wins (called)' : 'leads'}${flip ? ` · ${called ? 'FLIP' : 'LEADING TO FLIP'} from ${holder} to ${p}` : holder ? ` · ${holder} hold` : ''}` };
   };
-  // Called seats sit on the outside of each party's block; uncalled leads (potential flips innermost) sit next to the undecided squares.
-  const rank = (c) => (c.called ? 0 : 2) + (c.flip ? 1 : 0);
+  // Order inside each party's block, outside to inside: held seats (called, then leading), confirmed flips, likely flips, then the undecided squares.
+  const rank = (c) => (c.flip ? (c.called ? 20 : 30) : (c.called ? 0 : 10));
   const dC = lead.filter((x) => x.p === 'D').map(cellFor).sort((a, b) => rank(a) - rank(b)), rC = lead.filter((x) => x.p === 'R').map(cellFor).sort((a, b) => rank(b) - rank(a)), oC = lead.filter((x) => x.p !== 'D' && x.p !== 'R').map(cellFor);
   const holdRank = (c) => (c.hold === 'D' ? 0 : c.hold === 'R' ? 1 : 2); // undecided seats group by current holder: blue dots, then red, then unknown
   const undecided = rs.filter((r) => !leaderParty(r)).map((r) => { const h = holderOf(r.st); return { cls: 'N', hold: h === 'D' || h === 'R' ? h : null, title: `${STATES[r.st][0]}: not decided yet${h ? ` · currently held by ${h}` : ''}` }; }).sort((a, b) => holdRank(a) - holdRank(b));
@@ -181,7 +181,7 @@ function renderHouse() {
     return { cls: p === 'D' ? 'D1' : p === 'R' ? 'R1' : 'O', flip, called, title: `${x.id.slice(2)}: ${w || p} (${p}) ${called ? 'wins (called)' : 'leads'}${flip ? ` · ${called ? 'FLIP' : 'LEADING TO FLIP'} from ${holder} to ${p}` : holder ? ` · ${holder} hold` : ''}` };
   };
   const all = items.map((x) => ({ x, c: cell(x) }));
-  const rank = (c) => (c.called ? 0 : 2) + (c.flip ? 1 : 0); // called seats outermost, potential flips innermost
+  const rank = (c) => (c.flip ? (c.called ? 20 : 30) : (c.called ? 0 : 10)); // held seats, then confirmed flips, then likely flips, then undecided
   const dC = all.filter((e) => e.c.cls === 'D1').map((e) => e.c).sort((a, b) => rank(a) - rank(b));
   const rC = all.filter((e) => e.c.cls === 'R1').map((e) => e.c).sort((a, b) => rank(b) - rank(a));
   const oC = all.filter((e) => e.c.cls === 'O').map((e) => e.c);
