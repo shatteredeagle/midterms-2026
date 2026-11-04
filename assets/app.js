@@ -1,4 +1,4 @@
-import { STATES, RACES, closeTime } from './states.js?v=e4786749';
+import { STATES, RACES, closeTime } from './states.js?v=c550a743';
 
 const REPO = 'ShatteredEagle/midterms-2026';
 const RAW = `https://raw.githubusercontent.com/${REPO}/data/`;
@@ -88,7 +88,9 @@ function voteBar(o, call) {
 }
 const matchup = (o) => (o?.cands?.length ? [...o.cands].sort((x, y) => ({ D: 0, R: 1 }[x.p] ?? 2) - ({ D: 0, R: 1 }[y.p] ?? 2)).slice(0, 3).map((c) => `${esc(c.n)} (${esc(c.p)})`).join(' vs ') : '');
 // Leader of a race: counted votes first, otherwise an NBC call. `n` counts races with either.
-const leaderParty = (x) => (counted(x.o) ? x.o.cands[0].p : callOf(x.id)?.winner.p || null);
+// Counts under 5% in are too early to mean anything (a few precincts can show any party ahead), so they don't color the map or count in tallies unless the race is called.
+const tooEarly = (o) => counted(o) && o.pct < 5;
+const leaderParty = (x) => (counted(x.o) && !tooEarly(x.o) ? x.o.cands[0].p : callOf(x.id)?.winner.p || null);
 const tally = (rs) => { let d = 0, r = 0, o = 0, n = 0; for (const x of rs) { const p = leaderParty(x); if (!p) continue; n++; p === 'D' ? d++ : p === 'R' ? r++ : o++; } return { d, r, o, n }; };
 
 // ---------- trends ----------
@@ -235,7 +237,8 @@ function stateInfo(st) {
   const r = race(`${S.kind}-${st}`);
   if (!r) return { bin: 'none', text: `No ${KIND[S.kind]} race in 2026` };
   const o = r.o;
-  if (o && o.totalVotes > 0 && o.cands[0]?.votes > 0) {
+  if (tooEarly(o) && !callOf(`${S.kind}-${st}`)) return { bin: 'tooearly', text: `Too early to show: only ${o.pct}% in (${o.cands[0].n} (${o.cands[0].p}) ahead so far)` };
+  if (counted(o)) {
     const a = o.cands[0], b = o.cands[1], m = a.pct - (b ? b.pct : 0), party = a.p;
     const mag = m >= 20 ? 3 : m >= 10 ? 2 : 1;
     const bin = m < 1 ? 'T' : party === 'D' ? `D${mag}` : party === 'R' ? `R${mag}` : 'O';
@@ -263,8 +266,8 @@ function paintMap() {
     el.setAttribute('aria-label', `${STATES[st][0]}: ${i.text}`);
   }
   for (const c of document.querySelectorAll('.chip')) c.classList.toggle('sel', c.dataset.st === S.sel);
-  const sw = (cls, label) => `<span><i class="b-${cls}" style="background:${cls === 'T' ? 'repeating-linear-gradient(45deg,var(--t) 0 3px,var(--hatch) 3px 5px)' : cls === 'closed' ? 'repeating-linear-gradient(45deg,var(--none) 0 3px,var(--hatch) 3px 5px)' : `var(--${{ D3: 'd', D2: 'd-2', D1: 'd-1', R1: 'r-1', R2: 'r-2', R3: 'r', none: 'none', pend: 'pend', O: 'muted' }[cls]})`}"></i>${label}</span>`;
-  if (S.kind !== 'E') $('#legend').innerHTML = sw('D3', 'D leads by 20+') + sw('D2', 'D by 10–20') + sw('D1', 'D by under 10') + sw('T', 'Within 1 pt') + sw('R1', 'R by under 10') + sw('R2', 'R by 10–20') + sw('R3', 'R leads by 20+') + sw('O', 'Other leads') + sw('pend', 'Polls not closed') + sw('closed', 'Closed, no votes shown') + sw('none', 'No race') + '<span><i style="background:none;border:2px dashed var(--text)"></i>Dashed = under 50% reporting</span>';
+  const sw = (cls, label) => `<span><i class="b-${cls}" style="background:${cls === 'T' ? 'repeating-linear-gradient(45deg,var(--t) 0 3px,var(--hatch) 3px 5px)' : cls === 'closed' || cls === 'tooearly' ? 'repeating-linear-gradient(45deg,var(--none) 0 3px,var(--hatch) 3px 5px)' : `var(--${{ D3: 'd', D2: 'd-2', D1: 'd-1', R1: 'r-1', R2: 'r-2', R3: 'r', none: 'none', pend: 'pend', tooearly: 'none', O: 'muted' }[cls]})`}"></i>${label}</span>`;
+  if (S.kind !== 'E') $('#legend').innerHTML = sw('D3', 'D leads by 20+') + sw('D2', 'D by 10–20') + sw('D1', 'D by under 10') + sw('T', 'Within 1 pt') + sw('R1', 'R by under 10') + sw('R2', 'R by 10–20') + sw('R3', 'R leads by 20+') + sw('O', 'Other leads') + sw('tooearly', 'Under 5% in') + sw('pend', 'Polls not closed') + sw('closed', 'Closed, no votes shown') + sw('none', 'No race') + '<span><i style="background:none;border:2px dashed var(--text)"></i>Dashed = under 50% reporting</span>';
   const eSw = (v, label) => `<span><i style="background:var(--${v})"></i>${label}</span>`;
   if (S.kind === 'E') $('#legend').innerHTML = eSw('e1', 'Under 20%') + eSw('e2', '20–30%') + eSw('e3', '30–40%') + eSw('e4', '40%+') + sw('none', 'No readable report') + '<span>Shade = early-vote turnout of registered or active voters</span>';
   $('#mapSub').textContent = S.kind === 'E' ? 'Early-vote turnout where a state publishes a report this page can use. Most states do not, so most of the map is gray. This shows how many people voted early, not who they voted for.' : mapTally();

@@ -380,3 +380,5 @@ table.ctl tbody tr{cursor:pointer}
 .waffle i.flip{box-shadow:inset 0 0 0 2px #f2b01e}
 .waffle i.flip::after{content:"";position:absolute;right:0;bottom:0;width:48%;height:48%;background:linear-gradient(135deg,transparent 50%,#f2b01e 50%)}
 .waffle-key .flipkey::before{background:#f2b01e}
+
+.b-tooearly{fill:url(#hatchGray)}
