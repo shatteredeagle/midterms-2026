@@ -198,10 +198,10 @@ async function calls() {
   // Massachusetts ballot questions that NBC tracks (it lists only some of the nine), keyed MA-<question number>.
   const measures = {};
   try {
-    const mh = await get('https://www.nbcnews.com/politics/2026-elections/massachusetts-ballot-measures', false);
-    const mm = mh.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
+    // The ballot-measures endpoint is a plain JSON API (the HTML page refuses automated requests).
+    const mj = await get('https://www.nbcnews.com/firecracker/api/v2/state-results/2026-elections/massachusetts-ballot-measures', true);
     const ms = [];
-    (function walk(o) { if (Array.isArray(o)) o.forEach(walk); else if (o && typeof o === 'object') { if (o.raceId && o.candidates) ms.push(o); Object.values(o).forEach(walk); } })(JSON.parse(mm[1]));
+    (function walk(o) { if (Array.isArray(o)) o.forEach(walk); else if (o && typeof o === 'object') { if (o.raceId && o.candidates) ms.push(o); Object.values(o).forEach(walk); } })(mj);
     for (const r of ms) {
       const q = /~MA~/.test(r.raceId) && /^Question (\d+)/.exec(r.raceName || '');
       if (!q) continue;
