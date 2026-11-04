@@ -1,4 +1,4 @@
-import { STATES, RACES, HOUSE_SEATS, closeTime } from './states.js?v=995a3038';
+import { STATES, RACES, HOUSE_SEATS, closeTime } from './states.js?v=aa4ee6bd';
 
 const REPO = 'ShatteredEagle/midterms-2026';
 const RAW = `https://raw.githubusercontent.com/${REPO}/data/`;
@@ -137,22 +137,23 @@ function renderSenate() {
   const rs = allRaces('S'), t = tally(rs), unc = rs.length - t.n;
   const lead = rs.map((r) => ({ r, p: leaderParty(r) })).filter((x) => x.p);
   const cellFor = ({ r, p }) => {
-    const holder = holderOf(r.st), flip = !!holder && holder !== 'I' && p !== holder;
+    const holder = holderOf(r.st), flip = !!holder && holder !== 'I' && p !== holder, called = !!callOf(r.id);
     const w = counted(r.o) ? r.o.cands[0].n : callOf(r.id)?.winner.n;
-    return { cls: p === 'D' ? 'D1' : p === 'R' ? 'R1' : 'O', flip, holder, p, title: `${STATES[r.st][0]}: ${w || p} (${p}) ${callOf(r.id) ? 'wins' : 'leads'}${flip ? ` · FLIP from ${holder} to ${p}` : holder ? ` · ${holder} hold` : ''}` };
+    return { cls: p === 'D' ? 'D1' : p === 'R' ? 'R1' : 'O', flip, called, holder, p, title: `${STATES[r.st][0]}: ${w || p} (${p}) ${called ? 'wins (called)' : 'leads'}${flip ? ` · ${called ? 'FLIP' : 'LEADING TO FLIP'} from ${holder} to ${p}` : holder ? ` · ${holder} hold` : ''}` };
   };
   const dC = lead.filter((x) => x.p === 'D').map(cellFor).sort((a, b) => a.flip - b.flip), rC = lead.filter((x) => x.p === 'R').map(cellFor).sort((a, b) => b.flip - a.flip), oC = lead.filter((x) => x.p !== 'D' && x.p !== 'R').map(cellFor);
   const holdRank = (c) => (c.hold === 'D' ? 0 : c.hold === 'R' ? 1 : 2); // undecided seats group by current holder: blue dots, then red, then unknown
   const undecided = rs.filter((r) => !leaderParty(r)).map((r) => { const h = holderOf(r.st); return { cls: 'N', hold: h === 'D' || h === 'R' ? h : null, title: `${STATES[r.st][0]}: not decided yet${h ? ` · currently held by ${h}` : ''}` }; }).sort((a, b) => holdRank(a) - holdRank(b));
   const cells = [...Array(34).fill({ cls: 'D0', title: 'Democratic seat, not up this year' }), ...dC, ...undecided, ...oC, ...rC, ...Array(31).fill({ cls: 'R0', title: 'Republican seat, not up this year' })];
   const d = 34 + t.d, r = 31 + t.r;
-  const flipsD = dC.filter((c) => c.flip).length, flipsR = rC.filter((c) => c.flip).length, flipsO = oC.filter((c) => c.flip).length;
+  const flipsD = dC.filter((c) => c.flip && c.called).length, flipsR = rC.filter((c) => c.flip && c.called).length, flipsO = oC.filter((c) => c.flip && c.called).length;
+  const leadD = dC.filter((c) => c.flip && !c.called).length, leadR = rC.filter((c) => c.flip && !c.called).length;
   const majWho = { D0: 'a Democratic seat', D1: 'a Democratic seat', N: 'in a race not yet counted', O: 'held by an independent', R1: 'a Republican seat', R0: 'a Republican seat' }[cells[50].cls];
   $('#cardSenate').innerHTML = `<h3>Senate · 51 for majority</h3>
     <div class="big"><b class="d">${d}</b><small>D holding or leading</small><b class="r">${r}</b><small>R holding or leading</small></div>
-    <div class="waffle" role="img" aria-label="Senate seats: ${d} Democratic holding or leading, ${r} Republican, ${unc} races not yet counted. Flipped seats so far: Democrats ${flipsD}, Republicans ${flipsR}. The outlined 51st square decides control: it is currently ${majWho}.">${cells.map((c, i) => `<i class="${c.cls}${c.flip ? ' flip' : ''}${i === 50 ? ' maj' : ''}"${c.hold ? ` data-h="${c.hold}"` : ''} title="${esc(i === 50 ? `The 51st seat decides control: currently ${majWho}${c.title ? ` (${c.title})` : ''}` : c.title)}"></i>`).join('')}</div>
-    <div class="waffle-key"><span style="--c:var(--d)">D not up</span><span style="--c:var(--d-2)">D leading</span><span style="--c:var(--none)">Not decided ${unc}</span><span style="--c:var(--r-2)">R leading</span><span style="--c:var(--r)">R not up</span><span class="majkey">Outlined = the 51st seat</span><span class="flipkey">Gold corner = flipped seat</span><span class="dotkey">Dot = party holding an undecided seat now</span></div>
-    <p class="meta"><b>Flipped so far:</b> Democrats +${flipsD}, Republicans +${flipsR}${flipsO ? `, independents +${flipsO}` : ''} (net ${flipsD - flipsR === 0 ? 'even' : flipsD > flipsR ? `D +${flipsD - flipsR}` : `R +${flipsR - flipsD}`}). A flip is a seat won or led by a different party than the one that held it. Hover a square for the state.</p>
+    <div class="waffle" role="img" aria-label="Senate seats: ${d} Democratic holding or leading, ${r} Republican, ${unc} races not yet counted. Flipped seats so far: Democrats ${flipsD}, Republicans ${flipsR}. The outlined 51st square decides control: it is currently ${majWho}.">${cells.map((c, i) => `<i class="${c.cls}${c.flip ? ` flip${c.called ? '' : ' lead'}` : ''}${i === 50 ? ' maj' : ''}"${c.hold ? ` data-h="${c.hold}"` : ''} title="${esc(i === 50 ? `The 51st seat decides control: currently ${majWho}${c.title ? ` (${c.title})` : ''}` : c.title)}"></i>`).join('')}</div>
+    <div class="waffle-key"><span style="--c:var(--d)">D not up</span><span style="--c:var(--d-2)">D leading</span><span style="--c:var(--none)">Not decided ${unc}</span><span style="--c:var(--r-2)">R leading</span><span style="--c:var(--r)">R not up</span><span class="majkey">Outlined = the 51st seat</span><span class="flipkey">Gold ring = flip called</span><span class="flipkey lead">Dashed ring = leading to flip, not called</span><span class="dotkey">Dot = party holding an undecided seat now</span></div>
+    <p class="meta"><b>Flips called:</b> Democrats +${flipsD}, Republicans +${flipsR}${flipsO ? `, independents +${flipsO}` : ''}. <b>Leading to flip, not called yet:</b> Democrats +${leadD}, Republicans +${leadR}. A flip is a seat won or led by a different party than the one that held it; leads from early counts can still reverse. Hover a square for the state.</p>
     <p class="meta"><b>The outlined square is where control lands:</b> Democrats need it for 51 seats; if Republicans hold it they keep 50 or more, and the Vice President breaks a 50–50 tie for them. It is currently <b>${majWho}</b>.</p>
     <p class="meta">Votes counted or races called in ${t.n} of ${rs.length}. D leads ${t.d}, R leads ${t.r}. Seats not up: D 34, R 31. Calls are NBC News projections; the rest is counted votes. <a href="#control">What Democrats need ↗</a></p>`;
 }
@@ -173,9 +174,9 @@ function renderHouse() {
   const cell = (x) => {
     const p = leaderParty(x);
     if (!p) { const h = houseHolder(x.id); return { cls: 'N', hold: h, title: `${x.id.slice(2)}: not decided yet${h ? ` · currently held by ${h}` : ''}` }; }
-    const holder = houseHolder(x.id), flip = !!holder && p !== holder, call = callOf(x.id);
+    const holder = houseHolder(x.id), flip = !!holder && p !== holder, call = callOf(x.id), called = !!call;
     const w = counted(x.o) && !tooEarly(x.o) ? x.o.cands[0].n : call?.winner.n;
-    return { cls: p === 'D' ? 'D1' : p === 'R' ? 'R1' : 'O', flip, title: `${x.id.slice(2)}: ${w || p} (${p}) ${call ? 'wins' : 'leads'}${flip ? ` · FLIP from ${holder} to ${p}` : holder ? ` · ${holder} hold` : ''}` };
+    return { cls: p === 'D' ? 'D1' : p === 'R' ? 'R1' : 'O', flip, called, title: `${x.id.slice(2)}: ${w || p} (${p}) ${called ? 'wins (called)' : 'leads'}${flip ? ` · ${called ? 'FLIP' : 'LEADING TO FLIP'} from ${holder} to ${p}` : holder ? ` · ${holder} hold` : ''}` };
   };
   const all = items.map((x) => ({ x, c: cell(x) }));
   const dC = all.filter((e) => e.c.cls === 'D1').map((e) => e.c).sort((a, b) => a.flip - b.flip);
@@ -183,14 +184,15 @@ function renderHouse() {
   const oC = all.filter((e) => e.c.cls === 'O').map((e) => e.c);
   const nC = all.filter((e) => e.c.cls === 'N').map((e) => e.c).sort((a, b) => (a.hold === 'D' ? 0 : a.hold === 'R' ? 1 : 2) - (b.hold === 'D' ? 0 : b.hold === 'R' ? 1 : 2)); // blue-dot seats together, then red
   const cells = [...dC, ...nC, ...oC, ...rC];
-  const flipsD = dC.filter((c) => c.flip).length, flipsR = rC.filter((c) => c.flip).length;
+  const flipsD = dC.filter((c) => c.flip && c.called).length, flipsR = rC.filter((c) => c.flip && c.called).length;
+  const leadD = dC.filter((c) => c.flip && !c.called).length, leadR = rC.filter((c) => c.flip && !c.called).length;
   const known = [...dC, ...rC].filter((c) => /hold|FLIP/.test(c.title)).length;
   const majWho = { D1: 'a Democratic seat', N: 'in a district not yet decided', O: 'held by another party', R1: 'a Republican seat' }[cells[217].cls];
   $('#cardHouse').innerHTML = `<h3>House · 218 for majority</h3>
     <div class="big"><b class="d">${t.d}</b><small>districts D leads</small><b class="r">${t.r}</b><small>districts R leads</small></div>
-    <div class="waffle house" role="img" aria-label="435 House districts: ${t.d} Democratic leading or called, ${t.r} Republican, ${nC.length} not decided. Flips so far: Democrats ${flipsD}, Republicans ${flipsR}. The outlined 218th square decides control: it is currently ${majWho}.">${cells.map((c, i) => `<i class="${c.cls}${c.flip ? ' flip' : ''}${i === 217 ? ' maj' : ''}"${c.hold ? ` data-h="${c.hold}"` : ''} title="${esc(i === 217 ? `The 218th seat decides control: currently ${majWho}${c.title ? ` (${c.title})` : ''}` : c.title)}"></i>`).join('')}</div>
-    <div class="waffle-key"><span style="--c:var(--d-2)">D leading or called</span><span style="--c:var(--none)">Not decided ${nC.length}</span><span style="--c:var(--r-2)">R leading or called</span><span class="majkey">Outlined = the 218th seat</span><span class="flipkey">Gold corner = flipped seat</span><span class="dotkey">Dot = party holding an undecided seat now</span></div>
-    <p class="meta"><b>Flipped so far:</b> Democrats +${flipsD}, Republicans +${flipsR} (net ${flipsD === flipsR ? 'even' : flipsD > flipsR ? `D +${flipsD - flipsR}` : `R +${flipsR - flipsD}`}). The holder is the party of the member now holding that district number (congress-legislators data); in states that redrew maps, a few flips may be redistricting rather than a change in who represents the same voters. Two vacant seats show no dot.</p>
+    <div class="waffle house" role="img" aria-label="435 House districts: ${t.d} Democratic leading or called, ${t.r} Republican, ${nC.length} not decided. Flips so far: Democrats ${flipsD}, Republicans ${flipsR}. The outlined 218th square decides control: it is currently ${majWho}.">${cells.map((c, i) => `<i class="${c.cls}${c.flip ? ` flip${c.called ? '' : ' lead'}` : ''}${i === 217 ? ' maj' : ''}"${c.hold ? ` data-h="${c.hold}"` : ''} title="${esc(i === 217 ? `The 218th seat decides control: currently ${majWho}${c.title ? ` (${c.title})` : ''}` : c.title)}"></i>`).join('')}</div>
+    <div class="waffle-key"><span style="--c:var(--d-2)">D leading or called</span><span style="--c:var(--none)">Not decided ${nC.length}</span><span style="--c:var(--r-2)">R leading or called</span><span class="majkey">Outlined = the 218th seat</span><span class="flipkey">Gold ring = flip called</span><span class="flipkey lead">Dashed ring = leading to flip, not called</span><span class="dotkey">Dot = party holding an undecided seat now</span></div>
+    <p class="meta"><b>Flips called:</b> Democrats +${flipsD}, Republicans +${flipsR}. <b>Leading to flip, not called yet:</b> Democrats +${leadD}, Republicans +${leadR}. The holder is the party of the member now holding that district number (congress-legislators data); in states that redrew maps, a few flips may be redistricting rather than a change in who represents the same voters. Two vacant seats show no dot.</p>
     <p class="meta"><b>The outlined square is where control lands:</b> a party needs 218 of 435 seats, so the 218th seat from the Democratic side decides it. It is currently <b>${majWho}</b>. Squares fill in from vote feeds (CA, CO, FL, GA, IA, MN, NC, NE) and NBC News calls; other districts stay undecided here. Follow <a href="https://apnews.com/" target="_blank" rel="noopener">AP</a> or <a href="https://www.nbcnews.com/politics/2026-elections/midterms" target="_blank" rel="noopener">NBC</a> for the full count. <a href="#control">Key districts ↗</a></p>`;
 }
 

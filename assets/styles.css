@@ -394,3 +394,9 @@ table.ctl tbody tr{cursor:pointer}
 .waffle i[data-h=R]::before{background:#d12f2f}
 .waffle-key .dotkey::before{border-radius:50%;background:linear-gradient(90deg,#1f55c4 50%,#d12f2f 50%)}
 :root[data-theme=dark] .waffle i[data-h]::before{box-shadow:0 0 0 1.5px rgb(0 0 0/.55)}
+
+/* flips: solid = called, dashed = leading but not called */
+.waffle i.flip.lead{box-shadow:none;outline:2px dashed #f2b01e;outline-offset:-2px}
+.waffle i.flip.lead::after{background:linear-gradient(135deg,transparent 50%,rgb(242 176 30/.55) 50%)}
+.waffle.house i.flip.lead{outline-width:1.5px}
+.waffle-key .flipkey.lead::before{background:none;border:2px dashed #f2b01e}
