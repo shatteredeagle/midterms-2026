@@ -816,3 +816,6 @@
 {"t":"2026-11-04T12:43:03.630Z","type":"count","id":"S-IA","text":"Iowa Senate: Josh Turek (D) leads Ashley Hinson (R) 50.4%–46.3% · 95 of 99 precincts (96%)","source":"Iowa Secretary of State"}
 {"t":"2026-11-04T12:43:03.630Z","type":"count","id":"H-IA-03","text":"IA-03 House: Sarah Trone Garriott (D) leads Zach Nunn (R) 53.5%–46.2% · 21 of 21 precincts (100%)","source":"Iowa Secretary of State"}
 {"t":"2026-11-04T12:43:03.630Z","type":"count","id":"G-IA","text":"Iowa Governor: Rob Sand and Dave Muhlbauer (D) leads Zach Lahn and Derek Wulf (R) 55.4%–44.4% · 95 of 99 precincts (96%)","source":"Iowa Secretary of State"}
+{"t":"2026-11-04T13:00:33.277Z","type":"count","id":"H-CA-24","text":"CA-24 House: Salud Carbajal (D) leads Bob Smith (R) 67%–33% · 296 of 296 precincts (100%)","source":"California Secretary of State"}
+{"t":"2026-11-04T13:00:33.277Z","type":"count","id":"H-CA-26","text":"CA-26 House: Jacqui Irwin (D) leads Sam Gallucci (R) 63.6%–36.4% · 997 of 997 precincts (100%)","source":"California Secretary of State"}
+{"t":"2026-11-04T13:00:33.277Z","type":"count","id":"H-CA-32","text":"CA-32 House: Brad Sherman (D) leads Larry Thompson (R) 51.1%–48.9% · 140 of 140 precincts (100%)","source":"California Secretary of State"}
