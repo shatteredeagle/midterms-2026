@@ -1,4 +1,4 @@
-import { STATES, RACES, closeTime } from './states.js?v=c3ad9fc1';
+import { STATES, RACES, closeTime } from './states.js?v=df8ce385';
 
 const REPO = 'ShatteredEagle/midterms-2026';
 const RAW = `https://raw.githubusercontent.com/${REPO}/data/`;
@@ -502,7 +502,7 @@ function renderBallot() {
   if (!b) { el.innerHTML = '<p class="small">Ballot question data unavailable.</p>'; return; }
   $('#ballotSub').textContent = `${b.name} statewide questions on the Nov 3 ballot. ${b.threshold}`;
   const card = (q) => {
-    const r = q.result;
+    const nm = S.calls?.measures?.[q.id], r = q.result || (nm && nm.yes + nm.no > 0 ? { yes: nm.yes, no: nm.no, reporting: `${nm.pctIn || ''} counted${nm.status === 'P' ? (nm.passed ? ' · NBC projects it passes' : ' · NBC projects it fails') : ''}`, source: 'NBC News' } : null);
     const res = r ? `<div class="res"><div class="cand" data-p="D"><span>Yes</span><b>${r.yes.toFixed(1)}%</b></div><div class="split" role="img" aria-label="Yes ${r.yes}%, No ${(100 - r.yes).toFixed(1)}%"><i class="d" style="width:${r.yes}%"></i><i class="r" style="width:${100 - r.yes}%"></i></div><p class="small">${esc(r.reporting || '')} · ${esc(r.source || '')}</p></div>` : '<span class="tag">Results pending</span>';
     return `<article class="bq"><h3>${q.n ? `<span class="n">Q${q.n}</span>` : ''}<span>${esc(q.title)}${q.amount ? ` <span class="small">· ${money(q.amount)}</span>` : ''}</span></h3>
       <p><b>Yes:</b> ${esc(q.yes)}</p>${q.flag ? `<p class="small"><span class="tag">${esc(q.flag)}</span></p>` : ''}

@@ -175,7 +175,21 @@ async function calls() {
     out[id] = out[id] || { id, firstSeen: now() };
     Object.assign(out[id], { raceId: r.raceId, status: r.callStatusCode, winner: { n: w.lastName, p: party, pct: w.percentVote }, runnerUp: lose ? { n: lose.lastName, p: { Dem: 'D', Rep: 'R' }[lose.party] || 'O', pct: lose.percentVote } : null, pctIn: r.percentInFormatted || null, url: r.href ? `https://www.nbcnews.com${r.href}` : null });
   }
-  return { updated: now(), source: 'NBC News Decision Desk (projections)', url: 'https://www.nbcnews.com/politics/2026-elections/senate-results', calls: out };
+  // Massachusetts ballot questions that NBC tracks (it lists only some of the nine), keyed MA-<question number>.
+  const measures = {};
+  try {
+    const mh = await get('https://www.nbcnews.com/politics/2026-elections/massachusetts-ballot-measures', false);
+    const mm = mh.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
+    const ms = [];
+    (function walk(o) { if (Array.isArray(o)) o.forEach(walk); else if (o && typeof o === 'object') { if (o.raceId && o.candidates) ms.push(o); Object.values(o).forEach(walk); } })(JSON.parse(mm[1]));
+    for (const r of ms) {
+      const q = /~MA~/.test(r.raceId) && /^Question (\d+)/.exec(r.raceName || '');
+      if (!q) continue;
+      const y = r.candidates.find((x) => /yes/i.test(x.lastName)), n = r.candidates.find((x) => /no/i.test(x.lastName));
+      measures[`MA-${q[1]}`] = { yes: y?.percentVote ?? 0, no: n?.percentVote ?? 0, pctIn: r.percentInFormatted || null, status: r.callStatusCode || '', passed: !!y?.isWinner, source: 'NBC News', url: 'https://www.nbcnews.com/politics/2026-elections/massachusetts-ballot-measures' };
+    }
+  } catch (e) { console.error('measures', e.message); }
+  return { updated: now(), source: 'NBC News Decision Desk (projections)', url: 'https://www.nbcnews.com/politics/2026-elections/senate-results', calls: out, measures };
 }
 
 await mkdir(OUT, { recursive: true });
