@@ -225,14 +225,14 @@ export function nbcState(st, name, closed) {
   return async () => {
     if (!closed()) return {};
     const slug = SLUG(name);
-    let out = {};
-    try { out = parse(await get(`https://www.nbcnews.com/firecracker/api/v2/state-results/2026-elections/${slug}-results`, true)); } catch { /* try the page */ }
-    // The API sometimes returns only the nationwide "latest results" module; the state page always carries the statewide races.
-    if (!Object.keys(out).length && (RACES.S.includes(st) || RACES.G.includes(st))) {
-      const html = await get(`https://www.nbcnews.com/politics/2026-elections/${slug}-results`, false);
-      const m = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
-      if (m) out = parse(JSON.parse(m[1]));
+    const out = {};
+    // The office pages ("<state>-senate-results", "<state>-governor-results") always carry that statewide race, unlike the combined
+    // state endpoint, which sometimes answers with only the national "latest results" module.
+    const offices = [...(RACES.S.includes(st) ? ['senate'] : []), ...(RACES.G.includes(st) ? ['governor'] : [])];
+    for (const office of offices) {
+      try { Object.assign(out, parse(await get(`https://www.nbcnews.com/firecracker/api/v2/state-results/2026-elections/${slug}-${office}-results`, true))); } catch { /* try the next one */ }
     }
+    if (!Object.keys(out).length) { try { Object.assign(out, parse(await get(`https://www.nbcnews.com/firecracker/api/v2/state-results/2026-elections/${slug}-results`, true))); } catch { /* none */ } }
     return out;
   };
 }
