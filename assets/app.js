@@ -1,4 +1,4 @@
-import { STATES, RACES, HOUSE_SEATS, closeTime } from './states.js?v=cac7d5b9';
+import { STATES, RACES, HOUSE_SEATS, closeTime } from './states.js?v=35f198e4';
 
 const REPO = 'ShatteredEagle/midterms-2026';
 const RAW = `https://raw.githubusercontent.com/${REPO}/data/`;
@@ -255,7 +255,7 @@ function renderControl() {
   const K = S.key;
   if (!K) return;
   // Senate
-  const sRows = K.senate.races.map((k) => { const r = race(`S-${k.st}`); return { ...k, r, id: `S-${k.st}`, o: r?.o, st: k.st, label: STATES[k.st][0] + (r?.p?.special ? ' (special)' : ''), sub: !counted(r?.o) && r?.p?.lead ? `Polling average: ${esc(r.p.lead)}` : '', status: r ? statusTag(r) : '' }; });
+  const sRows = K.senate.races.map((k) => { const r = race(`S-${k.st}`); return { ...k, r, id: `S-${k.st}`, o: r?.o, st: k.st, label: STATES[k.st][0] + (r?.p?.special ? ' (special)' : ''), sub: '', status: r ? statusTag(r) : '' }; });
   const order = (x, y) => (counted(y.o) ? y.o.pct : callOf(y.id) ? 100 : -1) - (counted(x.o) ? x.o.pct : callOf(x.id) ? 100 : -1) || closeTime(x.st) - closeTime(y.st);
   const targets = sRows.filter((x) => x.holder === 'R').sort(order), defend = sRows.filter((x) => x.holder === 'D').sort(order);
   const all = tally(allRaces('S')), tT = tally(targets), tD = tally(defend);
@@ -369,7 +369,7 @@ function houseBlock(st) {
 function renderDetail() {
   const el = $('#detail');
   if (!S.sel) {
-    el.innerHTML = `<h3>Select a state</h3><p class="small">Click or tab to a state on the map, or pick one from a table, to see its official vote count and the pre-election polling average.</p>`;
+    el.innerHTML = `<h3>Select a state</h3><p class="small">Click or tab to a state on the map, or pick one from a table, to see its official vote count.</p>`;
     return;
   }
   const st = S.sel, name = STATES[st][0];

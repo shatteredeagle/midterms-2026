@@ -1,5 +1,5 @@
 // Parses Polymarket gamma events into compact race records. Used by the collector (Node) and the browser.
-import { NAME_TO_ST } from './states.js?v=cac7d5b9';
+import { NAME_TO_ST } from './states.js?v=35f198e4';
 
 const yes = (m) => { try { return Number(JSON.parse(m.outcomePrices)[0]); } catch { return NaN; } };
 const party = (m) => {
