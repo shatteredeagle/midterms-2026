@@ -635,3 +635,35 @@
 {"t":"2026-11-04T06:53:41.700Z","type":"count","id":"S-TX","text":"Texas Senate: James Talarico (D) leads Ken Paxton (R) 53.9%–44.3% · 90.3% of expected vote counted (90.3%)","source":"NBC News"}
 {"t":"2026-11-04T06:53:41.700Z","type":"count","id":"S-WY","text":"Wyoming Senate: Harriet Hageman (R) leads James Byrd (D) 65.2%–34.8% · 95.5% of expected vote counted (95.5%)","source":"NBC News"}
 {"t":"2026-11-04T06:53:41.700Z","type":"count","id":"S-MI","text":"Michigan Senate: Abdul El-Sayed (D) leads Mike Rogers (R) 51.7%–46.3% · 80% of expected vote counted (80%)","source":"NBC News"}
+{"t":"2026-11-04T06:55:12.297Z","type":"lead","id":"H-ME-02","text":"ME-02 House: lead changes to Matthew Dunlap (D) at 50.2%","source":"NBC News"}
+{"t":"2026-11-04T06:55:12.297Z","type":"count","id":"G-WY","text":"Wyoming Governor: Eric Barlow (R) leads Rebecca Bextel (O) 68.6%–16.8% · 95.5% of expected vote counted (95.5%)","source":"NBC News"}
+{"t":"2026-11-04T06:55:12.298Z","type":"call","id":"H-TX-03","text":"NBC News projects Keith Self (R) wins TX-03 House · 52.8%–47.2% over Hunt (D)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T06:55:12.298Z","type":"call","id":"H-TX-25","text":"NBC News projects Roger Williams (R) wins TX-25 House · 54.1%–45.9% over Sims (D)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T06:56:11.985Z","type":"call","id":"H-TX-12","text":"NBC News projects Craig Goldman (R) wins TX-12 House · 53.3%–46.7% over Rodriguez Prilliman (D)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T06:59:42.216Z","type":"count","id":"H-CA-04","text":"CA-04 House: Eric Jones (D) leads Mike Thompson (D) 66.9%–33.1% · 13 of 23 precincts (56.5%)","source":"California Secretary of State"}
+{"t":"2026-11-04T06:59:42.216Z","type":"count","id":"H-CA-18","text":"CA-18 House: Zoe Lofgren (D) leads Shane Lewis (R) 81.8%–18.2% · 24 of 40 precincts (60%)","source":"California Secretary of State"}
+{"t":"2026-11-04T06:59:42.216Z","type":"count","id":"H-CA-19","text":"CA-19 House: Jimmy Panetta (D) leads Peter Coe Verbica (R) 82.5%–17.5% · 85 of 161 precincts (52.8%)","source":"California Secretary of State"}
+{"t":"2026-11-04T07:00:12.761Z","type":"count","id":"H-MA-04","text":"MA-04 House: Jake Auchincloss (D) leads Thomas Stalcup (R) 67.4%–32.6% · 51.9% of expected vote counted (51.9%)","source":"NBC News"}
+{"t":"2026-11-04T07:01:12.186Z","type":"count","id":"S-ID","text":"Idaho Senate: no leader yet · 81.4% of expected vote counted (81.4%)","source":"NBC News"}
+{"t":"2026-11-04T07:01:12.186Z","type":"count","id":"G-ID","text":"Idaho Governor: Brad Little (R) leads Terri Pickens (D) 56.1%–33.2% · 81.6% of expected vote counted (81.6%)","source":"NBC News"}
+{"t":"2026-11-04T07:01:12.188Z","type":"call","id":"H-CA-05","text":"NBC News projects Tom McClintock (R) wins CA-05 House · 55.4%–44.6% over Masuda (D)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T07:02:12.382Z","type":"call","id":"H-CA-06","text":"NBC News projects Richard Pan (D) wins CA-06 House · 58.3%–41.7% over Kiley (O)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T07:02:43.000Z","type":"count","id":"S-MI","text":"Michigan Senate: Abdul El-Sayed (D) leads Mike Rogers (R) 51.7%–46.3% · 80.1% of expected vote counted (80.1%)","source":"NBC News"}
+{"t":"2026-11-04T07:03:12.106Z","type":"call","id":"H-ID-02","text":"NBC News projects Mike Simpson (R) wins ID-02 House · 50.7%–41.3% over Gilbreath (D)","source":"NBC News Decision Desk"}
+{"t":"2026-11-04T07:05:12.552Z","type":"count","id":"S-SC","text":"South Carolina Senate: Annie Andrews (D) leads Darline Graham (R) 51.1%–46.7% · 95.5% of expected vote counted (95.5%)","source":"NBC News"}
+{"t":"2026-11-04T07:05:12.552Z","type":"count","id":"S-KS","text":"Kansas Senate: Adam Hamilton (D) leads Roger Marshall (R) 51%–46% · 95.1% of expected vote counted (95.1%)","source":"NBC News"}
+{"t":"2026-11-04T07:05:42.246Z","type":"count","id":"S-NE","text":"Nebraska Senate: Pete Ricketts (R) leads Dan Osborn (O) 49.1%–44.9% · 595 of 1,322 precincts (45%)","source":"Nebraska Secretary of State"}
+{"t":"2026-11-04T07:05:42.246Z","type":"count","id":"G-NE","text":"Nebraska Governor: Jim Pillen and Joe Kelly (R) leads Lynne Walz and Ben Steffen (D) 49.3%–43.7% · 595 of 1,322 precincts (45%)","source":"Nebraska Secretary of State"}
+{"t":"2026-11-04T07:05:42.246Z","type":"count","id":"S-RI","text":"Rhode Island Senate: Jack Reed (D) leads Raymond McKay (R) 66.6%–29.5% · 95% of expected vote counted (95%)","source":"NBC News"}
+{"t":"2026-11-04T07:06:12.403Z","type":"count","id":"G-RI","text":"Rhode Island Governor: Helena Foulkes (D) leads Kenneth Block (O) 57.5%–27.9% · 95% of expected vote counted (95%)","source":"NBC News"}
+{"t":"2026-11-04T07:06:42.513Z","type":"count","id":"S-NE","text":"Nebraska Senate: Pete Ricketts (R) leads Dan Osborn (O) 49.1%–44.9% · 595 of 1,322 precincts (45%)","source":"Nebraska Secretary of State"}
+{"t":"2026-11-04T07:06:42.513Z","type":"count","id":"G-NE","text":"Nebraska Governor: Jim Pillen and Joe Kelly (R) leads Lynne Walz and Ben Steffen (D) 49.3%–43.7% · 595 of 1,322 precincts (45%)","source":"Nebraska Secretary of State"}
+{"t":"2026-11-04T07:06:42.513Z","type":"lead","id":"H-MI-07","text":"MI-07 House: lead changes to William Lawrence (D) at 50.2%","source":"NBC News"}
+{"t":"2026-11-04T07:06:42.513Z","type":"count","id":"S-MA","text":"Massachusetts Senate: Ed Markey (D) leads John Deaton (R) 63.9%–31.6% · 70% of expected vote counted (70%)","source":"NBC News"}
+{"t":"2026-11-04T07:07:11.679Z","type":"count","id":"G-MA","text":"Massachusetts Governor: Maura Healey (D) leads Michael Minogue (R) 62.7%–34% · 70.1% of expected vote counted (70.1%)","source":"NBC News"}
+{"t":"2026-11-04T07:07:41.843Z","type":"count","id":"S-NE","text":"Nebraska Senate: Pete Ricketts (R) leads Dan Osborn (O) 49.1%–44.9% · 595 of 1,322 precincts (45%)","source":"Nebraska Secretary of State"}
+{"t":"2026-11-04T07:07:41.843Z","type":"count","id":"G-NE","text":"Nebraska Governor: Jim Pillen and Joe Kelly (R) leads Lynne Walz and Ben Steffen (D) 49.3%–43.7% · 595 of 1,322 precincts (45%)","source":"Nebraska Secretary of State"}
+{"t":"2026-11-04T07:09:41.823Z","type":"count","id":"H-MN-02","text":"MN-02 House: Matt Little (D) leads Eric Pratt (R) 57.2%–42.8% · 260 of 260 precincts (100%)","source":"Minnesota Secretary of State"}
+{"t":"2026-11-04T07:11:12.686Z","type":"count","id":"S-NE","text":"Nebraska Senate: Pete Ricketts (R) leads Dan Osborn (O) 49.1%–44.9% · 829 of 1,322 precincts (62.7%)","source":"Nebraska Secretary of State"}
+{"t":"2026-11-04T07:11:12.686Z","type":"count","id":"G-NE","text":"Nebraska Governor: Jim Pillen and Joe Kelly (R) leads Lynne Walz and Ben Steffen (D) 49.4%–43.7% · 829 of 1,322 precincts (62.7%)","source":"Nebraska Secretary of State"}
+{"t":"2026-11-04T07:11:12.686Z","type":"count","id":"H-NE-02","text":"NE-02 House: Denise Powell (D) leads Brinker Harding (R) 57.1%–40.3% · 315 of 334 precincts (94.3%)","source":"Nebraska Secretary of State"}
