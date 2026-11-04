@@ -1,4 +1,4 @@
-import { STATES, RACES, closeTime } from './states.js?v=e4ffdfbf';
+import { STATES, RACES, closeTime } from './states.js?v=cdbf9226';
 
 const REPO = 'ShatteredEagle/midterms-2026';
 const RAW = `https://raw.githubusercontent.com/${REPO}/data/`;
@@ -563,7 +563,7 @@ function wireFeed() {
 // Shows only for calls that happen while the page is open: everything already called at load is treated as seen.
 // Calls that arrive together are merged into one banner (newest first) with an expandable list, never stacked.
 let cbTimer = null;
-const cbState = { items: [] };
+const cbState = { items: [], collapsed: false }; // expanded by default when more than one race was called
 const raceLabel = (id) => { const [k, st, n] = id.split('-'); return k === 'H' ? `${st}-${n} House` : `${STATES[st]?.[0] || st} ${KIND[k]}`; };
 function callItem(c) {
   const cands = S.results?.races?.[c.id]?.cands || [];
@@ -579,12 +579,14 @@ function renderBanner(flash) {
   $('#cbText').dataset.id = first.id;
   const more = $('#cbMore');
   more.hidden = n < 2;
-  more.textContent = `${$('#cbList').hidden ? 'See all' : 'Hide'} ${n} ▾`;
-  more.setAttribute('aria-expanded', String(!$('#cbList').hidden));
+  const list = $('#cbList');
+  list.hidden = n < 2 || cbState.collapsed;
+  more.textContent = cbState.collapsed ? `Show all ${n} ▾` : 'Collapse ▴';
+  more.setAttribute('aria-expanded', String(!list.hidden));
   $('#cbList').innerHTML = cbState.items.map((c) => `<li><button type="button" data-id="${esc(c.id)}">${esc(c.label)}: ${esc(c.name)}<span class="pty">${esc(c.p)}</span></button></li>`).join('');
   b.hidden = false;
   if (flash) { b.classList.remove('flash'); void b.offsetWidth; b.classList.add('flash'); }
-  clearTimeout(cbTimer); cbTimer = setTimeout(() => { if ($('#cbList').hidden) { cbState.items = []; renderBanner(false); } }, 90000);
+  clearTimeout(cbTimer); cbTimer = setTimeout(() => { cbState.items = []; cbState.collapsed = false; renderBanner(false); }, 120000);
 }
 function checkCalls() {
   const ids = Object.keys(S.calls?.calls || {});
@@ -593,13 +595,14 @@ function checkCalls() {
   if (!fresh.length) return;
   for (const id of fresh) S.callsSeen.add(id);
   cbState.items = [...fresh.map((id) => callItem(S.calls.calls[id])), ...cbState.items];
+  cbState.collapsed = false; // new calls always open the list
   renderBanner(true);
 }
 function openRace(id) { const st = id?.split('-')[1]; if (id && STATES[st]) { select(st); goMap(); } }
 function wireBanner() {
-  $('#cbClose').addEventListener('click', () => { clearTimeout(cbTimer); cbState.items = []; $('#cbList').hidden = true; renderBanner(false); });
+  $('#cbClose').addEventListener('click', () => { clearTimeout(cbTimer); cbState.items = []; cbState.collapsed = false; renderBanner(false); });
   $('#cbText').addEventListener('click', (e) => openRace(e.currentTarget.dataset.id));
-  $('#cbMore').addEventListener('click', () => { $('#cbList').hidden = !$('#cbList').hidden; renderBanner(false); });
+  $('#cbMore').addEventListener('click', () => { cbState.collapsed = !cbState.collapsed; renderBanner(false); });
   $('#cbList').addEventListener('click', (e) => { const btn = e.target.closest('button[data-id]'); if (btn) openRace(btn.dataset.id); });
 }
 
@@ -664,7 +667,7 @@ async function boot() {
   setInterval(tick, 30000);
   window.addEventListener('hashchange', route);
   route();
-  if (/[?&]demoCall/.test(location.search)) { cbState.items = ['S-GA', 'G-GA', 'S-NC', 'H-FL-07', 'H-NC-01'].map((id) => ({ id, label: raceLabel(id), name: 'Demo', p: 'D' })); if (/demoCall=2/.test(location.search)) $('#cbList').hidden = false; renderBanner(true); } // preview only
+  if (/[?&]demoCall/.test(location.search)) { cbState.items = ['S-GA', 'G-GA', 'S-NC', 'H-FL-07', 'H-NC-01'].map((id) => ({ id, label: raceLabel(id), name: 'Demo', p: 'D' })); renderBanner(true); } // preview only
   document.addEventListener('visibilitychange', () => !document.hidden && tick());
 }
 boot().catch((e) => { console.error(e); $('#liveText').textContent = 'Failed to load'; });
