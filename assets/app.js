@@ -1,5 +1,5 @@
-import { STATES, closeTime } from './states.js?v=8c5c298c';
-import { fetchControl } from './markets.js?v=8c5c298c';
+import { STATES, closeTime } from './states.js?v=78b41692';
+import { fetchControl } from './markets.js?v=78b41692';
 
 const REPO = 'ShatteredEagle/midterms-2026';
 const RAW = `https://raw.githubusercontent.com/${REPO}/data/`;
@@ -204,7 +204,7 @@ function wireFlips() {
 // ---------- map ----------
 function drawMap() {
   const svg = $('#usmap');
-  const defs = `<defs><pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="var(--t)"/><rect width="3" height="8" fill="var(--hatch)" opacity=".55"/></pattern></defs>`;
+  const defs = `<defs><pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="var(--t)"/><rect width="3" height="8" fill="var(--hatch)" opacity=".55"/></pattern><pattern id="hatchGray" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="var(--none)"/><rect width="2" height="8" fill="var(--hatch)" opacity=".45"/></pattern></defs>`;
   const paths = Object.entries(S.paths).map(([fips, p]) => {
     const st = FIPS[fips];
     return st ? `<path id="st-${st}" data-st="${st}" d="${p.d}" tabindex="0" role="button"></path>` : '';
@@ -229,25 +229,37 @@ function stateInfo(st) {
     const h = houseState(st);
     return h ? { bin: h.share >= .95 ? 'D3' : h.share >= .75 ? 'D2' : h.share >= .55 ? 'D1' : h.share > .45 ? 'T' : h.share > .25 ? 'R1' : h.share > .05 ? 'R2' : 'R3', text: `${h.d.toFixed(1)} D · ${h.r.toFixed(1)} R of ${h.n} seats (expected)` } : { bin: 'none', text: 'No market data' };
   }
+  // Senate / Governor: only counted votes color the map (no odds, no polls).
   const r = race(`${S.kind}-${st}`);
   if (!r) return { bin: 'none', text: `No ${KIND[S.kind]} race in 2026` };
-  const official = r.o && r.o.totalVotes > 0;
-  const fl = flipInfo(r);
-  return { bin: binOf(r.pD), called: r.projected, flip: !!fl?.flipping, text: `${official ? 'Counting · ' : ''}${leanText(r.pD)}${r.projected ? ' · projected' : r.closed ? ' · polls closed' : ''}${fl?.flipping ? ` · projected flip ${fl.holder}→${fl.to}` : ''}` };
+  const o = r.o;
+  if (o && o.totalVotes > 0 && o.cands[0]?.votes > 0) {
+    const a = o.cands[0], b = o.cands[1], m = a.pct - (b ? b.pct : 0), party = a.p;
+    const mag = m >= 20 ? 3 : m >= 10 ? 2 : 1;
+    const bin = m < 1 ? 'T' : party === 'D' ? `D${mag}` : party === 'R' ? `R${mag}` : 'O';
+    return { bin, early: o.pct < 50, called: !!o.winner, text: `${a.n} (${a.p}) leads${b ? ` ${b.n}` : ''} ${a.pct}%–${b ? b.pct : 0}% · ${o.reporting}${o.winner ? ` · state flags winner: ${o.winner}` : ''}` };
+  }
+  return r.closed ? { bin: 'closed', text: o ? 'Polls closed · no votes counted yet' : 'Polls closed · no results feed on this page for this state' } : { bin: 'pend', text: `Polls close ${new Date(closeTime(st)).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}` };
+}
+function mapTally() {
+  const ids = new Set([...Object.keys(S.markets?.races || {}), ...Object.keys(S.polls?.races || {})].filter((k) => k[0] === S.kind));
+  let counted = 0, d = 0, r = 0, o = 0;
+  for (const id of ids) { const x = S.results?.races?.[id]; if (x?.totalVotes > 0 && x.cands[0]?.votes > 0) { counted++; const p = x.cands[0].p; p === 'D' ? d++ : p === 'R' ? r++ : o++; } }
+  return `${KIND[S.kind]} races filled in only as official votes are counted: color shows who leads, shade shows the margin. Votes counted in ${counted} of ${ids.size} races (D leads ${d}, R leads ${r}${o ? `, other ${o}` : ''}). Only states with an official results feed fill in; the rest stay gray. Early returns can swing as more votes come in.`;
 }
 function paintMap() {
   for (const el of document.querySelectorAll('#usmap path')) {
     const st = el.dataset.st, i = stateInfo(st);
-    el.setAttribute('class', `b-${i.bin}${i.called ? ' called' : ''}${i.flip ? ' flip' : ''}${S.sel === st ? ' sel' : ''}`);
+    el.setAttribute('class', `b-${i.bin}${i.called ? ' called' : ''}${i.early ? ' early' : ''}${S.sel === st ? ' sel' : ''}`);
     el.setAttribute('aria-label', `${STATES[st][0]}: ${i.text}`);
   }
   for (const c of document.querySelectorAll('.chip')) c.classList.toggle('sel', c.dataset.st === S.sel);
-  const sw = (cls, label) => `<span><i class="b-${cls}" style="background:${cls === 'T' ? 'repeating-linear-gradient(45deg,var(--t) 0 3px,var(--hatch) 3px 5px)' : `var(--${{ D3: 'd', D2: 'd-2', D1: 'd-1', R1: 'r-1', R2: 'r-2', R3: 'r', none: 'none' }[cls]})`}"></i>${label}</span>`;
-  $('#legend').innerHTML = sw('D3', 'D ≥95%') + sw('D2', 'D 80–95%') + sw('D1', 'D 62–80%') + sw('T', 'Toss-up') + sw('R1', 'R 62–80%') + sw('R2', 'R 80–95%') + sw('R3', 'R ≥95%') + sw('none', S.kind === 'H' ? 'No data' : 'No race') + '<span>Bold outline = projected after polls close</span><span><i style="background:none;border:2px dashed #f2b01e"></i>Gold dashed = favored to flip</span>';
+  const sw = (cls, label) => `<span><i class="b-${cls}" style="background:${cls === 'T' ? 'repeating-linear-gradient(45deg,var(--t) 0 3px,var(--hatch) 3px 5px)' : cls === 'closed' ? 'repeating-linear-gradient(45deg,var(--none) 0 3px,var(--hatch) 3px 5px)' : `var(--${{ D3: 'd', D2: 'd-2', D1: 'd-1', R1: 'r-1', R2: 'r-2', R3: 'r', none: 'none', pend: 'pend', O: 'muted' }[cls]})`}"></i>${label}</span>`;
+  if (S.kind !== 'E') $('#legend').innerHTML = sw('D3', 'D leads by 20+') + sw('D2', 'D by 10–20') + sw('D1', 'D by under 10') + sw('T', 'Within 1 pt') + sw('R1', 'R by under 10') + sw('R2', 'R by 10–20') + sw('R3', 'R leads by 20+') + sw('O', 'Other leads') + sw('pend', 'Polls not closed') + sw('closed', 'Closed, no votes shown') + sw('none', 'No race') + '<span><i style="background:none;border:2px dashed var(--text)"></i>Dashed = under 50% reporting</span>';
   const eSw = (v, label) => `<span><i style="background:var(--${v})"></i>${label}</span>`;
   if (S.kind === 'E') $('#legend').innerHTML = eSw('e1', 'Under 20%') + eSw('e2', '20–30%') + eSw('e3', '30–40%') + eSw('e4', '40%+') + sw('none', 'No readable report') + '<span>Shade = early-vote turnout of registered or active voters</span>';
   const closedN = Object.keys(STATES).filter(isClosed).length;
-  $('#mapSub').textContent = S.kind === 'E' ? 'Early-vote turnout where a state publishes a report this page can use. Most states do not, so most of the map is gray. This shows how many people voted early, not who they voted for.' : S.kind === 'H' ? 'Expected House seats by state, summed from per-district market odds. Updates as markets move.' : `${KIND[S.kind]} races colored by market odds (${closedN} states closed). Official counts appear in the detail panel as feeds publish.`;
+  $('#mapSub').textContent = S.kind === 'E' ? 'Early-vote turnout where a state publishes a report this page can use. Most states do not, so most of the map is gray. This shows how many people voted early, not who they voted for.' : S.kind === 'S' || S.kind === 'G' ? mapTally() : S.kind === 'H' ? 'Early-vote turnout where a state publishes a report this page can use. Most states do not, so most of the map is gray. This shows how many people voted early, not who they voted for.' : S.kind === 'H' ? 'Expected House seats by state, summed from per-district market odds. Updates as markets move.' : `${KIND[S.kind]} races colored by market odds (${closedN} states closed). Official counts appear in the detail panel as feeds publish.`;
 }
 const PORDER = { D: 0, R: 1, O: 2 };
 const money = (n) => (n >= 1e6 ? `$${(n / 1e6).toFixed(1)}M` : `$${Math.round(n / 1e3)}k`);
